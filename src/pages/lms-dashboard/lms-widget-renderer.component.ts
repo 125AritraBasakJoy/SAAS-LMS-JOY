@@ -77,8 +77,8 @@ export class LmsWidgetRendererComponent {
     const isEmpty = summary.total === 0;
 
     const periodSubtext = period === '30d' ? 'vs last 30 days' : period === 'quarter' ? 'vs last quarter' : 'vs prior year';
-    const totalTrend = isEmpty 
-      ? '+0 this period' 
+    const totalTrend = isEmpty
+      ? '+0 this period'
       : (period === '30d' ? '+1 this month' : period === 'quarter' ? '+3 this quarter' : '+5 this year');
 
     return [
