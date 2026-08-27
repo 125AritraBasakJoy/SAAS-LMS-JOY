@@ -1,5 +1,5 @@
-
 import { Component, ChangeDetectionStrategy, inject, effect, signal } from '@angular/core';
+
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
