@@ -23,6 +23,7 @@ import {
 } from '../../../models/plan.model';
 import { CustomSelectComponent, SelectOption } from '../../../components/custom-select/custom-select.component';
 import { StepperComponent, StepperStep, StepItem } from '../../../components/stepper/stepper.component';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 
 export type { StepItem };
 
@@ -45,6 +46,7 @@ export class PlanCreateComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private lmsData = inject(LmsDataService);
+  modalService = inject(ConfirmationModalService);
 
   activeTenant = this.lmsData.activeTenant;
   activeLms = this.lmsData.activeLms;
@@ -1332,14 +1334,17 @@ export class PlanCreateComponent implements OnInit {
     this.router.navigate(['/plans']);
   }
 
-  onCancel() {
-    // Always show Cancel Confirmation Modal
-    this.showCancelModal.set(true);
-  }
-
-  confirmCancel() {
-    this.showCancelModal.set(false);
-    this.goBack();
+  async onCancel() {
+    const res = await this.modalService.confirmDiscard({
+      title: 'Discard Plan Creation?',
+      message: 'You have unsaved changes in this wizard. You can save your progress as a draft to resume later.'
+    });
+    if (res === 'draft') {
+      this.saveDraft();
+      this.router.navigate(['/plans']);
+    } else if (res === 'discard') {
+      this.router.navigate(['/plans']);
+    }
   }
 
   goBack() {
