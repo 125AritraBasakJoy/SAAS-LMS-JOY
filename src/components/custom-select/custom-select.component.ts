@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed, ElementRef, HostListener, inject, forwardRef, ViewChild } from '@angular/core';
+import { Component, input, output, signal, computed, ElementRef, HostListener, inject, forwardRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
@@ -17,9 +17,9 @@ export interface SelectOption {
   imports: [CommonModule, FormsModule],
   host: {
     class: 'block w-full relative',
-    '[style.zIndex]': 'isOpen() ? 9999 : null',
-    '[class.z-50]': 'isOpen()',
-    '[class.z-10]': '!isOpen()'
+    '[class.z-[99999]]': 'isOpen()',
+    '[class.z-0]': '!isOpen()',
+    '[style.zIndex]': 'isOpen() ? 99999 : "auto"'
   },
   providers: [
     {
@@ -29,8 +29,7 @@ export interface SelectOption {
     }
   ],
   template: `
-    <div class="relative w-full text-left custom-select-root" [style.zIndex]="isOpen() ? 9999 : null" [class.z-50]="isOpen()" [class.opacity-60]="disabled()">
-    <div class="w-full text-left custom-select-root" [class.z-[100]]="isOpen()" [class.opacity-60]="disabled()">
+    <div class="relative w-full text-left custom-select-root" [class.z-[99999]]="isOpen()" [class.opacity-60]="disabled()">
       @if (label()) {
         <label class="block text-xs font-semibold text-text-primary mb-1">
           {{ label() }}
@@ -309,8 +308,9 @@ export interface SelectOption {
     }
   `]
 })
-export class CustomSelectComponent implements ControlValueAccessor {
+export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   private elementRef = inject(ElementRef);
+  private static activeSelect: CustomSelectComponent | null = null;
 
   @ViewChild('triggerBtn') triggerBtn?: ElementRef<HTMLButtonElement>;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
@@ -440,7 +440,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
     if (!q) return opts;
     return opts.filter(o => 
       (o.label && o.label.toLowerCase().includes(q)) || 
-      (o.sublabel && o.sublabel.toLowerCase().includes(q))
+                      (o.sublabel && o.sublabel.toLowerCase().includes(q))
     );
   });
 
@@ -450,14 +450,14 @@ export class CustomSelectComponent implements ControlValueAccessor {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.isOpen.set(false);
+      this.close();
     }
   }
 
   @HostListener('keydown.escape')
   onEscape() {
     if (this.isOpen()) {
-      this.isOpen.set(false);
+      this.close();
       this.triggerBtn?.nativeElement.focus();
     }
   }
@@ -476,11 +476,31 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return null;
   }
 
+  close() {
+    this.isOpen.set(false);
+    this.searchQuery.set('');
+    this.highlightedIndex.set(-1);
+    if (CustomSelectComponent.activeSelect === this) {
+      CustomSelectComponent.activeSelect = null;
+    }
+  }
+
+  ngOnDestroy() {
+    if (CustomSelectComponent.activeSelect === this) {
+      CustomSelectComponent.activeSelect = null;
+    }
+  }
+
   toggleOpen() {
     if (this.disabled()) return;
     const willOpen = !this.isOpen();
     
     if (willOpen) {
+      if (CustomSelectComponent.activeSelect && CustomSelectComponent.activeSelect !== this) {
+        CustomSelectComponent.activeSelect.close();
+      }
+      CustomSelectComponent.activeSelect = this;
+
       if (this.dropdownPosition() === 'top') {
         this.actualPlacement.set('top');
       } else if (this.dropdownPosition() === 'bottom') {
@@ -521,7 +541,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
         }
       }, 50);
     } else {
-      this.isOpen.set(false);
+      this.close();
       this.onTouched();
     }
   }
@@ -546,7 +566,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
       this.onChange(option.value);
       this.valueChange.emit(option.value);
       this.selectionChange.emit(option);
-      this.isOpen.set(false);
+      this.close();
       this.onTouched();
       this.triggerBtn?.nativeElement.focus();
     }

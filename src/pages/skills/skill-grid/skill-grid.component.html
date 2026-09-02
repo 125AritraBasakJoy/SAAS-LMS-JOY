@@ -22,12 +22,12 @@
         <span>Skill Dashboard</span>
       </a>
 
-      <button
-        (click)="openCreateClusterModal()"
+      <a
+        routerLink="/skills/clusters"
         class="px-3.5 py-2.5 rounded-2xl bg-white dark:bg-base-200 hover:bg-slate-50 dark:hover:bg-base-300 border border-slate-200/80 dark:border-base-300 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
         <span class="material-symbols-outlined text-base text-purple-600">bubble_chart</span>
         <span>Manage Clusters</span>
-      </button>
+      </a>
 
       <button 
         (click)="openCreateSkillModal()"
@@ -35,15 +35,6 @@
         <span class="material-symbols-outlined text-base">add_circle</span>
         <span>Create Skill</span>
       </button>
-    </div>
-  </div>
-
-      <a
-        routerLink="/skills/dashboard"
-        class="px-3.5 py-2 rounded-xl bg-base-100 hover:bg-base-200 border border-base-300 text-text-primary font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-2xs">
-        <span class="material-symbols-outlined text-base text-amber-600">space_dashboard</span>
-        <span>Skill Dashboard</span>
-      </a>
     </div>
   </div>
 
@@ -96,8 +87,8 @@
               [options]="categorySelectOptions()"
               [clearable]="false"
               [searchable]="false"
-              [ngModel]="draftCategory()"
-              (ngModelChange)="draftCategory.set($event); currentPage.set(1)">
+              [ngModel]="selectedCategory()"
+              (ngModelChange)="selectedCategory.set($event); currentPage.set(1)">
             </app-custom-select>
           </app-filter-section>
 
@@ -107,8 +98,8 @@
               [options]="clusterSelectOptions()"
               [clearable]="false"
               [searchable]="false"
-              [ngModel]="draftCluster()"
-              (ngModelChange)="draftCluster.set($event); currentPage.set(1)">
+              [ngModel]="selectedCluster()"
+              (ngModelChange)="selectedCluster.set($event); currentPage.set(1)">
             </app-custom-select>
           </app-filter-section>
 
@@ -118,8 +109,8 @@
               [options]="mappedSelectOptions"
               [clearable]="false"
               [searchable]="false"
-              [ngModel]="draftMappedFilter()"
-              (ngModelChange)="draftMappedFilter.set($event); currentPage.set(1)">
+              [ngModel]="selectedMappedFilter()"
+              (ngModelChange)="selectedMappedFilter.set($event); currentPage.set(1)">
             </app-custom-select>
           </app-filter-section>
 
@@ -390,44 +381,41 @@
             </div>
 
             <!-- Category -->
-            <div>
+            <div class="relative z-30">
               <label class="block text-xs font-bold text-text-primary mb-1">Category / Domain <span class="text-rose-500">*</span></label>
-              <select
-                formControlName="category"
-                class="w-full px-3.5 py-2 rounded-xl border border-base-300 bg-base-100 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-tenant-500">
-                @for (c of categories; track c) {
-                  <option [value]="c">{{ c }}</option>
-                }
-              </select>
+              <app-custom-select
+                [options]="formSkillCategoryOptions"
+                [clearable]="false"
+                [searchable]="true"
+                formControlName="category">
+              </app-custom-select>
             </div>
 
             <!-- Cluster -->
-            <div>
+            <div class="relative z-30">
               <label class="block text-xs font-bold text-text-primary mb-1">Competency Cluster</label>
-              <select
-                formControlName="clusterId"
-                class="w-full px-3.5 py-2 rounded-xl border border-base-300 bg-base-100 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-tenant-500">
-                <option value="">None (Uncategorized)</option>
-                @for (cls of lmsData.skillClusters(); track cls.clusterId) {
-                  <option [value]="cls.clusterId">{{ cls.name }} ({{ cls.clusterCode }})</option>
-                }
-              </select>
+              <app-custom-select
+                [options]="formSkillClusterOptions()"
+                [clearable]="true"
+                [searchable]="true"
+                placeholder="None (Uncategorized)"
+                formControlName="clusterId">
+              </app-custom-select>
             </div>
 
             <!-- Status -->
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-2 relative z-20">
               <label class="block text-xs font-bold text-text-primary mb-1">Operational Status <span class="text-rose-500">*</span></label>
-              <select
-                formControlName="status"
-                class="w-full px-3.5 py-2 rounded-xl border border-base-300 bg-base-100 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-tenant-500">
-                <option value="active">Active (Available for curriculum mapping)</option>
-                <option value="inactive">Inactive (Archived / Cannot be newly mapped)</option>
-                <option value="draft">Draft (Under construction)</option>
-              </select>
+              <app-custom-select
+                [options]="formSkillStatusOptions"
+                [clearable]="false"
+                [searchable]="false"
+                formControlName="status">
+              </app-custom-select>
             </div>
 
             <!-- Description -->
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-2 relative z-10">
               <label class="block text-xs font-bold text-text-primary mb-1">
                 Description & Competency Criteria <span class="text-rose-500">*</span>
               </label>
@@ -659,28 +647,25 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label class="block text-[11px] font-bold text-text-secondary mb-1">Target Type</label>
-                <select
+                <app-custom-select
+                  [options]="mappingTargetTypeOptions"
+                  [clearable]="false"
+                  [searchable]="false"
                   [ngModel]="mappingTargetType()"
-                  (ngModelChange)="mappingTargetType.set($event); mappingTargetId.set('')"
-                  class="w-full px-3 py-1.5 rounded-xl border border-base-300 bg-base-100 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-tenant-500">
-                  <option value="course">Course / Class</option>
-                  <option value="plan">Training Plan</option>
-                  <option value="phase">Phase</option>
-                  <option value="content">Content Asset</option>
-                </select>
+                  (ngModelChange)="mappingTargetType.set($event); mappingTargetId.set('')">
+                </app-custom-select>
               </div>
 
               <div class="sm:col-span-2">
                 <label class="block text-[11px] font-bold text-text-secondary mb-1">Select Target Item</label>
-                <select
+                <app-custom-select
+                  [options]="mappingTargetItemOptions()"
+                  [clearable]="true"
+                  [searchable]="true"
+                  placeholder="-- Choose Target --"
                   [ngModel]="mappingTargetId()"
-                  (ngModelChange)="mappingTargetId.set($event)"
-                  class="w-full px-3 py-1.5 rounded-xl border border-base-300 bg-base-100 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-tenant-500">
-                  <option value="">-- Choose Target --</option>
-                  @for (opt of mappingTargetItemOptions(); track opt.value) {
-                    <option [value]="opt.value">{{ opt.label }}</option>
-                  }
-                </select>
+                  (ngModelChange)="mappingTargetId.set($event)">
+                </app-custom-select>
               </div>
             </div>
 
