@@ -42,6 +42,47 @@ export class SkillGridComponent implements OnInit {
   selectedTargetType = signal<string>('all');   // 'all' | 'content' | 'course' | 'phase' | 'plan'
   isFilterPanelOpen = signal<boolean>(false);
 
+  // Draft Filter Staging State
+  draftStatus = signal<string>('all');
+  draftCategory = signal<string>('all');
+  draftCluster = signal<string>('all');
+  draftMappedFilter = signal<string>('all');
+  draftTargetType = signal<string>('all');
+
+  toggleFilterPanel() {
+    if (!this.isFilterPanelOpen()) {
+      this.draftStatus.set(this.selectedStatus());
+      this.draftCategory.set(this.selectedCategory());
+      this.draftCluster.set(this.selectedCluster());
+      this.draftMappedFilter.set(this.selectedMappedFilter());
+      this.draftTargetType.set(this.selectedTargetType());
+      this.isFilterPanelOpen.set(true);
+    } else {
+      this.isFilterPanelOpen.set(false);
+    }
+  }
+
+  cancelFilterPanel() {
+    this.isFilterPanelOpen.set(false);
+  }
+
+  applyFilterPanel() {
+    this.selectedStatus.set(this.draftStatus());
+    this.selectedCategory.set(this.draftCategory());
+    this.selectedCluster.set(this.draftCluster());
+    this.selectedMappedFilter.set(this.draftMappedFilter());
+    this.selectedTargetType.set(this.draftTargetType());
+    this.isFilterPanelOpen.set(false);
+  }
+
+  clearDraftFilters() {
+    this.draftStatus.set('all');
+    this.draftCategory.set('all');
+    this.draftCluster.set('all');
+    this.draftMappedFilter.set('all');
+    this.draftTargetType.set('all');
+  }
+
   // Cluster Search State
   clusterSearchQuery = signal<string>('');
 
@@ -161,9 +202,9 @@ export class SkillGridComponent implements OnInit {
   });
 
   formSkillStatusOptions: SelectOption[] = [
-    { value: 'active', label: 'Active (Available for mapping)', icon: 'check_circle', badge: 'Active', badgeClass: 'bg-emerald-50 text-emerald-700' },
-    { value: 'inactive', label: 'Inactive (Cannot be newly mapped)', icon: 'pause_circle', badge: 'Inactive', badgeClass: 'bg-rose-50 text-rose-700' },
-    { value: 'draft', label: 'Draft', icon: 'draft', badge: 'Draft', badgeClass: 'bg-blue-50 text-blue-700' }
+    { value: 'active', label: 'Active', sublabel: 'Available for mapping', icon: 'check_circle', badge: 'Active', badgeClass: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' },
+    { value: 'inactive', label: 'Inactive', sublabel: 'Cannot be newly mapped', icon: 'pause_circle', badge: 'Inactive', badgeClass: 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800' },
+    { value: 'draft', label: 'Draft', sublabel: 'Under review or development', icon: 'edit_note', badge: 'Draft', badgeClass: 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800' }
   ];
 
   mappingTargetItemOptions = computed<SelectOption[]>(() => {

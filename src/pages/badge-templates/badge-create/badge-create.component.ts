@@ -42,6 +42,12 @@ export class BadgeCreateComponent implements OnInit {
     { id: 3, key: 'preview', title: 'Preview & Publish', shortTitle: '3. Preview & Publish', sublabel: 'Review & Publish', icon: 'visibility' }
   ];
 
+  // Alert & Validation State
+  welcomeAlert = signal<boolean>(true);
+  formErrorAlert = signal<string | null>(null);
+  successAlert = signal<string | null>(null);
+  submitted = signal<boolean>(false);
+
   // Step 1 Form State
   badgeName = signal<string>('');
   templateId = signal<string>('');
@@ -142,9 +148,15 @@ export class BadgeCreateComponent implements OnInit {
     // Check query params for edit mode
     this.route.queryParams.subscribe(params => {
       const editId = params['edit'];
+      const qStep = params['step'];
       if (editId) {
         this.editingBadgeId.set(editId);
         this.loadBadgeForEditing(editId);
+        if (qStep) {
+          this.currentStep.set(Number(qStep));
+        }
+      } else {
+        this.showStepAlert(1, 'entered');
       }
     });
   }
@@ -168,7 +180,7 @@ export class BadgeCreateComponent implements OnInit {
     if (existing.earning) {
       this.criteria.set(existing.earning.criteria || '');
       this.level.set((existing.earning.level as BadgeLevel) || '');
-      this.skillTags.set(existing.earning.skillTags || []);
+      this.skillTags.set(existing.earning.skillTags ? [...existing.earning.skillTags] : []);
       this.expires.set(existing.earning.expires || false);
       if (existing.earning.validity) {
         this.expiryAmount.set(existing.earning.validity.amount || 1);
@@ -183,7 +195,7 @@ export class BadgeCreateComponent implements OnInit {
 
     this.elements.set(existing.elements ? JSON.parse(JSON.stringify(existing.elements)) : []);
     
-    // Set completed steps based on loaded badge status
+    // Set completed steps based on loaded badge status & step position
     const completed = new Set<number>();
     if (existing.status === 'published' || existing.lastCompletedStep === 'preview') {
       completed.add(1);
@@ -192,8 +204,10 @@ export class BadgeCreateComponent implements OnInit {
     } else if (existing.lastCompletedStep === 'designer') {
       completed.add(1);
       completed.add(2);
+      this.currentStep.set(2);
     } else if (existing.lastCompletedStep === 'emblem-details') {
       completed.add(1);
+      this.currentStep.set(1);
     }
     this.completedSteps.set(completed);
   }
@@ -293,12 +307,51 @@ export class BadgeCreateComponent implements OnInit {
     this.selectedElementId.set(null);
   }
 
+  // Step Alert & Progress Toaster Helper
+  showStepAlert(step: number, action: 'entered' | 'completed' | 'back' | 'jump' = 'entered') {
+    const stepTitles: Record<number, string> = {
+      1: 'Step 1 of 3: Emblem & Details',
+      2: 'Step 2 of 3: Designer Canvas',
+      3: 'Step 3 of 3: Preview & Publish'
+    };
+
+    const stepDescriptions: Record<number, string> = {
+      1: 'Step 1 of 3 — Emblem & Details: Enter badge name, metadata, and emblem appearance.',
+      2: 'Step 2 of 3 — Designer Canvas: Place dynamic text labels and placeholder tokens.',
+      3: 'Step 3 of 3 — Preview & Publish: Review badge appearance with sample data before publishing.'
+    };
+
+    let title = stepTitles[step] || `Step ${step}`;
+    let badge = `STEP ${step} / 3`;
+    let type: 'success' | 'info' | 'warning' | 'error' = 'info';
+
+    let msg = stepDescriptions[step] || `Step ${step}`;
+    if (action === 'completed') {
+      const prev = step - 1;
+      const prevName = (stepTitles[prev] || '').split(': ')[1] || `Step ${prev}`;
+      const nextName = (stepTitles[step] || '').split(': ')[1] || `Step ${step}`;
+      title = `Step ${prev} Completed Successfully`;
+      badge = `STEP ${prev} COMPLETED`;
+      msg = `Step ${prev} (${prevName}) saved. Now on Step ${step} of 3: ${nextName}.`;
+      type = 'success';
+    } else if (action === 'back') {
+      msg = `Navigated back to Step ${step} of 3 (${(stepTitles[step] || '').split(': ')[1] || ''}).`;
+      type = 'info';
+    } else if (action === 'jump') {
+      msg = `Active: Step ${step} of 3 (${(stepTitles[step] || '').split(': ')[1] || ''}).`;
+      type = 'info';
+    }
+
+    this.dataService.showToast(msg, type, 4000, title, badge);
+  }
+
   // Navigation & Step Validation
   onStepClicked(step: StepperStep) {
     this.goToStep(step.id);
   }
 
   goToStep(step: number) {
+    this.formErrorAlert.set(null);
     if (step === 2 && this.currentStep() === 1) {
       if (!this.validateStep1()) return;
       this.completedSteps.update(set => {
@@ -306,7 +359,11 @@ export class BadgeCreateComponent implements OnInit {
         next.add(1);
         return next;
       });
-      this.dataService.showToast('Badge details have been saved successfully.', 'success', 3000, 'Step 1 Complete');
+      this.successAlert.set('Step 1 (Emblem & Details) saved. Proceeding to Step 2 of 3: Designer Canvas.');
+      this.showStepAlert(2, 'completed');
+      this.currentStep.set(2);
+      this.scrollTop();
+      return;
     }
     if (step === 3 && this.currentStep() === 2) {
       this.completedSteps.update(set => {
@@ -315,7 +372,11 @@ export class BadgeCreateComponent implements OnInit {
         next.add(2);
         return next;
       });
-      this.dataService.showToast('Badge design has been saved successfully.', 'success', 3000, 'Step 2 Complete');
+      this.successAlert.set('Step 2 (Designer Canvas) saved. Proceeding to Step 3 of 3: Preview & Publish.');
+      this.showStepAlert(3, 'completed');
+      this.currentStep.set(3);
+      this.scrollTop();
+      return;
     }
     if (step === 3 && this.currentStep() === 1) {
       if (!this.validateStep1()) return;
@@ -324,31 +385,49 @@ export class BadgeCreateComponent implements OnInit {
         next.add(1);
         return next;
       });
+      this.currentStep.set(3);
+      this.showStepAlert(3, 'jump');
+      this.scrollTop();
+      return;
+    }
+    if (step < this.currentStep()) {
+      this.currentStep.set(step);
+      this.showStepAlert(step, 'back');
+      this.scrollTop();
+      return;
     }
     this.currentStep.set(step);
+    this.showStepAlert(step, 'jump');
+    this.scrollTop();
   }
 
   validateStep1(): boolean {
+    this.submitted.set(true);
     if (!this.badgeName().trim() || !this.criteria().trim()) {
-      this.dataService.showToast('All mandatory fields are not filled up.', 'error', 4000, 'Validation Error');
+      this.formErrorAlert.set('All mandatory fields are not filled up.');
+      this.dataService.showToast('Step 1 Validation: All mandatory fields are not filled up.', 'error', 4500, 'Step 1 Error', 'STEP 1 / 3');
+      this.scrollToFirstError();
       return false;
     }
+    this.formErrorAlert.set(null);
     return true;
   }
 
   saveDraftAndExit() {
     this.saveOrUpdateBadge('draft');
+    this.dataService.showToast('Badge template draft saved successfully.', 'success', 4000, 'Draft Saved', 'DRAFT');
     this.router.navigate(['/certificates/badges']);
   }
 
   publishBadge() {
     if (!this.validateStep1()) {
       this.goToStep(1);
+      this.scrollToFirstError();
       return;
     }
 
     this.saveOrUpdateBadge('published');
-    this.dataService.showToast('Badge has been published successfully.', 'success', 3500, 'Badge Published');
+    this.dataService.showToast('Badge template has been successfully published and is now awardable across courses.', 'success', 5000, 'Badge Published', 'PUBLISHED');
     this.router.navigate(['/certificates/badges']);
   }
 
@@ -402,6 +481,29 @@ export class BadgeCreateComponent implements OnInit {
 
   cancelAndExit() {
     this.router.navigate(['/certificates/badges']);
+  }
+
+  private scrollTop() {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  private scrollToFirstError() {
+    if (typeof window === 'undefined') return;
+    setTimeout(() => {
+      const errorEl = document.querySelector(
+        '#badge-name-input, #badge-criteria-input, input.ng-invalid, textarea.ng-invalid, .border-rose-500, .border-red-500, #form-error-banner'
+      );
+      if (errorEl) {
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if ((errorEl as HTMLElement).focus && typeof (errorEl as HTMLElement).focus === 'function') {
+          (errorEl as HTMLElement).focus();
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 80);
   }
 
   // Token sample resolution helper

@@ -134,7 +134,7 @@
           class="space-y-4"
           [ngClass]="widget.colSpanPct === 100 ? 'md:col-span-12' : (widget.colSpanPct === 75 ? 'md:col-span-9' : 'md:col-span-6')">
           
-          <div class="bg-base-100 rounded-3xl border border-base-300 p-6 shadow-sm h-full flex flex-col justify-between space-y-4">
+          <div class="bg-base-100 rounded-3xl border border-base-300 p-6 shadow-sm h-full flex flex-col space-y-4">
             <!-- Widget Header -->
             <div class="flex items-center justify-between pb-3 border-b border-base-300">
               <div class="flex items-center gap-2">
@@ -146,90 +146,121 @@
               <span class="text-[10px] text-text-secondary font-mono">Live</span>
             </div>
 
-            <!-- 1. KPI SUMMARY WIDGET -->
+            <!-- 1. KPI SUMMARY WIDGET (§LMS Dashboard Design) -->
             @if (widget.type === 'kpi_summary') {
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-4 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between shadow-xs">
-                  <div>
-                    <span class="text-[11px] font-semibold text-text-secondary block">Total Badges</span>
-                    <span class="text-2xl font-extrabold text-text-primary">{{ stats().total }}</span>
-                    <span class="text-[10px] text-text-secondary block mt-0.5">Configured Templates</span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <!-- 1. Total Badges -->
+                <div class="bg-white dark:bg-base-200/60 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Badges</span>
+                    <div class="w-10 h-10 rounded-2xl bg-pink-50 text-pink-600 border border-pink-100 dark:bg-pink-950/40 dark:border-pink-900/40 flex items-center justify-center shadow-2xs">
+                      <span class="material-symbols-outlined text-xl">military_tech</span>
+                    </div>
                   </div>
-                  <div class="w-10 h-10 rounded-xl bg-tenant-500/10 text-tenant-600 dark:text-tenant-400 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-xl">military_tech</span>
-                  </div>
-                </div>
-
-                <div class="p-4 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between shadow-xs">
-                  <div>
-                    <span class="text-[11px] font-semibold text-text-secondary block">Published Badges</span>
-                    <span class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ stats().published }}</span>
-                    <span class="text-[10px] text-emerald-700 dark:text-emerald-300 block mt-0.5">Active for awarding</span>
-                  </div>
-                  <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-xl">verified</span>
+                  <div class="mt-4">
+                    <div class="flex items-baseline justify-between gap-2">
+                      <h3 class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">{{ stats().total }}</h3>
+                      <span class="text-xs font-bold text-tenant-600 dark:text-tenant-400 flex items-center gap-0.5">
+                        Configured
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Configured Templates</p>
                   </div>
                 </div>
 
-                <div class="p-4 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between shadow-xs">
-                  <div>
-                    <span class="text-[11px] font-semibold text-text-secondary block">Creation Drafts</span>
-                    <span class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{{ stats().draft }}</span>
-                    <span class="text-[10px] text-amber-700 dark:text-amber-300 block mt-0.5">In wizard composition</span>
+                <!-- 2. Published Badges -->
+                <div class="bg-white dark:bg-base-200/60 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Published Badges</span>
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900/40 flex items-center justify-center shadow-2xs">
+                      <span class="material-symbols-outlined text-xl">verified</span>
+                    </div>
                   </div>
-                  <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-xl">edit_document</span>
+                  <div class="mt-4">
+                    <div class="flex items-baseline justify-between gap-2">
+                      <h3 class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">{{ stats().published }}</h3>
+                      <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                        Active
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Active for awarding</p>
                   </div>
                 </div>
 
-                <div class="p-4 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between shadow-xs">
-                  <div>
-                    <span class="text-[11px] font-semibold text-text-secondary block">Org-Wide Shared</span>
-                    <span class="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{{ stats().orgCount }}</span>
-                    <span class="text-[10px] text-blue-700 dark:text-blue-300 block mt-0.5">Multi-tenant access</span>
+                <!-- 3. Creation Drafts -->
+                <div class="bg-white dark:bg-base-200/60 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Creation Drafts</span>
+                    <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/40 dark:border-amber-900/40 flex items-center justify-center shadow-2xs">
+                      <span class="material-symbols-outlined text-xl">edit_document</span>
+                    </div>
                   </div>
-                  <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-xl">public</span>
+                  <div class="mt-4">
+                    <div class="flex items-baseline justify-between gap-2">
+                      <h3 class="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight">{{ stats().draft }}</h3>
+                      <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
+                        Draft
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">In wizard composition</p>
+                  </div>
+                </div>
+
+                <!-- 4. Org-Wide Shared -->
+                <div class="bg-white dark:bg-base-200/60 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+                  <div class="flex items-start justify-between">
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Org-Wide Shared</span>
+                    <div class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 dark:bg-sky-950/40 dark:border-sky-900/40 flex items-center justify-center shadow-2xs">
+                      <span class="material-symbols-outlined text-xl">public</span>
+                    </div>
+                  </div>
+                  <div class="mt-4">
+                    <div class="flex items-baseline justify-between gap-2">
+                      <h3 class="text-3xl font-black text-sky-600 dark:text-sky-400 font-mono tracking-tight">{{ stats().orgCount }}</h3>
+                      <span class="text-xs font-bold text-sky-600 dark:text-sky-400 flex items-center gap-0.5">
+                        Multi-tenant
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Multi-tenant access</p>
                   </div>
                 </div>
               </div>
             }
-
             <!-- 2. STATUS BREAKDOWN WIDGET -->
             @if (widget.type === 'status_breakdown') {
-              <div class="space-y-3 py-1">
+              <div class="space-y-3.5 py-1">
                 <div>
-                  <div class="flex justify-between text-xs font-semibold mb-1">
-                    <span class="text-text-primary flex items-center gap-1.5">
-                      <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Published & Active
+                  <div class="flex justify-between text-xs font-semibold mb-1.5">
+                    <span class="text-text-primary flex items-center gap-1.5 font-bold">
+                      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs"></span> Published & Active
                     </span>
-                    <span class="text-text-secondary">{{ stats().published }}</span>
+                    <span class="text-xs font-black font-mono text-emerald-600 dark:text-emerald-400">{{ stats().published }}</span>
                   </div>
-                  <div class="w-full bg-base-200 rounded-full h-2.5 overflow-hidden">
+                  <div class="w-full bg-slate-100 dark:bg-base-300 rounded-full h-2.5 overflow-hidden">
                     <div class="bg-emerald-500 h-full rounded-full transition-all" [style.width.%]="stats().total ? (stats().published / stats().total) * 100 : 0"></div>
                   </div>
                 </div>
 
                 <div>
-                  <div class="flex justify-between text-xs font-semibold mb-1">
-                    <span class="text-text-primary flex items-center gap-1.5">
-                      <span class="w-2 h-2 rounded-full bg-amber-500"></span> Drafts in Progress
+                  <div class="flex justify-between text-xs font-semibold mb-1.5">
+                    <span class="text-text-primary flex items-center gap-1.5 font-bold">
+                      <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs"></span> Drafts in Progress
                     </span>
-                    <span class="text-text-secondary">{{ stats().draft }}</span>
+                    <span class="text-xs font-black font-mono text-amber-600 dark:text-amber-400">{{ stats().draft }}</span>
                   </div>
-                  <div class="w-full bg-base-200 rounded-full h-2.5 overflow-hidden">
+                  <div class="w-full bg-slate-100 dark:bg-base-300 rounded-full h-2.5 overflow-hidden">
                     <div class="bg-amber-500 h-full rounded-full transition-all" [style.width.%]="stats().total ? (stats().draft / stats().total) * 100 : 0"></div>
                   </div>
                 </div>
 
                 <div>
-                  <div class="flex justify-between text-xs font-semibold mb-1">
-                    <span class="text-text-primary flex items-center gap-1.5">
-                      <span class="w-2 h-2 rounded-full bg-slate-400"></span> Archived Templates
+                  <div class="flex justify-between text-xs font-semibold mb-1.5">
+                    <span class="text-text-primary flex items-center gap-1.5 font-bold">
+                      <span class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-xs"></span> Archived Templates
                     </span>
-                    <span class="text-text-secondary">{{ stats().archived }}</span>
+                    <span class="text-xs font-black font-mono text-slate-600 dark:text-slate-400">{{ stats().archived }}</span>
                   </div>
-                  <div class="w-full bg-base-200 rounded-full h-2.5 overflow-hidden">
+                  <div class="w-full bg-slate-100 dark:bg-base-300 rounded-full h-2.5 overflow-hidden">
                     <div class="bg-slate-400 h-full rounded-full transition-all" [style.width.%]="stats().total ? (stats().archived / stats().total) * 100 : 0"></div>
                   </div>
                 </div>
@@ -239,34 +270,50 @@
             <!-- 3. SHARING POLICY BREAKDOWN WIDGET -->
             @if (widget.type === 'sharing_breakdown') {
               <div class="grid grid-cols-3 gap-3 py-1">
-                <div class="p-3.5 bg-base-200 rounded-2xl border border-base-300 text-center">
-                  <span class="material-symbols-outlined text-text-secondary text-xl mb-1">lock</span>
-                  <span class="text-xl font-bold text-text-primary block">{{ stats().privateCount }}</span>
-                  <span class="text-[11px] text-text-secondary">Private Scope</span>
+                <div class="p-4 bg-white dark:bg-base-200/50 rounded-2xl border border-slate-200/80 dark:border-base-300 text-center shadow-2xs hover:shadow-xs transition-all">
+                  <div class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-base-300 text-slate-600 dark:text-slate-300 flex items-center justify-center mx-auto mb-2">
+                    <span class="material-symbols-outlined text-base">lock</span>
+                  </div>
+                  <span class="text-2xl font-black font-mono text-text-primary block">{{ stats().privateCount }}</span>
+                  <span class="text-[11px] font-semibold text-text-secondary mt-0.5 block">Private Scope</span>
                 </div>
-                <div class="p-3.5 bg-base-200 rounded-2xl border border-base-300 text-center">
-                  <span class="material-symbols-outlined text-tenant-600 text-xl mb-1">apartment</span>
-                  <span class="text-xl font-bold text-text-primary block">{{ stats().lmsCount }}</span>
-                  <span class="text-[11px] text-text-secondary">LMS-Shared</span>
+                <div class="p-4 bg-white dark:bg-base-200/50 rounded-2xl border border-slate-200/80 dark:border-base-300 text-center shadow-2xs hover:shadow-xs transition-all">
+                  <div class="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 border border-pink-100 dark:bg-pink-950/40 dark:border-pink-900/40 flex items-center justify-center mx-auto mb-2">
+                    <span class="material-symbols-outlined text-base">apartment</span>
+                  </div>
+                  <span class="text-2xl font-black font-mono text-text-primary block">{{ stats().lmsCount }}</span>
+                  <span class="text-[11px] font-semibold text-text-secondary mt-0.5 block">LMS-Shared</span>
                 </div>
-                <div class="p-3.5 bg-base-200 rounded-2xl border border-base-300 text-center">
-                  <span class="material-symbols-outlined text-blue-600 text-xl mb-1">domain</span>
-                  <span class="text-xl font-bold text-text-primary block">{{ stats().orgCount }}</span>
-                  <span class="text-[11px] text-text-secondary">Org-Shared</span>
+                <div class="p-4 bg-white dark:bg-base-200/50 rounded-2xl border border-slate-200/80 dark:border-base-300 text-center shadow-2xs hover:shadow-xs transition-all">
+                  <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 border border-sky-100 dark:bg-sky-950/40 dark:border-sky-900/40 flex items-center justify-center mx-auto mb-2">
+                    <span class="material-symbols-outlined text-base">domain</span>
+                  </div>
+                  <span class="text-2xl font-black font-mono text-text-primary block">{{ stats().orgCount }}</span>
+                  <span class="text-[11px] font-semibold text-text-secondary mt-0.5 block">Org-Shared</span>
                 </div>
               </div>
             }
 
             <!-- 4. LEVEL & TIER BREAKDOWN WIDGET -->
             @if (widget.type === 'level_breakdown') {
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 py-1">
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 py-1">
                 @for (entry of levelBreakdown(); track entry.level) {
-                  <div class="p-3 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between">
-                    <div>
-                      <span class="text-[10px] font-bold uppercase text-text-secondary block truncate">{{ entry.level }}</span>
-                      <span class="text-lg font-extrabold text-text-primary">{{ entry.count }}</span>
+                  <div class="p-3.5 rounded-2xl border flex flex-col justify-between transition-all hover:shadow-xs"
+                    [ngClass]="{
+                      'bg-amber-50/80 border-amber-200/90 text-amber-900 dark:bg-amber-950/30 dark:border-amber-900/50 dark:text-amber-200': entry.level.toLowerCase().includes('gold'),
+                      'bg-slate-100/90 border-slate-200 text-slate-800 dark:bg-slate-800/40 dark:border-slate-700 dark:text-slate-200': entry.level.toLowerCase().includes('silver'),
+                      'bg-orange-50/80 border-orange-200/90 text-orange-900 dark:bg-orange-950/30 dark:border-orange-900/50 dark:text-orange-200': entry.level.toLowerCase().includes('bronze'),
+                      'bg-purple-50/80 border-purple-200/90 text-purple-900 dark:bg-purple-950/30 dark:border-purple-900/50 dark:text-purple-200': entry.level.toLowerCase().includes('platinum'),
+                      'bg-sky-50/80 border-sky-200/90 text-sky-900 dark:bg-sky-950/30 dark:border-sky-900/50 dark:text-sky-200': !entry.level.toLowerCase().includes('gold') && !entry.level.toLowerCase().includes('silver') && !entry.level.toLowerCase().includes('bronze') && !entry.level.toLowerCase().includes('platinum')
+                    }">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-extrabold uppercase tracking-wider block truncate">{{ entry.level }}</span>
+                      <span class="material-symbols-outlined text-base opacity-80">military_tech</span>
                     </div>
-                    <span class="material-symbols-outlined text-tenant-600 text-lg">military_tech</span>
+                    <div class="mt-2.5 flex items-baseline justify-between">
+                      <span class="text-2xl font-black font-mono tracking-tight">{{ entry.count }}</span>
+                      <span class="text-[10px] font-bold opacity-70">{{ entry.pct }}%</span>
+                    </div>
                   </div>
                 }
               </div>
@@ -274,28 +321,37 @@
 
             <!-- 5. MOST-USED BADGES WIDGET -->
             @if (widget.type === 'most_used') {
-              <div class="space-y-2 py-1">
+              <div class="space-y-2.5 py-1">
                 @for (badge of mostUsedBadges(); track badge.templateId; let idx = $index) {
-                  <div class="p-2.5 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between hover:border-tenant-500/40 transition-colors">
-                    <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                      <span class="w-6 h-6 rounded-lg bg-base-300 text-text-primary font-bold text-xs flex items-center justify-center shrink-0">
+                  <div class="p-3 bg-white dark:bg-base-200/50 rounded-2xl border border-slate-200/80 dark:border-base-300 flex items-center justify-between hover:border-tenant-500/40 hover:shadow-2xs transition-all">
+                    <div class="flex items-center gap-3 min-w-0 pr-2">
+                      <span class="w-7 h-7 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs font-mono"
+                        [ngClass]="idx === 0 ? 'bg-amber-100 text-amber-800 border border-amber-200' : (idx === 1 ? 'bg-slate-200 text-slate-700 border border-slate-300' : 'bg-orange-100 text-orange-800 border border-orange-200')">
                         #{{ idx + 1 }}
                       </span>
+                      <div class="w-9 h-9 rounded-xl bg-pink-50 text-pink-600 border border-pink-100 dark:bg-pink-950/40 dark:border-pink-900/40 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-base">military_tech</span>
+                      </div>
                       <div class="min-w-0">
-                        <p class="text-xs font-bold text-text-primary truncate">{{ badge.name }}</p>
-                        <p class="text-[10px] text-text-secondary truncate">{{ badge.category }} • {{ badge.earning?.level || 'Standard' }}</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ badge.name }}</p>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                          <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ badge.category }}</span>
+                          <span class="text-[10px] text-slate-300 dark:text-slate-600">•</span>
+                          <span class="text-[10px] font-semibold text-tenant-600 dark:text-tenant-400">{{ badge.earning?.level || 'Standard' }}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div class="flex items-center gap-2 shrink-0">
-                      <span class="px-2 py-0.5 bg-tenant-500/10 text-tenant-700 dark:text-tenant-300 border border-tenant-500/20 rounded-lg text-xs font-bold">
+                    <div class="flex items-center gap-2.5 shrink-0">
+                      <span class="px-3 py-1 bg-tenant-50 text-tenant-700 dark:bg-tenant-950/40 dark:text-tenant-300 border border-tenant-200/80 dark:border-tenant-800 rounded-xl text-xs font-black font-mono shadow-2xs">
                         {{ badge.usageCount }} courses
                       </span>
                       <a 
                         [routerLink]="['/certificates/badges/create']"
                         [queryParams]="{ edit: badge.templateId }"
-                        class="text-text-secondary hover:text-tenant-600 p-1 flex items-center">
-                        <span class="material-symbols-outlined text-base">edit</span>
+                        class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-base-300 hover:bg-tenant-500 hover:text-white text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+                        title="Edit Badge Template">
+                        <span class="material-symbols-outlined text-sm">edit</span>
                       </a>
                     </div>
                   </div>
@@ -305,31 +361,39 @@
 
             <!-- 6. ACTIVE CREATION DRAFTS WIDGET -->
             @if (widget.type === 'active_drafts') {
-              <div class="space-y-2 py-1">
+              <div class="space-y-3 py-1">
                 @for (draft of creationDrafts(); track draft.templateId) {
-                  <div class="p-2.5 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between">
-                    <div class="min-w-0 pr-2">
-                      <div class="flex items-center gap-1.5">
-                        <p class="text-xs font-bold text-text-primary truncate">{{ draft.name }}</p>
-                        <span class="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 text-[9px] font-extrabold uppercase rounded">
-                          {{ draft.lastCompletedStep || 'Step 1' }}
-                        </span>
+                  <div class="p-4 bg-white dark:bg-base-200/50 rounded-2xl border border-slate-200/80 dark:border-base-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-amber-400/50 hover:shadow-2xs transition-all">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/60 dark:bg-amber-950/40 dark:border-amber-900/40 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-lg">edit_document</span>
                       </div>
-                      <p class="text-[10px] text-text-secondary mt-0.5">Updated {{ draft.updatedAt | date:'short' }}</p>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                          <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ draft.name || 'Untitled Draft' }}</p>
+                          <span class="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 text-[10px] font-extrabold uppercase rounded-lg">
+                            {{ draft.lastCompletedStep || 'Step 1' }}
+                          </span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs">schedule</span>
+                          <span>Last updated {{ (draft.updatedAt | date:'medium') || draft.updatedAt || 'Recently' }}</span>
+                        </p>
+                      </div>
                     </div>
 
                     <button 
-                      type="button" 
-                      (click)="resumeDraft(draft)"
-                      class="px-2.5 py-1 bg-tenant-500 hover:bg-tenant-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer">
-                      <span>Resume</span>
-                      <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                       type="button" 
+                       (click)="resumeDraft(draft)" 
+                       class="px-4 py-2 bg-tenant-500 hover:bg-tenant-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs hover:shadow-sm transition-all cursor-pointer shrink-0">
+                       <span>Resume</span>
+                       <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </button>
                   </div>
                 } @empty {
-                  <div class="text-center py-6 text-text-secondary text-xs">
-                    <span class="material-symbols-outlined text-2xl text-text-secondary/50 mb-1">check_circle</span>
-                    <p>No active drafts. All badge templates are published.</p>
+                  <div class="text-center py-8 text-slate-400 text-xs">
+                    <span class="material-symbols-outlined text-3xl text-slate-300 mb-1">check_circle</span>
+                    <p class="font-medium">No active drafts. All badge templates are published.</p>
                   </div>
                 }
               </div>
@@ -337,23 +401,30 @@
 
             <!-- 7. RECENT ACTIVITY FEED WIDGET -->
             @if (widget.type === 'recent_activity') {
-              <div class="space-y-2 py-1">
+              <div class="space-y-2.5 py-1">
                 @for (badge of allBadges().slice(0, 5); track badge.templateId) {
-                  <div class="p-2.5 bg-base-200 rounded-2xl border border-base-300 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                      <div class="w-7 h-7 rounded-lg bg-tenant-500/10 text-tenant-600 dark:text-tenant-400 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-sm">history</span>
+                  <div 
+                    (click)="resumeDraft(badge)"
+                    class="p-3 bg-white dark:bg-base-200/50 rounded-2xl border border-slate-200/80 dark:border-base-300 flex items-center justify-between hover:border-tenant-500/40 hover:shadow-2xs transition-all cursor-pointer group">
+                    <div class="flex items-center gap-3 min-w-0 pr-2">
+                      <div class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-base-300 text-slate-600 dark:text-slate-300 group-hover:bg-tenant-50 group-hover:text-tenant-600 flex items-center justify-center shrink-0 transition-colors">
+                        <span class="material-symbols-outlined text-base">history</span>
                       </div>
                       <div class="min-w-0">
-                        <p class="text-xs font-bold text-text-primary truncate">{{ badge.name }}</p>
-                        <p class="text-[10px] text-text-secondary">{{ badge.updatedAt | date:'mediumDate' }} by {{ badge.createdBy }}</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-tenant-600 dark:group-hover:text-tenant-400 transition-colors truncate">
+                          {{ badge.name || 'Untitled Badge' }}
+                        </p>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          {{ (badge.updatedAt | date:'mediumDate') || badge.updatedAt || 'Recently' }} by <span class="font-medium text-slate-600 dark:text-slate-300">{{ badge.createdBy || 'System Admin' }}</span>
+                        </p>
                       </div>
                     </div>
 
                     <span 
-                      class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase shrink-0"
-                      [ngClass]="badge.status === 'published' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200'">
-                      {{ badge.status }}
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase shrink-0 border"
+                      [ngClass]="badge.status === 'published' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300' : (badge.status === 'draft' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300' : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300')">
+                      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="badge.status === 'published' ? 'bg-emerald-500' : (badge.status === 'draft' ? 'bg-amber-500' : 'bg-slate-400')"></span>
+                      {{ badge.status || 'Active' }}
                     </span>
                   </div>
                 }
@@ -364,10 +435,13 @@
             @if (widget.type === 'top_skill_tags') {
               <div class="flex flex-wrap gap-2 py-1">
                 @for (tag of topSkillTags(); track tag.tag) {
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-base-200 text-text-primary border border-base-300 rounded-xl text-xs font-medium hover:border-tenant-500 transition-colors">
+                  <a 
+                    [routerLink]="['/certificates/badges']"
+                    [queryParams]="{ search: tag.tag }"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white dark:bg-base-200 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-base-300 rounded-xl text-xs font-bold shadow-2xs hover:border-tenant-500 hover:text-tenant-600 transition-all cursor-pointer">
                     <span>#{{ tag.tag }}</span>
-                    <span class="px-1.5 py-0.2 bg-base-300 text-text-secondary rounded-md text-[10px] font-bold">{{ tag.count }}</span>
-                  </span>
+                    <span class="px-1.5 py-0.2 bg-tenant-50 text-tenant-700 dark:bg-tenant-950/60 dark:text-tenant-300 rounded-md text-[10px] font-black font-mono">{{ tag.count }}</span>
+                  </a>
                 }
               </div>
             }

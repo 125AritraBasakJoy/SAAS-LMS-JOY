@@ -446,23 +446,24 @@ export const DEFAULT_RATING_FILTERS: RatingFilters = {
       <!-- 4. RATING SUBMISSION MODAL                                               -->
       <!-- ========================================================================= -->
       @if (showRatingModal()) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div class="w-full max-w-lg rounded-3xl bg-base-100 border border-base-300 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+        <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-slate-950/60 backdrop-blur-xs z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div class="w-full max-w-lg rounded-3xl bg-white dark:bg-base-100 border border-slate-200/80 dark:border-base-300 shadow-2xl overflow-hidden flex flex-col m-auto">
             
-            <div class="p-5 border-b border-base-300 flex items-center justify-between bg-base-200">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-                  <span class="material-symbols-outlined text-lg">star</span>
+            <div class="p-6 pb-5 border-b border-slate-100 dark:border-base-300 flex items-center justify-between bg-slate-50/50 dark:bg-base-200/40">
+              <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/80 dark:bg-amber-950/40 dark:border-amber-900/40 flex items-center justify-center shadow-2xs shrink-0">
+                  <span class="material-symbols-outlined text-xl">star</span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-extrabold text-text-primary">Submit Experience Rating</h3>
-                  <p class="text-[11px] text-text-secondary font-medium">Contribute to multi-dimensional course performance indexes</p>
+                  <h3 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Submit Experience Rating</h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Contribute to multi-dimensional course performance indexes</p>
                 </div>
               </div>
               <button 
                 type="button" 
                 (click)="showRatingModal.set(false)"
-                class="w-8 h-8 rounded-xl hover:bg-base-300 flex items-center justify-center text-text-secondary transition-colors cursor-pointer">
+                class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-base-300 hover:bg-slate-200 dark:hover:bg-base-300/80 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer"
+                title="Close modal">
                 <span class="material-symbols-outlined text-base">close</span>
               </button>
             </div>
@@ -471,33 +472,54 @@ export const DEFAULT_RATING_FILTERS: RatingFilters = {
               
               <!-- Scope Selection Buttons -->
               <div>
-                <label class="font-extrabold text-text-primary block mb-1.5 uppercase tracking-wider text-[10px] text-text-secondary">Evaluation Scope</label>
-                <div class="grid grid-cols-3 gap-2">
+                <label class="font-extrabold text-slate-400 dark:text-slate-500 block mb-1.5 uppercase tracking-wider text-[10px]">Evaluation Scope</label>
+                <div class="grid grid-cols-3 gap-2.5">
                   <button 
                     type="button"
                     (click)="setScope('plan')"
-                    [class.border-tenant-600]="ratingForm.get('level')?.value === 'plan'"
+                    [class.border-tenant-500]="ratingForm.get('level')?.value === 'plan'"
+                    [class.border-2]="ratingForm.get('level')?.value === 'plan'"
                     [class.bg-tenant-50]="ratingForm.get('level')?.value === 'plan'"
-                    [class.dark:bg-tenant-950/30]="ratingForm.get('level')?.value === 'plan'"
-                    class="p-2.5 rounded-xl border border-base-300 text-center font-bold text-text-primary cursor-pointer transition-all">
+                    [class.text-tenant-700]="ratingForm.get('level')?.value === 'plan'"
+                    [class.dark:bg-tenant-950/40]="ratingForm.get('level')?.value === 'plan'"
+                    [class.dark:text-tenant-300]="ratingForm.get('level')?.value === 'plan'"
+                    [class.border-slate-200]="ratingForm.get('level')?.value !== 'plan'"
+                    [class.bg-slate-50]="ratingForm.get('level')?.value !== 'plan'"
+                    [class.dark:bg-base-200/60]="ratingForm.get('level')?.value !== 'plan'"
+                    [class.text-slate-600]="ratingForm.get('level')?.value !== 'plan'"
+                    class="p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer hover:shadow-2xs">
                     Plan Level
                   </button>
                   <button 
                     type="button"
                     (click)="setScope('phase')"
-                    [class.border-tenant-600]="ratingForm.get('level')?.value === 'phase'"
+                    [class.border-tenant-500]="ratingForm.get('level')?.value === 'phase'"
+                    [class.border-2]="ratingForm.get('level')?.value === 'phase'"
                     [class.bg-tenant-50]="ratingForm.get('level')?.value === 'phase'"
-                    [class.dark:bg-tenant-950/30]="ratingForm.get('level')?.value === 'phase'"
-                    class="p-2.5 rounded-xl border border-base-300 text-center font-bold text-text-primary cursor-pointer transition-all">
+                    [class.text-tenant-700]="ratingForm.get('level')?.value === 'phase'"
+                    [class.dark:bg-tenant-950/40]="ratingForm.get('level')?.value === 'phase'"
+                    [class.dark:text-tenant-300]="ratingForm.get('level')?.value === 'phase'"
+                    [class.border-slate-200]="ratingForm.get('level')?.value !== 'phase'"
+                    [class.bg-slate-50]="ratingForm.get('level')?.value !== 'phase'"
+                    [class.dark:bg-base-200/60]="ratingForm.get('level')?.value !== 'phase'"
+                    [class.text-slate-600]="ratingForm.get('level')?.value !== 'phase'"
+                    class="p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer hover:shadow-2xs">
                     Phase Level
                   </button>
                   <button 
                     type="button"
                     (click)="setScope('course')"
-                    [class.border-tenant-600]="ratingForm.get('level')?.value === 'course'"
+                    [class.border-tenant-500]="ratingForm.get('level')?.value === 'course'"
+                    [class.border-2]="ratingForm.get('level')?.value === 'course'"
                     [class.bg-tenant-50]="ratingForm.get('level')?.value === 'course'"
-                    [class.dark:bg-tenant-950/30]="ratingForm.get('level')?.value === 'course'"
-                    class="p-2.5 rounded-xl border border-base-300 text-center font-bold text-text-primary cursor-pointer transition-all">
+                    [class.text-tenant-700]="ratingForm.get('level')?.value === 'course'"
+                    [class.dark:bg-tenant-950/40]="ratingForm.get('level')?.value === 'course'"
+                    [class.dark:text-tenant-300]="ratingForm.get('level')?.value === 'course'"
+                    [class.border-slate-200]="ratingForm.get('level')?.value !== 'course'"
+                    [class.bg-slate-50]="ratingForm.get('level')?.value !== 'course'"
+                    [class.dark:bg-base-200/60]="ratingForm.get('level')?.value !== 'course'"
+                    [class.text-slate-600]="ratingForm.get('level')?.value !== 'course'"
+                    class="p-2.5 rounded-2xl border text-center font-bold transition-all cursor-pointer hover:shadow-2xs">
                     Course Level
                   </button>
                 </div>
@@ -505,7 +527,7 @@ export const DEFAULT_RATING_FILTERS: RatingFilters = {
 
               <!-- Dimension Dropdown Selector -->
               <div>
-                <label class="font-extrabold text-text-primary block mb-1.5 uppercase tracking-wider text-[10px] text-text-secondary">Evaluation Dimension</label>
+                <label class="font-extrabold text-slate-400 dark:text-slate-500 block mb-1.5 uppercase tracking-wider text-[10px]">Evaluation Dimension</label>
                 <app-custom-select
                   [options]="evaluationDimensionOptions"
                   [clearable]="false"
@@ -515,46 +537,51 @@ export const DEFAULT_RATING_FILTERS: RatingFilters = {
               </div>
 
               <!-- Interactive Star Rating selector -->
-              <div class="text-center py-4 bg-base-200 rounded-2xl border border-base-300">
-                <span class="text-[10px] font-extrabold text-text-secondary block mb-2 uppercase tracking-wider">Reputation Index Score</span>
-                <div class="flex items-center justify-center gap-2.5">
+              <div class="text-center py-4 px-4 bg-amber-50/40 dark:bg-amber-950/20 rounded-2xl border border-amber-200/60 dark:border-amber-900/40">
+                <span class="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 block mb-2 uppercase tracking-wider">Reputation Index Score</span>
+                <div class="flex items-center justify-center gap-2">
                   @for (s of [1,2,3,4,5]; track s) {
                     <button 
                       type="button" 
                       (click)="ratingForm.get('value')?.setValue(s)"
-                      class="text-3xl text-amber-500 hover:scale-115 active:scale-95 transition-transform cursor-pointer">
+                      class="text-3xl text-amber-400 hover:text-amber-500 hover:scale-115 active:scale-95 transition-all cursor-pointer">
                       <span class="material-symbols-outlined text-3xl">
                         {{ s <= (ratingForm.get('value')?.value || 0) ? 'star' : 'star_outline' }}
                       </span>
                     </button>
                   }
                 </div>
-                <span class="text-xs font-black text-text-primary mt-2 block">{{ ratingForm.get('value')?.value }} of 5.0 Stars</span>
+                <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white dark:bg-base-100 border border-amber-200/80 dark:border-amber-900 shadow-2xs text-xs font-black text-amber-700 dark:text-amber-300 mt-2">
+                  <span>{{ ratingForm.get('value')?.value }}</span>
+                  <span class="text-slate-400 font-normal">/</span>
+                  <span>5.0 Stars</span>
+                </div>
               </div>
 
               <!-- Qualitative Feedbacks -->
               <div>
-                <label class="font-extrabold text-text-primary block mb-1.5 uppercase tracking-wider text-[10px] text-text-secondary">Observations & Written Feedback</label>
+                <label class="font-extrabold text-slate-400 dark:text-slate-500 block mb-1.5 uppercase tracking-wider text-[10px]">Observations & Written Feedback</label>
                 <textarea 
                   formControlName="comment" 
                   rows="3" 
                   placeholder="Share details on curriculum relevance, pacing, or areas for future course improvements..."
-                  class="w-full px-3.5 py-2.5 rounded-2xl bg-base-200 border border-base-300 text-text-primary placeholder:text-text-secondary/40 focus:outline-none focus:border-slate-400 transition-all text-xs">
+                  class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-base-200/60 border border-slate-200 dark:border-base-300 text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white focus:outline-none transition-all text-xs">
                 </textarea>
               </div>
 
               <!-- Actions block -->
-              <div class="pt-4 border-t border-base-300 flex items-center justify-end gap-2.5">
+              <div class="pt-4 border-t border-slate-100 dark:border-base-300 flex items-center justify-end gap-2.5">
                 <button 
                   type="button" 
                   (click)="showRatingModal.set(false)"
-                  class="px-4.5 py-2 rounded-xl bg-base-200 hover:bg-base-300 text-text-primary font-bold transition-colors cursor-pointer">
+                  class="px-4.5 py-2.5 rounded-xl border border-slate-200 dark:border-base-300 hover:bg-slate-100 dark:hover:bg-base-300 text-slate-700 dark:text-slate-300 font-bold transition-colors cursor-pointer text-xs">
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  class="px-4.5 py-2 rounded-xl bg-tenant-500 hover:bg-tenant-600 text-white font-bold shadow-2xs transition-all cursor-pointer">
-                  Submit Review
+                  class="px-5 py-2.5 rounded-xl bg-tenant-500 hover:bg-tenant-600 text-white font-bold shadow-xs hover:shadow-sm transition-all cursor-pointer flex items-center gap-1.5 text-xs">
+                  <span class="material-symbols-outlined text-sm">send</span>
+                  <span>Submit Review</span>
                 </button>
               </div>
 

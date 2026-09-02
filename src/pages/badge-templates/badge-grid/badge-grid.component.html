@@ -36,7 +36,7 @@
         <button 
           type="button" 
           id="btn-create-badge-template"
-          (click)="createBadge()" 
+          (click)="createBadge()"
           class="px-4 py-2.5 rounded-2xl bg-tenant-500 hover:bg-tenant-600 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-sm active:scale-[0.98] cursor-pointer">
           <span class="material-symbols-outlined text-base">add_circle</span>
           <span>Create Badge</span>
@@ -45,53 +45,81 @@
     </div>
   </div>
 
-  <!-- KPI Metric Overview Cards -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-    <!-- Total Badges -->
-    <div class="bg-base-100 border border-base-300 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-      <div>
-        <p class="text-xs font-medium text-text-secondary">Total Badges</p>
-        <h3 class="text-2xl font-bold text-text-primary mt-1">{{ kpiStats().total }}</h3>
-        <span class="text-[11px] text-text-secondary">Configured templates</span>
+  <!-- KPI Telemetry Bar (§LMS Dashboard Design) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <!-- 1. Total Badges -->
+    <div class="bg-white dark:bg-base-100 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Badges</span>
+        <div class="w-10 h-10 rounded-2xl bg-pink-50 text-pink-600 border border-pink-100 dark:bg-pink-950/40 dark:border-pink-900/40 flex items-center justify-center shadow-2xs">
+          <span class="material-symbols-outlined text-xl">military_tech</span>
+        </div>
       </div>
-      <div class="w-10 h-10 rounded-xl bg-tenant-50 dark:bg-tenant-500/20 text-tenant-600 dark:text-tenant-400 flex items-center justify-center border border-tenant-500/30">
-        <span class="material-symbols-outlined">military_tech</span>
-      </div>
-    </div>
-
-    <!-- Published -->
-    <div class="bg-base-100 border border-base-300 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-      <div>
-        <p class="text-xs font-medium text-text-secondary">Published</p>
-        <h3 class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ kpiStats().published }}</h3>
-        <span class="text-[11px] text-emerald-700 dark:text-emerald-400">Awardable in courses</span>
-      </div>
-      <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
-        <span class="material-symbols-outlined">verified</span>
+      <div class="mt-4">
+        <div class="flex items-baseline justify-between gap-2">
+          <h3 class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">{{ kpiStats().total }}</h3>
+          <span class="text-xs font-bold text-tenant-600 dark:text-tenant-400 flex items-center gap-0.5">
+            Configured
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Configured Templates</p>
       </div>
     </div>
 
-    <!-- Drafts -->
-    <div class="bg-base-100 border border-base-300 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-      <div>
-        <p class="text-xs font-medium text-text-secondary">Creation Drafts</p>
-        <h3 class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{{ kpiStats().draft }}</h3>
-        <span class="text-[11px] text-amber-700 dark:text-amber-400">In composition</span>
+    <!-- 2. Published Badges -->
+    <div class="bg-white dark:bg-base-100 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Published</span>
+        <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/40 dark:border-emerald-900/40 flex items-center justify-center shadow-2xs">
+          <span class="material-symbols-outlined text-xl">verified</span>
+        </div>
       </div>
-      <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-200 dark:border-amber-800">
-        <span class="material-symbols-outlined">edit_document</span>
+      <div class="mt-4">
+        <div class="flex items-baseline justify-between gap-2">
+          <h3 class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">{{ kpiStats().published }}</h3>
+          <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+            Active
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Awardable in courses</p>
       </div>
     </div>
 
-    <!-- Archived -->
-    <div class="bg-base-100 border border-base-300 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-      <div>
-        <p class="text-xs font-medium text-text-secondary">Archived</p>
-        <h3 class="text-2xl font-bold text-text-primary mt-1">{{ kpiStats().archived }}</h3>
-        <span class="text-[11px] text-text-secondary">Historical records</span>
+    <!-- 3. Creation Drafts -->
+    <div class="bg-white dark:bg-base-100 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Creation Drafts</span>
+        <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/40 dark:border-amber-900/40 flex items-center justify-center shadow-2xs">
+          <span class="material-symbols-outlined text-xl">edit_document</span>
+        </div>
       </div>
-      <div class="w-10 h-10 rounded-xl bg-base-200 border border-base-300 flex items-center justify-center text-text-secondary">
-        <span class="material-symbols-outlined">archive</span>
+      <div class="mt-4">
+        <div class="flex items-baseline justify-between gap-2">
+          <h3 class="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight">{{ kpiStats().draft }}</h3>
+          <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
+            Draft
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">In composition</p>
+      </div>
+    </div>
+
+    <!-- 4. Archived -->
+    <div class="bg-white dark:bg-base-100 rounded-3xl border border-slate-200/80 dark:border-base-300 p-5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
+      <div class="flex items-start justify-between">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Archived</span>
+        <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-center shadow-2xs">
+          <span class="material-symbols-outlined text-xl">archive</span>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-baseline justify-between gap-2">
+          <h3 class="text-3xl font-black text-slate-600 dark:text-slate-300 font-mono tracking-tight">{{ kpiStats().archived }}</h3>
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
+            Legacy
+          </span>
+        </div>
+        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">Inactive / Legacy</p>
       </div>
     </div>
   </div>
@@ -111,8 +139,8 @@
             placeholder="Search by badge name, ID, category, or skill tags..."
             class="w-full pl-9 pr-9 py-2 bg-base-200 border border-base-300 rounded-xl text-xs text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-tenant-500 transition-colors shadow-2xs" />
           @if (searchQuery()) {
-            <button 
-              type="button" 
+            <button
+              type="button"
               (click)="onSearchChange('')"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary p-0.5 rounded-md cursor-pointer">
               <span class="material-symbols-outlined text-xs">close</span>
@@ -121,7 +149,7 @@
         </div>
 
         <!-- Filter Button -->
-        <button 
+        <button
           type="button"
           id="btn-toggle-badge-filter"
           (click)="toggleFilterPanel()"
@@ -141,7 +169,7 @@
 
         <!-- Grid-Level Reset Button -->
         @if (isResetVisible()) {
-          <button 
+          <button
             type="button"
             id="btn-badge-grid-reset"
             (click)="resetGrid()"
@@ -157,18 +185,18 @@
       <div class="flex items-center justify-end gap-3 text-xs text-text-secondary self-end sm:self-auto flex-shrink-0">
         <!-- Grid/Table Toggle -->
         <div class="flex items-center bg-base-200 rounded-xl p-1 border border-base-300">
-          <button 
-            type="button" 
-            (click)="viewMode.set('grid')" 
+          <button
+            type="button"
+            (click)="viewMode.set('grid')"
             [class]="viewMode() === 'grid' ? 'bg-base-100 shadow-xs text-tenant-600 dark:text-tenant-400 font-bold' : 'text-text-secondary hover:text-text-primary'"
             class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition-all cursor-pointer"
             title="Card View">
             <span class="material-symbols-outlined text-[16px]">grid_view</span>
             <span class="hidden md:inline">Cards</span>
           </button>
-          <button 
-            type="button" 
-            (click)="viewMode.set('table')" 
+          <button
+            type="button"
+            (click)="viewMode.set('table')"
             [class]="viewMode() === 'table' ? 'bg-base-100 shadow-xs text-tenant-600 dark:text-tenant-400 font-bold' : 'text-text-secondary hover:text-text-primary'"
             class="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1 transition-all cursor-pointer"
             title="Table View">
@@ -187,7 +215,7 @@
     @if (isFilterPanelOpen()) {
       <div class="pt-5 border-t border-base-300 animate-in fade-in slide-in-from-top-2 duration-200 space-y-6 relative z-30">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-          
+
           <!-- 1. Status Multi-select -->
           <div class="lg:col-span-5 space-y-3">
             <h4 class="text-xs sm:text-sm font-bold text-text-primary tracking-tight">
@@ -196,7 +224,7 @@
             <div class="grid grid-cols-2 gap-x-6 gap-y-3">
               @for (st of availableStatuses; track st) {
                 <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
-                  <input 
+                  <input
                     type="checkbox"
                     [checked]="draftFilters().statuses.includes(st)"
                     (change)="toggleStatusDraft(st)"
@@ -315,7 +343,7 @@
         <!-- Filter Panel Footer Actions -->
         <div class="pt-4 border-t border-base-300 flex items-center justify-between">
           <button 
-            type="button" 
+            type="button"
             id="btn-clear-badge-draft-filters"
             (click)="clearFilterPanelDraft()"
             class="text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors cursor-pointer bg-transparent border-0 p-0 focus:outline-none">
@@ -324,7 +352,7 @@
 
           <div class="flex items-center gap-2.5">
             <button 
-              type="button" 
+              type="button"
               id="btn-cancel-badge-filters"
               (click)="closeFilterPanel()"
               class="px-4 py-2 rounded-xl bg-base-200 hover:bg-base-300 text-text-secondary hover:text-text-primary text-xs font-semibold transition-colors cursor-pointer focus:outline-none">
@@ -352,7 +380,7 @@
             <span>{{ badge.value }}</span>
             <button 
               type="button" 
-              (click)="badge.remove()" 
+              (click)="badge.remove()"
               class="hover:text-rose-500 ml-0.5 flex items-center cursor-pointer">
               <span class="material-symbols-outlined text-xs">close</span>
             </button>
@@ -360,7 +388,7 @@
         }
         <button 
           type="button" 
-          (click)="clearAllFilters()" 
+          (click)="clearAllFilters()"
           class="text-xs font-semibold text-rose-500 hover:text-rose-600 ml-2 cursor-pointer">
           Clear All
         </button>
@@ -440,7 +468,7 @@
                 <h3 class="text-sm font-bold text-text-primary group-hover:text-tenant-600 transition-colors line-clamp-1">
                   {{ badge.name }}
                 </h3>
-                
+
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-[10px] font-mono text-text-secondary bg-base-200 px-1.5 py-0.5 rounded border border-base-300">
                     {{ badge.templateId }}
@@ -481,7 +509,7 @@
             <div class="pt-3 border-t border-base-300 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <!-- Sharing Scope Pill -->
-                <span 
+                <span
                   class="px-2 py-0.5 text-[10px] font-bold rounded-lg border capitalize"
                   [ngClass]="{
                     'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800': badge.sharing.level === 'organization',
@@ -502,9 +530,9 @@
               <!-- Action Icon Buttons -->
               <div class="flex items-center gap-1">
                 <!-- Preview Modal Button -->
-                <button 
-                  type="button" 
-                  (click)="openPreview(badge)" 
+                <button
+                  type="button"
+                  (click)="openPreview(badge)"
                   class="w-7 h-7 rounded-lg bg-base-200 hover:bg-base-300 text-text-secondary hover:text-text-primary flex items-center justify-center transition-colors cursor-pointer shadow-xs"
                   title="Live Badge Preview">
                   <span class="material-symbols-outlined text-sm">visibility</span>
@@ -512,9 +540,9 @@
 
                 <!-- Edit Template Button -->
                 @if (permissions().canEdit) {
-                  <button 
-                    type="button" 
-                    (click)="editBadge(badge)" 
+                  <button
+                    type="button"
+                    (click)="editBadge(badge)"
                     class="w-7 h-7 rounded-lg bg-base-200 hover:bg-base-300 text-text-secondary hover:text-tenant-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
                     title="Edit Badge Template">
                     <span class="material-symbols-outlined text-sm">edit</span>
@@ -523,9 +551,9 @@
 
                 <!-- Duplicate Button -->
                 @if (permissions().canCreate) {
-                  <button 
-                    type="button" 
-                    (click)="duplicateBadge(badge)" 
+                  <button
+                    type="button"
+                    (click)="duplicateBadge(badge)"
                     class="w-7 h-7 rounded-lg bg-base-200 hover:bg-base-300 text-text-secondary hover:text-tenant-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
                     title="Duplicate Template">
                     <span class="material-symbols-outlined text-sm">content_copy</span>
@@ -534,9 +562,9 @@
 
                 <!-- Archive Button -->
                 @if (permissions().canArchive && badge.status !== 'archived') {
-                  <button 
-                    type="button" 
-                    (click)="openConfirmModal(badge, 'archive')" 
+                  <button
+                    type="button"
+                    (click)="openConfirmModal(badge, 'archive')"
                     class="w-7 h-7 rounded-lg bg-base-200 hover:bg-base-300 text-text-secondary hover:text-amber-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
                     title="Archive Badge">
                     <span class="material-symbols-outlined text-sm">archive</span>
@@ -545,9 +573,9 @@
 
                 <!-- Delete Button -->
                 @if (permissions().canDelete) {
-                  <button 
-                    type="button" 
-                    (click)="openConfirmModal(badge, 'delete')" 
+                  <button
+                    type="button"
+                    (click)="openConfirmModal(badge, 'delete')"
                     class="w-7 h-7 rounded-lg bg-base-200 hover:bg-rose-100 dark:hover:bg-rose-950/60 text-text-secondary hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
                     title="Delete Template">
                     <span class="material-symbols-outlined text-sm">delete</span>
@@ -623,7 +651,7 @@
 
                   <!-- Scope -->
                   <td class="py-3 px-4">
-                    <span 
+                    <span
                       class="px-2 py-0.5 text-[10px] font-bold rounded-lg border capitalize"
                       [ngClass]="{
                         'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800': badge.sharing.level === 'organization',
@@ -641,7 +669,7 @@
 
                   <!-- Status -->
                   <td class="py-3 px-4">
-                    <span 
+                    <span
                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border"
                       [ngClass]="getStatusBadgeClass(badge.status)">
                       <span class="w-1.5 h-1.5 rounded-full" [ngClass]="getStatusDotClass(badge.status)"></span>
@@ -652,18 +680,18 @@
                   <!-- Actions -->
                   <td class="py-3 px-4 text-right">
                     <div class="flex items-center justify-end gap-1">
-                      <button 
-                        type="button" 
-                        (click)="openPreview(badge)" 
+                      <button
+                        type="button"
+                        (click)="openPreview(badge)"
                         class="w-7 h-7 rounded-lg bg-base-200 hover:bg-base-300 text-text-secondary hover:text-text-primary flex items-center justify-center transition-colors cursor-pointer"
                         title="Preview">
                         <span class="material-symbols-outlined text-sm">visibility</span>
                       </button>
 
                       @if (permissions().canEdit) {
-                        <button 
-                          type="button" 
-                          (click)="editBadge(badge)" 
+                        <button
+                          type="button"
+                          (click)="editBadge(badge)"
                           class="w-7 h-7 rounded-lg bg-base-200 hover:bg-base-300 text-text-secondary hover:text-tenant-600 flex items-center justify-center transition-colors cursor-pointer"
                           title="Edit">
                           <span class="material-symbols-outlined text-sm">edit</span>
@@ -671,9 +699,9 @@
                       }
 
                       @if (permissions().canCreate) {
-                        <button 
-                          type="button" 
-                          (click)="duplicateBadge(badge)" 
+                        <button
+                          type="button"
+                          (click)="duplicateBadge(badge)"
                           class="w-7 h-7 rounded-lg bg-base-200 hover:bg-base-300 text-text-secondary hover:text-tenant-600 flex items-center justify-center transition-colors cursor-pointer"
                           title="Duplicate">
                           <span class="material-symbols-outlined text-sm">content_copy</span>
@@ -681,9 +709,9 @@
                       }
 
                       @if (permissions().canDelete) {
-                        <button 
-                          type="button" 
-                          (click)="openConfirmModal(badge, 'delete')" 
+                        <button
+                          type="button"
+                          (click)="openConfirmModal(badge, 'delete')"
                           class="w-7 h-7 rounded-lg bg-base-200 hover:bg-rose-100 text-text-secondary hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer"
                           title="Delete">
                           <span class="material-symbols-outlined text-sm">delete</span>
@@ -707,26 +735,26 @@
         </p>
 
         <div class="flex items-center gap-1.5">
-          <button 
-            type="button" 
-            [disabled]="currentPage() === 1" 
-            (click)="setPage(currentPage() - 1)" 
+          <button
+            type="button"
+            [disabled]="currentPage() === 1"
+            (click)="setPage(currentPage() - 1)"
             class="px-3 py-1.5 rounded-xl border border-base-300 bg-base-100 text-text-primary text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-base-200 transition-colors cursor-pointer">
             Previous
           </button>
           @for (p of [].constructor(totalPages()); track $index) {
-            <button 
-              type="button" 
-              (click)="setPage($index + 1)" 
+            <button
+              type="button"
+              (click)="setPage($index + 1)"
               [class]="$index + 1 === currentPage() ? 'bg-tenant-500 text-white font-bold' : 'bg-base-100 text-text-primary hover:bg-base-200'"
               class="w-8 h-8 rounded-xl border border-base-300 text-xs transition-colors cursor-pointer">
               {{ $index + 1 }}
             </button>
           }
-          <button 
-            type="button" 
-            [disabled]="currentPage() === totalPages()" 
-            (click)="setPage(currentPage() + 1)" 
+          <button
+            type="button"
+            [disabled]="currentPage() === totalPages()"
+            (click)="setPage(currentPage() + 1)"
             class="px-3 py-1.5 rounded-xl border border-base-300 bg-base-100 text-text-primary text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-base-200 transition-colors cursor-pointer">
             Next
           </button>
@@ -749,7 +777,7 @@
       @if (hasActiveFilters()) {
         <button 
           type="button" 
-          (click)="clearAllFilters()" 
+          (click)="clearAllFilters()"
           class="px-4 py-2 bg-tenant-500 hover:bg-tenant-600 text-white text-xs font-semibold rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5">
           <span class="material-symbols-outlined text-sm">filter_alt_off</span>
           <span>Clear All Filters</span>
@@ -880,7 +908,7 @@
             Close
           </button>
           <button 
-            type="button" 
+            type="button"
             (click)="editBadge(previewingBadge()!); closePreview()"
             class="px-4 py-2 bg-tenant-500 hover:bg-tenant-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">edit</span>

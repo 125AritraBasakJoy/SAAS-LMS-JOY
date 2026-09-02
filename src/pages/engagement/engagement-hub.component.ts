@@ -367,15 +367,15 @@ import { CustomSelectComponent } from '../../components/custom-select/custom-sel
       <!-- ========================================================================= -->
       @if (activePlanId()) {
         @if (activeTab() === 'ratings') {
-          <div class="animate-in fade-in">
+          <div>
             <app-ratings-view [planId]="activePlanId()"></app-ratings-view>
           </div>
         } @else if (activeTab() === 'feedback') {
-          <div class="animate-in fade-in">
+          <div>
             <app-feedback-studio [planId]="activePlanId()"></app-feedback-studio>
           </div>
         } @else if (activeTab() === 'forum') {
-          <div class="animate-in fade-in">
+          <div>
             <app-forum-workspace [planId]="activePlanId()"></app-forum-workspace>
           </div>
         }

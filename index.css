@@ -53,10 +53,14 @@ select:hover:not(:disabled) {
 }
 
 select:focus,
-select:focus-visible {
+select:focus-visible,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([readonly]):focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([readonly]):focus-visible,
+textarea:focus,
+textarea:focus-visible {
   outline: none !important;
   border-color: var(--tenant-primary, #EC008C) !important;
-  box-shadow: 0 0 0 2px rgba(236, 0, 140, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(236, 0, 140, 0.18) !important;
 }
 
 .material-symbols-outlined {

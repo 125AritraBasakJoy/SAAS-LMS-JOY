@@ -50,38 +50,7 @@
     </app-stepper>
   </div>
 
-  <!-- Welcome Alert -->
-  @if (!isEditMode() && showWelcomeAlert() && currentStep() === 1) {
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-tenant-500/10 via-purple-500/5 to-transparent border border-tenant-200/60 dark:border-tenant-800/60 p-6 flex items-start gap-4 shadow-sm animate-in fade-in slide-in-from-top-3">
-      <!-- Close button -->
-      <button (click)="showWelcomeAlert.set(false)" class="absolute top-4 right-4 text-text-secondary hover:text-text-primary transition-colors cursor-pointer w-7 h-7 flex items-center justify-center rounded-full hover:bg-base-200 bg-transparent border-0 p-0">
-        <span class="material-symbols-outlined text-sm">close</span>
-      </button>
-      <div class="w-11 h-11 rounded-2xl bg-tenant-500 text-white flex items-center justify-center shadow-lg shadow-tenant-500/20 shrink-0">
-        <span class="material-symbols-outlined text-2xl">celebration</span>
-      </div>
-      <div class="space-y-1.5 flex-1 pr-6">
-        <h2 class="text-sm font-extrabold text-text-primary tracking-tight">Welcome to the Certificate Template Wizard!</h2>
-        <p class="text-xs text-text-secondary leading-relaxed">
-          Let's build a beautiful, modern, high-fidelity certificate template in 3 simple steps:
-        </p>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-[11px] font-medium text-text-primary">
-          <div class="flex items-center gap-1.5 p-2 rounded-xl bg-base-100/50 border border-base-300">
-            <span class="w-5 h-5 rounded-full bg-tenant-100 dark:bg-tenant-900/50 text-tenant-600 dark:text-tenant-400 flex items-center justify-center font-bold">1</span>
-            <span>Details & Canvas Base</span>
-          </div>
-          <div class="flex items-center gap-1.5 p-2 rounded-xl bg-base-100/50 border border-base-300">
-            <span class="w-5 h-5 rounded-full bg-tenant-100 dark:bg-tenant-900/50 text-tenant-600 dark:text-tenant-400 flex items-center justify-center font-bold">2</span>
-            <span>Interactive Editor</span>
-          </div>
-          <div class="flex items-center gap-1.5 p-2 rounded-xl bg-base-100/50 border border-base-300">
-            <span class="w-5 h-5 rounded-full bg-tenant-100 dark:bg-tenant-900/50 text-tenant-600 dark:text-tenant-400 flex items-center justify-center font-bold">3</span>
-            <span>Preview & Publish</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
+
 
   <!-- Mandatory Field Error Alert -->
   @if (formErrorAlert()) {
