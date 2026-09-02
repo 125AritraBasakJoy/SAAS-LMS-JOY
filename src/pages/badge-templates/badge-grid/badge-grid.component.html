@@ -139,8 +139,8 @@
     (cancelFilters)="closeFilterPanel()"
     (applyFilters)="applyFilterPanel()"
     [viewMode]="viewMode()"
-            (viewModeChange)="viewMode.set($event)"
-            [showViewSwitcher]="true"
+    (viewModeChange)="viewMode.set($event)"
+    [showViewSwitcher]="true"
     [itemCountText]="'Showing ' + filteredBadges().length + ' of ' + allBadges().length + ' Badges'"
     filterPanelTitle="FILTER BADGE REPOSITORY"
     filterPanelSubtitle="Refine badges across status, category, sharing scope, level, and skill tags"
@@ -150,11 +150,12 @@
     (pageSizeChange)="pageSize.set($event)"
     [totalItems]="filteredBadges().length"
     [emptyStateType]="emptyStateType()"
-    emptyStateIcon="military_tech"
-    emptyStateTitle="No badge templates found"
-    emptyStateMessage="Try clearing your search or adjusting your status, category, or level filters."
-    emptyActionLabel="Reset Filters"
-    (emptyActionClick)="resetGrid()"
+    emptyIcon="military_tech"
+    emptyTitle="No badge templates found"
+    emptyMessage="Try clearing your search or adjusting your status, category, or level filters."
+    [emptyActionText]="permissions().canCreate ? 'Create First Badge Template' : ''"
+    emptyActionIcon="add_circle"
+    (emptyAction)="createBadge()"
   >
     <!-- Filter Panel Projection -->
     <div filter-panel class="space-y-6">
@@ -546,78 +547,12 @@
           </tbody>
         </table>
       </div>
-    }
-
-    <!-- Pagination Controls -->
-    @if (totalPages() > 1) {
-      <div class="flex items-center justify-between pt-2">
-        <p class="text-xs text-text-secondary">
-          Showing page <strong class="text-text-primary">{{ currentPage() }}</strong> of {{ totalPages() }}
-        </p>
-
-        <div class="flex items-center gap-1.5">
-          <button
-            type="button"
-            [disabled]="currentPage() === 1"
-            (click)="setPage(currentPage() - 1)"
-            class="px-3 py-1.5 rounded-xl border border-base-300 bg-base-100 text-text-primary text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-base-200 transition-colors cursor-pointer">
-            Previous
-          </button>
-          @for (p of [].constructor(totalPages()); track $index) {
-            <button
-              type="button"
-              (click)="setPage($index + 1)"
-              [class]="$index + 1 === currentPage() ? 'bg-tenant-500 text-white font-bold' : 'bg-base-100 text-text-primary hover:bg-base-200'"
-              class="w-8 h-8 rounded-xl border border-base-300 text-xs transition-colors cursor-pointer">
-              {{ $index + 1 }}
-            </button>
-          }
-          <button
-            type="button"
-            [disabled]="currentPage() === totalPages()"
-            (click)="setPage(currentPage() + 1)"
-            class="px-3 py-1.5 rounded-xl border border-base-300 bg-base-100 text-text-primary text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-base-200 transition-colors cursor-pointer">
-            Next
-          </button>
-        </div>
-      </div>
-    }
-  } @else {
-    <!-- Empty Search State -->
-    <div class="bg-base-100 rounded-3xl border border-base-300 p-12 text-center shadow-sm space-y-4 max-w-lg mx-auto">
-      <div class="w-14 h-14 rounded-2xl bg-base-200 text-text-secondary flex items-center justify-center mx-auto border border-base-300">
-        <span class="material-symbols-outlined text-3xl">military_tech</span>
-      </div>
-      <div>
-        <h3 class="text-base font-bold text-text-primary">No Badge Templates Found</h3>
-        <p class="text-xs text-text-secondary mt-1">
-          {{ hasActiveFilters() ? 'No badges matched your active search query or filter criteria.' : 'No badge templates have been created in this repository yet.' }}
-        </p>
-      </div>
-
-      @if (hasActiveFilters()) {
-        <button
-          type="button"
-          (click)="clearAllFilters()"
-          class="px-4 py-2 bg-tenant-500 hover:bg-tenant-600 text-white text-xs font-semibold rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-sm">filter_alt_off</span>
-          <span>Clear All Filters</span>
-        </button>
-      } @else if (permissions().canCreate) {
-        <button 
-          type="button" 
-          (click)="createBadge()" 
-          class="px-4 py-2 bg-tenant-500 hover:bg-tenant-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-sm">add_circle</span>
-          <span>Create First Badge Template</span>
-        </button>
-      }
     </div>
   </app-data-grid>
 
   <!-- LIVE PREVIEW MODAL -->
   @if (previewingBadge()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+    <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
       <div class="bg-base-100 rounded-3xl border border-base-300 shadow-2xl max-w-lg w-full overflow-hidden space-y-5">
         <!-- Modal Header -->
         <div class="flex items-center justify-between p-5 border-b border-base-300 bg-base-200">
@@ -742,7 +677,7 @@
 
   <!-- CONFIRMATION MODAL -->
   @if (confirmModalAction()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+    <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
       <div class="bg-base-100 rounded-3xl border border-base-300 shadow-2xl max-w-md w-full p-6 space-y-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl flex items-center justify-center" [ngClass]="confirmModalAction() === 'delete' ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400' : 'bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'">
