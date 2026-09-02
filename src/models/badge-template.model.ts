@@ -231,7 +231,7 @@ export const INITIAL_BADGE_TEMPLATES: BadgeTemplate[] = [
     creationStatus: 'saved',
     lastCompletedStep: 'preview',
     createdBy: 'Farhana Ahmed',
-    createdAt: '2026-01-15T10:30:00',
+    createdAt: '2026-01-15',
     updatedAt: '2026-01-15T10:30:00',
     usageCount: 12
   },
@@ -271,7 +271,7 @@ export const INITIAL_BADGE_TEMPLATES: BadgeTemplate[] = [
     creationStatus: 'saved',
     lastCompletedStep: 'preview',
     createdBy: 'Karim Rahman',
-    createdAt: '2026-02-20T14:15:00',
+    createdAt: '2026-02-20',
     updatedAt: '2026-02-20T14:15:00',
     usageCount: 8
   },
@@ -312,7 +312,7 @@ export const INITIAL_BADGE_TEMPLATES: BadgeTemplate[] = [
     creationStatus: 'saved',
     lastCompletedStep: 'preview',
     createdBy: 'System Administrator',
-    createdAt: '2026-03-01T09:00:00',
+    createdAt: '2026-03-01',
     updatedAt: '2026-03-01T09:00:00',
     usageCount: 25
   },
@@ -344,7 +344,7 @@ export const INITIAL_BADGE_TEMPLATES: BadgeTemplate[] = [
     creationStatus: 'draft',
     lastCompletedStep: 'designer',
     createdBy: 'Tanvir Hossain',
-    createdAt: '2026-04-10T16:45:00',
+    createdAt: '2026-04-10',
     updatedAt: '2026-04-10T16:45:00',
     usageCount: 0
   },
@@ -376,7 +376,7 @@ export const INITIAL_BADGE_TEMPLATES: BadgeTemplate[] = [
     creationStatus: 'saved',
     lastCompletedStep: 'preview',
     createdBy: 'Nusrat Jahan',
-    createdAt: '2024-11-12T11:20:00',
+    createdAt: '2024-11-12',
     updatedAt: '2026-01-05T11:20:00',
     usageCount: 4
   }
