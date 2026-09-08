@@ -95,6 +95,25 @@
           </div>
         </div>
 
+        <!-- Parent Org Context (Read-only) -->
+        <div class="p-4 rounded-2xl bg-base-200/80 border border-base-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-tenant-500/10 border border-tenant-500/30 flex items-center justify-center text-tenant-600 font-bold">
+              <span class="material-symbols-outlined text-xl">corporate_fare</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">Target Parent Organization</span>
+              <strong class="text-xs text-text-primary">{{ parentOrg().name }}</strong>
+              <span class="text-[11px] font-mono text-text-secondary ml-1.5">(ID: {{ parentOrg().numericId || parentOrg().id }})</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+              Active Organization
+            </span>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           <!-- LMS Name * -->
@@ -174,26 +193,6 @@
               <p class="text-[11px] text-rose-500 mt-1">{{ errors()['urlDomain'] }}</p>
             } @else {
               <p class="text-[10px] text-text-secondary mt-1">Unique subdomain routing endpoint for trainees and staff.</p>
-            }
-          </div>
-
-          <!-- LMS Common Email (General / public inquiries) -->
-          <div>
-            <label class="block text-xs font-semibold text-text-primary mb-1">
-              LMS Common Email
-              <span class="text-[10px] text-text-secondary font-normal ml-1">(General / public inquiries)</span>
-            </label>
-            <input 
-              type="email" 
-              [ngModel]="commonEmail()" 
-              (ngModelChange)="commonEmail.set($event)"
-              placeholder="e.g. info.academy@brac.net"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-base-200 border text-xs focus:outline-none focus:border-tenant-500 transition-all font-medium"
-              [ngClass]="errors()['commonEmail'] ? 'border-rose-500 bg-rose-50/20' : 'border-base-300'" />
-            @if (errors()['commonEmail']) {
-              <p class="text-[11px] text-rose-500 mt-1">{{ errors()['commonEmail'] }}</p>
-            } @else {
-              <p class="text-[10px] text-text-secondary mt-1">Contact address for general public inquiries and support desk.</p>
             }
           </div>
 
@@ -571,8 +570,8 @@
             </div>
           </div>
 
-          <button 
-            type="button" 
+          <button
+            type="button"
             id="btn-add-admin-row"
             (click)="addAdmin()"
             class="px-3.5 py-2 rounded-xl bg-tenant-500 hover:bg-tenant-600 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
@@ -585,7 +584,7 @@
         <div class="space-y-4">
           @for (adm of adminsList(); track adm.id; let i = $index) {
             <div class="p-4 rounded-2xl bg-base-200/60 border border-base-300/80 space-y-3.5 relative transition-all">
-              
+
               <div class="flex items-center justify-between pb-2 border-b border-base-300/50">
                 <div class="flex items-center gap-2">
                   <span class="w-6 h-6 rounded-lg bg-base-100 border border-base-300 flex items-center justify-center text-[11px] font-bold text-tenant-600">
@@ -595,9 +594,9 @@
                 </div>
 
                 @if (adminsList().length > 1) {
-                  <button 
-                    type="button" 
-                    (click)="removeAdmin(i)" 
+                  <button
+                    type="button"
+                    (click)="removeAdmin(i)"
                     class="px-2.5 py-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer">
                     <span class="material-symbols-outlined text-sm">delete</span>
                     <span>Remove</span>
@@ -606,15 +605,15 @@
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
+
                 <!-- Admin Full Name * -->
                 <div>
                   <label class="block text-xs font-semibold text-text-primary mb-1">
                     Admin Full Name <span class="text-rose-500">*</span>
                   </label>
-                  <input 
-                    type="text" 
-                    [value]="adm.name" 
+                  <input
+                    type="text"
+                    [value]="adm.name"
                     (input)="updateAdminField(i, 'name', $any($event.target).value)"
                     placeholder="e.g. Dr. Sarah Jenkins"
                     class="w-full px-3.5 py-2.5 rounded-xl bg-base-100 border text-xs focus:outline-none focus:border-tenant-500 transition-all font-medium"
@@ -630,9 +629,9 @@
                     Contact Number <span class="text-rose-500">*</span>
                     <span class="text-[10px] text-text-secondary font-normal ml-1">(11 digits, starts 013–019)</span>
                   </label>
-                  <input 
-                    type="text" 
-                    [value]="adm.contactNumber" 
+                  <input
+                    type="text"
+                    [value]="adm.contactNumber"
                     (input)="updateAdminField(i, 'contactNumber', $any($event.target).value)"
                     maxlength="15"
                     placeholder="01712345678"
@@ -648,9 +647,9 @@
                   <label class="block text-xs font-semibold text-text-primary mb-1">
                     Admin Email <span class="text-rose-500">*</span>
                   </label>
-                  <input 
-                    type="email" 
-                    [value]="adm.email" 
+                  <input
+                    type="email"
+                    [value]="adm.email"
                     (input)="updateAdminField(i, 'email', $any($event.target).value)"
                     placeholder="admin@lms-instance.org"
                     class="w-full px-3.5 py-2.5 rounded-xl bg-base-100 border text-xs focus:outline-none focus:border-tenant-500 transition-all font-medium"
@@ -760,7 +759,7 @@
           <div class="space-y-2 text-xs pt-2">
             <div>
               <span class="text-[10px] text-text-secondary block">Parent Organization</span>
-              <span class="text-text-primary font-bold">{{ parentOrg()?.name || 'Organization' }}</span>
+              <span class="text-text-primary font-bold">{{ parentOrg().name }}</span>
             </div>
 
             <div>
@@ -772,13 +771,6 @@
               <span class="text-[10px] text-text-secondary block">Timezone</span>
               <span class="text-text-primary font-medium">{{ getTimezoneDisplay(selectedTimezone()) }}</span>
             </div>
-
-            @if (commonEmail()) {
-              <div>
-                <span class="text-[10px] text-text-secondary block">LMS Common Email</span>
-                <span class="text-text-primary font-mono text-[11px] font-medium">{{ commonEmail() }}</span>
-              </div>
-            }
 
             @if (summary()) {
               <div>
@@ -797,9 +789,9 @@
             <div class="pt-2 border-t border-base-300">
               <span class="text-[10px] text-text-secondary block">Parent Theme Preset</span>
               <div class="flex items-center gap-2 mt-1">
-                <div class="w-4 h-4 rounded-full border border-white/20 shadow-xs" [style.backgroundColor]="lms.activeTenant()?.branding?.primaryColor || '#0284c7'"></div>
-                <span class="text-text-primary text-[11px] font-semibold">{{ lms.activeTenant()?.name || 'Default' }}</span>
-                <span class="text-[10px] font-mono text-text-secondary">({{ lms.activeTenant()?.branding?.primaryColor || '#0284c7' }})</span>
+                <div class="w-4 h-4 rounded-full border border-white/20 shadow-xs" [style.backgroundColor]="lms.activeTenant().branding.primaryColor"></div>
+                <span class="text-text-primary text-[11px] font-semibold">{{ lms.activeTenant().name }}</span>
+                <span class="text-[10px] font-mono text-text-secondary">({{ lms.activeTenant().branding.primaryColor }})</span>
               </div>
             </div>
           </div>
@@ -832,7 +824,7 @@
                 </div>
                 <div class="space-y-0.5 pt-1">
                   <div class="text-text-secondary text-[11px]">Assigned Subdomain:</div>
-                  <div class="font-mono font-medium text-tenant-600 text-[11px] truncate">{{ urlDomain() || 'N/A' }}</div>
+                  <div class="font-mono font-medium text-tenant-600 text-[11px] truncate">{{ urlDomain() }}.{{ parentOrg().shortName.toLowerCase() || 'cloud' }}.edu</div>
                 </div>
               </div>
 
@@ -842,7 +834,7 @@
                   <span>LMS Administrator(s)</span>
                   <span class="font-mono text-tenant-600 font-bold">({{ getAllAdmins().length }})</span>
                 </div>
-                
+
                 <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
                   @for (adm of getAllAdmins(); track $index) {
                     <div class="p-2 rounded-xl bg-base-100 border border-base-300/80 text-[11px] space-y-0.5">
@@ -893,11 +885,11 @@
 
             <div class="p-3.5 rounded-2xl bg-base-200/80 border border-base-300 text-xs">
               <div class="flex items-center justify-between text-[11px]">
-                <span class="text-text-secondary">Remaining {{ parentOrg()?.name || 'Org' }} DB Capacity:</span>
+                <span class="text-text-secondary">Remaining {{ parentOrg().name }} DB Capacity:</span>
                 <strong class="font-mono text-text-primary">{{ remainingOrgDbAvailable() }} GB</strong>
               </div>
               <div class="flex items-center justify-between text-[11px] mt-1">
-                <span class="text-text-secondary">Remaining {{ parentOrg()?.name || 'Org' }} File Capacity:</span>
+                <span class="text-text-secondary">Remaining {{ parentOrg().name }} File Capacity:</span>
                 <strong class="font-mono text-text-primary">{{ remainingOrgFileAvailable() }} GB</strong>
               </div>
             </div>
@@ -977,7 +969,7 @@
         </div>
         <div class="flex justify-between">
           <span>Primary Admin:</span>
-          <strong class="text-text-primary">{{ getAllAdmins()[0]?.name || 'N/A' }}</strong>
+          <strong class="text-text-primary">{{ adminName() }}</strong>
         </div>
       </div>
 

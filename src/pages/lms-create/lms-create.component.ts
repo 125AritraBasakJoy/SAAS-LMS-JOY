@@ -47,7 +47,6 @@ export class LmsCreateComponent implements OnInit {
   programmeDepartment = signal<string>('');
   customDepartment = signal<string>('');
   isAddingNewDept = signal<boolean>(false);
-  commonEmail = signal<string>('');
   summary = signal<string>('');
   goal = signal<string>('');
   lmsType = signal<LmsType>('Private');
@@ -86,10 +85,10 @@ export class LmsCreateComponent implements OnInit {
   timezones = TIMEZONE_OPTIONS;
   timezoneSearch = signal<string>('');
   filteredTimezones = computed(() => {
-    const q = (this.timezoneSearch() || '').toLowerCase().trim();
+    const q = this.timezoneSearch().toLowerCase().trim();
     if (!q) return this.timezones;
     return this.timezones.filter(tz => 
-      (tz?.display || '').toLowerCase().includes(q) || (tz?.stored || '').toLowerCase().includes(q)
+      tz.display.toLowerCase().includes(q) || tz.stored.toLowerCase().includes(q)
     );
   });
 
@@ -280,7 +279,6 @@ export class LmsCreateComponent implements OnInit {
     if (instance.basicInfo) {
       this.lmsName.set(instance.basicInfo.lmsName || '');
       this.programmeDepartment.set(instance.basicInfo.programmeDepartment || '');
-      this.commonEmail.set(instance.basicInfo.commonEmail || '');
       this.summary.set(instance.basicInfo.summary || '');
       this.goal.set(instance.basicInfo.goal || '');
       this.lmsType.set(instance.basicInfo.lmsType || 'Private');
@@ -339,7 +337,6 @@ export class LmsCreateComponent implements OnInit {
     if (draft.basicInfo) {
       this.lmsName.set(draft.basicInfo.lmsName || '');
       this.programmeDepartment.set(draft.basicInfo.programmeDepartment || '');
-      this.commonEmail.set(draft.basicInfo.commonEmail || '');
       this.summary.set(draft.basicInfo.summary || '');
       this.goal.set(draft.basicInfo.goal || '');
       this.lmsType.set(draft.basicInfo.lmsType || 'Private');
@@ -421,10 +418,10 @@ export class LmsCreateComponent implements OnInit {
 
   // Auto-generate suggested URL domain when LMS Name changes
   onLmsNameChange(val: string) {
-    this.lmsName.set(val || '');
+    this.lmsName.set(val);
     if (!this.isUrlManuallyEdited()) {
-      const slug = (val || '').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-      const orgDomain = this.parentOrg()?.domain || 'brac.net';
+      const slug = val.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const orgDomain = this.parentOrg().domain || 'brac.net';
       if (slug) {
         this.urlDomain.set(`${slug}.${orgDomain}`);
       }
@@ -448,7 +445,7 @@ export class LmsCreateComponent implements OnInit {
   }
 
   saveCustomDepartment() {
-    const trimmed = (this.customDepartment() || '').trim();
+    const trimmed = this.customDepartment().trim();
     if (trimmed) {
       this.lms.addOrganizationDepartment(trimmed);
       this.programmeDepartment.set(trimmed);
@@ -492,9 +489,9 @@ export class LmsCreateComponent implements OnInit {
   // =========================================================================
   validateStep1(): boolean {
     const newErrors: Record<string, string> = {};
-    const name = (this.lmsName() || '').trim();
-    const dept = (this.programmeDepartment() || '').trim();
-    const url = (this.urlDomain() || '').trim();
+    const name = this.lmsName().trim();
+    const dept = this.programmeDepartment().trim();
+    const url = this.urlDomain().trim();
     const tz = this.selectedTimezone();
 
     if (!name) {
@@ -503,10 +500,10 @@ export class LmsCreateComponent implements OnInit {
       newErrors['lmsName'] = 'LMS Name must not exceed 99 characters.';
     } else {
       const isDuplicate = this.existingOrgLms().some(
-        l => (l?.basicInfo?.lmsName || '').toLowerCase() === name.toLowerCase() && l?.id !== this.draftId()
+        l => l.basicInfo.lmsName.toLowerCase() === name.toLowerCase() && l.id !== this.draftId()
       );
       if (isDuplicate) {
-        newErrors['lmsName'] = `An LMS named "${name}" already exists in ${this.parentOrg()?.name || 'this Organization'}. LMS Name must be unique within this Organization.`;
+        newErrors['lmsName'] = `An LMS named "${name}" already exists in ${this.parentOrg().name}. LMS Name must be unique within this Organization.`;
       }
     }
 
@@ -526,14 +523,6 @@ export class LmsCreateComponent implements OnInit {
 
     if (!tz) {
       newErrors['timezone'] = 'Timezone is mandatory.';
-    }
-
-    const commonEmailVal = (this.commonEmail() || '').trim();
-    if (commonEmailVal) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
-      if (!emailRegex.test(commonEmailVal)) {
-        newErrors['commonEmail'] = 'Please enter a valid email address ending with domain extension (.com, .org, etc).';
-      }
     }
 
     this.errors.set(newErrors);
@@ -605,9 +594,9 @@ export class LmsCreateComponent implements OnInit {
     }
 
     list.forEach((adm, idx) => {
-      const name = (adm?.name || '').trim();
-      const email = (adm?.email || '').trim().toLowerCase();
-      const contact = (adm?.contactNumber || '').trim();
+      const name = adm.name.trim();
+      const email = adm.email.trim().toLowerCase();
+      const contact = adm.contactNumber.trim();
 
       // Name validation
       if (!name) {
@@ -651,11 +640,11 @@ export class LmsCreateComponent implements OnInit {
 
   getAllAdmins(): LmsAdminInfo[] {
     return this.adminsList()
-      .filter(a => (a?.name || '').trim() || (a?.email || '').trim())
+      .filter(a => a.name.trim() || a.email.trim())
       .map(a => ({
-        name: (a?.name || '').trim() || 'LMS Admin',
-        email: (a?.email || '').trim(),
-        contactNumber: (a?.contactNumber || '').trim() || 'N/A',
+        name: a.name.trim() || 'LMS Admin',
+        email: a.email.trim(),
+        contactNumber: a.contactNumber.trim() || 'N/A',
         role: 'LMS Admin',
         invitationStatus: 'pending'
       }));
@@ -735,7 +724,6 @@ export class LmsCreateComponent implements OnInit {
     if (step === 1) {
       this.lmsName.set('');
       this.programmeDepartment.set('');
-      this.commonEmail.set('');
       this.summary.set('');
       this.goal.set('');
       this.urlDomain.set('');
@@ -782,7 +770,6 @@ export class LmsCreateComponent implements OnInit {
       basicInfo: {
         lmsName: this.lmsName(),
         programmeDepartment: this.programmeDepartment(),
-        commonEmail: this.commonEmail() || undefined,
         summary: this.summary(),
         goal: this.goal(),
         lmsType: this.lmsType(),
@@ -824,7 +811,6 @@ export class LmsCreateComponent implements OnInit {
         basicInfo: {
           lmsName: this.lmsName(),
           programmeDepartment: this.programmeDepartment(),
-          commonEmail: this.commonEmail() || undefined,
           summary: this.summary(),
           goal: this.goal(),
           lmsType: this.lmsType(),
@@ -874,7 +860,6 @@ export class LmsCreateComponent implements OnInit {
       basicInfo: {
         lmsName: this.lmsName(),
         programmeDepartment: this.programmeDepartment(),
-        commonEmail: this.commonEmail() || undefined,
         summary: this.summary(),
         goal: this.goal(),
         lmsType: this.lmsType(),
