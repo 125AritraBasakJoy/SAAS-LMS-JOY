@@ -292,14 +292,14 @@
                 
                 <!-- Top Row: Back to Website Link & Mobile Logo -->
                 <div class="flex items-center justify-between mb-4 sm:mb-6">
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     (click)="selectPage('sign_in')"
                     class="flex items-center gap-1.5 text-xs font-semibold opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
                     <span>Back to website</span>
                   </button>
-
+                  
                   <div class="block lg:hidden">
                     @if (formData().logoUrlLight) {
                       <img [src]="formData().logoUrlLight" alt="Logo" class="h-6 w-auto object-contain" referrerpolicy="no-referrer" />
@@ -325,7 +325,7 @@
 
                     <!-- Single Prominent Google SSO Button -->
                     @if (formData().enableSsoGoogle) {
-                      <button
+                      <button 
                         type="button"
                         class="w-full py-2.5 px-4 rounded-xl border text-xs font-semibold flex items-center justify-center gap-3 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer shadow-2xs auth-sso-btn ak-SecondaryButton"
                         [class.bg-white]="previewTheme() === 'light'"
@@ -360,8 +360,8 @@
                         <label class="text-[11px] font-bold" [class.text-slate-700]="previewTheme() === 'light'" [class.text-slate-300]="previewTheme() === 'dark'">
                           Email*
                         </label>
-                        <input
-                          type="email"
+                        <input 
+                          type="email" 
                           [ngModel]="testEmail()"
                           (ngModelChange)="testEmail.set($event)"
                           placeholder="shovon.sen@brac.net"
@@ -420,7 +420,7 @@
                       </div>
 
                       <!-- Sign In CTA Button -->
-                      <button
+                      <button 
                         type="button"
                         [style.background]="formData().buttonGradientEnabled ? 'linear-gradient(135deg, ' + formData().primaryColor + ' 0%, ' + formData().accentColor + ' 100%)' : formData().primaryColor"
                         [class.rounded-full]="formData().buttonStyle === 'pill'"
@@ -643,16 +643,16 @@
                         <span>Edit content panel</span>
                       </button>
                     </div>
-
-                  <!-- Brand Logo & Title -->
-                  <div class="flex items-center gap-3">
-                    @if (formData().logoUrlLight) {
-                      <img [src]="formData().logoUrlLight" alt="Logo" class="h-9 w-auto object-contain brightness-0 invert drop-shadow" referrerpolicy="no-referrer" />
-                    }
-                    <div class="text-2xl font-black tracking-tight drop-shadow-sm">
-                      BRAC LMS
+                    
+                    <!-- Brand Logo & Title -->
+                    <div class="flex items-center gap-3">
+                      @if (formData().logoUrlLight) {
+                        <img [src]="formData().logoUrlLight" alt="Logo" class="h-9 w-auto object-contain brightness-0 invert drop-shadow" referrerpolicy="no-referrer" />
+                      }
+                      <div class="text-2xl font-black tracking-tight drop-shadow-sm">
+                        BRAC LMS
+                      </div>
                     </div>
-                  </div>
 
                     <!-- Headline & Subtitle -->
                     <div class="space-y-2">
@@ -816,7 +816,7 @@
             @if ((formData().layout === 'split_left' || formData().layout === 'split_right') && viewportMode() !== 'mobile') {
               @if (isHeroPanelEmpty()) {
                 <!-- EMPTY HERO STATE (Exact Image 1 Replica) -->
-                <div
+                <div 
                   [class.order-2]="formData().layout === 'split_right'"
                   [class.order-1]="formData().layout === 'split_left'"
                   [class.hidden]="hideContentPanelOnMobile()"
@@ -830,7 +830,7 @@
                 </div>
               } @else if (formData().useCustomContentPanel && formData().customHtml) {
                 <!-- CUSTOM HTML RENDERED -->
-                <div
+                <div 
                   [class.order-2]="formData().layout === 'split_right'"
                   [class.order-1]="formData().layout === 'split_left'"
                   [class.hidden]="hideContentPanelOnMobile()"
@@ -845,7 +845,7 @@
                 </div>
               } @else {
                 <!-- DEFAULT SPLIT HERO PANEL -->
-                <div
+                <div 
                   [class.order-2]="formData().layout === 'split_right'"
                   [class.order-1]="formData().layout === 'split_left'"
                   [class.hidden]="hideContentPanelOnMobile()"
@@ -859,7 +859,7 @@
                   [class.from-slate-950/90]="formData().sidePanel?.theme === 'gradient'"
                   [class.to-pink-950/80]="formData().sidePanel?.theme === 'gradient'"
                   class="w-full lg:flex-1 max-w-md lg:max-w-lg space-y-4 p-6 sm:p-8 rounded-2xl sm:rounded-3xl backdrop-blur-2xl border shadow-xl transition-all duration-300 relative overflow-hidden group">
-
+                  
                   <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <button (click)="openContentPanelModal()" class="px-2.5 py-1 text-xs font-semibold bg-black/70 hover:bg-black/90 text-white rounded-lg border border-white/20 shadow-md backdrop-blur-md flex items-center gap-1.5 cursor-pointer">
                       <span class="material-symbols-outlined text-xs">code</span>
@@ -1098,39 +1098,9 @@
               <!-- ============================================================= -->
               @if (selectedPage() === 'sign_in') {
                 <div class="space-y-4">
-
-                  @if (formData().enableSsoGoogle || formData().enableSsoMicrosoft || formData().enableSsoOkta) {
-                        @if (formData().enableSsoGoogle) {
-                                  [class.bg-slate-800]="previewTheme() === 'dark'" [class.border-slate-700]="previewTheme() === 'dark'" [class.text-white]="previewTheme() === 'dark'"
-                                  [class.bg-white]="previewTheme() === 'light'" [class.border-slate-200]="previewTheme() === 'light'" [class.text-slate-800]="previewTheme() === 'light'">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.27 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.97 0 12s.46 3.84 1.26 5.42l4.02-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.27 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-                            <span>Google</span>
-                          </button>
-                        }
-
-                        @if (formData().enableSsoMicrosoft) {
-                                  [class.bg-slate-800]="previewTheme() === 'dark'" [class.border-slate-700]="previewTheme() === 'dark'" [class.text-white]="previewTheme() === 'dark'"
-                                  [class.bg-white]="previewTheme() === 'light'" [class.border-slate-200]="previewTheme() === 'light'" [class.text-slate-800]="previewTheme() === 'light'">
-                            <svg class="w-4 h-4" viewBox="0 0 23 23"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg>
-                            <span>Microsoft</span>
-                          </button>
-                        }
-                      </div>
-
-                    <div class="relative flex items-center justify-center py-1">
-                      <div class="w-full border-t" [class.border-slate-700]="previewTheme() === 'dark'" [class.border-slate-200]="previewTheme() === 'light'"></div>
-                      <span class="absolute px-2 text-[10px] uppercase font-bold tracking-wider"
-                            [class.bg-slate-900]="previewTheme() === 'dark'" [class.text-slate-400]="previewTheme() === 'dark'"
-                            [class.bg-white]="previewTheme() === 'light'" [class.text-slate-400]="previewTheme() === 'light'">OR WORK EMAIL</span>
-                    </div>
-                  }
-
-                  <div class="space-y-1.5">
-                        Work Email
-                      </label>
-                    <div class="relative">
-                      <input 
+                  
                   <!-- SSO Buttons Grid -->
+                  @if (formData().enableSsoGoogle || formData().enableSsoMicrosoft || formData().enableSsoOkta) {
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 auth-sso-container">
                       @if (formData().enableSsoGoogle) {
                         <button type="button" class="py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold hover:opacity-90 transition-all cursor-pointer shadow-xs auth-sso-btn ak-SSOProfileTrigger"
@@ -1140,6 +1110,7 @@
                           <span>Google</span>
                         </button>
                       }
+
                       @if (formData().enableSsoMicrosoft) {
                         <button type="button" class="py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold hover:opacity-90 transition-all cursor-pointer shadow-xs auth-sso-btn"
                                 [class.bg-slate-800]="previewTheme() === 'dark'" [class.border-slate-700]="previewTheme() === 'dark'" [class.text-white]="previewTheme() === 'dark'"
@@ -1149,11 +1120,23 @@
                         </button>
                       }
                     </div>
+
+                    <div class="relative flex items-center justify-center py-1">
+                      <div class="w-full border-t" [class.border-slate-700]="previewTheme() === 'dark'" [class.border-slate-200]="previewTheme() === 'light'"></div>
+                      <span class="absolute px-2 text-[10px] uppercase font-bold tracking-wider"
+                            [class.bg-slate-900]="previewTheme() === 'dark'" [class.text-slate-400]="previewTheme() === 'dark'"
+                            [class.bg-white]="previewTheme() === 'light'" [class.text-slate-400]="previewTheme() === 'light'">OR WORK EMAIL</span>
+                    </div>
+                  }
+
                   <!-- Work Email Field -->
+                  <div class="space-y-1.5">
                     <label class="block text-xs font-bold auth-label ak-Label" [class.text-slate-300]="previewTheme() === 'dark'" [class.text-slate-700]="previewTheme() === 'light'">
                       Work Email
                     </label>
-                        type="email"
+                    <div class="relative">
+                      <input 
+                        type="email" 
                         [ngModel]="testEmail()" 
                         (ngModelChange)="testEmail.set($event)"
                         class="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs font-medium border outline-none transition-all auth-input ak-TextField"
@@ -1202,7 +1185,7 @@
                   }
 
                   <!-- Primary CTA Button -->
-                  <button
+                  <button 
                     type="button"
                     [style.background]="formData().buttonGradientEnabled ? 'linear-gradient(135deg, ' + formData().primaryColor + ' 0%, ' + formData().accentColor + ' 100%)' : formData().primaryColor"
                     [class.rounded-full]="formData().buttonStyle === 'pill'"
@@ -1626,10 +1609,10 @@
     <!-- B. RIGHT PANEL: BRANDING SETUP & CONTROLS (Harmonious Light Studio)      -->
     <!-- ======================================================================= -->
     <div class="w-80 sm:w-96 bg-white flex flex-col flex-shrink-0 z-20 shadow-sm overflow-hidden">
-
+      
       <!-- Top Setup Tabs (Global styles | Page settings | Custom CSS) -->
       <div class="h-12 border-b border-slate-200 px-3 flex items-center gap-1 flex-shrink-0 bg-slate-50/60">
-
+        
         <button 
           type="button" 
           (click)="setRightPanelTab('global_styles')"
@@ -1658,7 +1641,7 @@
 
       <!-- Tab Content Scrollable Area -->
       <div class="flex-1 overflow-y-auto p-5 space-y-6">
-
+        
         <!-- =================================================================== -->
         <!-- TAB 1: GLOBAL STYLES                                                -->
         <!-- =================================================================== -->
@@ -1913,32 +1896,11 @@
         <!-- =================================================================== -->
         @if (rightPanelTab() === 'page_settings') {
           <div class="space-y-6">
-            
-            <!-- Quick Preset Banner for the Modern Canvas Split -->
-            <div class="p-3 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-pink-900 flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-sm text-pink-600">auto_awesome</span>
-                  <span>Modern Aurora Variant</span>
-                </span>
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-pink-600 text-white uppercase tracking-wider">New</span>
-              </div>
-              <p class="text-[11px] text-pink-800/80 leading-relaxed">
-                Applies the requested full-canvas split layout with fluid silk aurora mesh and enterprise feature grid.
-              </p>
-              <button
-                type="button"
-                (click)="applyModernSplitVariant()"
-                class="w-full py-1.5 px-3 rounded-xl bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 transition-all">
-                <span class="material-symbols-outlined text-sm">palette</span>
-                <span>Apply Variant 1-Click</span>
-              </button>
-            </div>
 
             <!-- =============================================================== -->
             <!-- CONTENT PANEL (HERO) CUSTOMIZATION CONTROLS                     -->
             <!-- =============================================================== -->
-            <div class="space-y-3 pt-3 border-t border-slate-200">
+            <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <label class="block text-xs font-bold text-slate-800">Content Panel (Hero)</label>
                 @if (formData().useCustomContentPanel) {
@@ -1955,8 +1917,8 @@
               </p>
 
               <div class="space-y-2">
-                <button
-                  type="button"
+                <button 
+                  type="button" 
                   (click)="openContentPanelModal()"
                   class="w-full py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2 transition-all">
                   <span class="material-symbols-outlined text-base">code</span>
@@ -1964,16 +1926,16 @@
                 </button>
 
                 <div class="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     (click)="clearContentPanel()"
                     class="py-1.5 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
                     <span class="material-symbols-outlined text-sm text-slate-500">crop_square</span>
                     <span>Set Empty</span>
                   </button>
 
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     (click)="resetToDefaultHero()"
                     class="py-1.5 px-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors">
                     <span class="material-symbols-outlined text-sm text-slate-500">restart_alt</span>
@@ -2100,49 +2062,6 @@
                     </button>
                   </div>
                 </div>
-
-                <!-- Headline & Subheadline Inputs -->
-                <div class="space-y-2">
-                  <div class="space-y-1">
-                    <span class="text-[11px] text-slate-500 font-medium">Hero Headline</span>
-                    <input type="text" [(ngModel)]="formData().headline" class="w-full px-3 py-2 rounded-xl text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-800 outline-none" />
-                  </div>
-                  <div class="space-y-1">
-                    <span class="text-[11px] text-slate-500 font-medium">Hero Subtitle</span>
-                    <textarea [(ngModel)]="formData().subheadline" rows="2" class="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 outline-none resize-none"></textarea>
-                  </div>
-                </div>
-
-                <!-- Feature Highlights Bullets Manager -->
-                <div class="space-y-2">
-                  <span class="text-[11px] text-slate-500 font-medium">Feature Highlights</span>
-                  <div class="space-y-1.5">
-                    @for (bullet of formData().sidePanel?.bullets || []; track bullet.id) {
-                      <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                        <span class="material-symbols-outlined text-sm text-tenant-600 shrink-0">{{ bullet.icon || 'check' }}</span>
-                        <input type="text" [(ngModel)]="bullet.title" class="flex-1 bg-transparent border-none text-xs font-medium text-slate-800 outline-none" />
-                        <button type="button" (click)="removeSidePanelBullet(bullet.id)" class="text-slate-400 hover:text-rose-600 cursor-pointer">
-                          <span class="material-symbols-outlined text-sm">delete</span>
-                        </button>
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Add New Feature Bullet -->
-                  <div class="flex items-center gap-2 pt-1">
-                    <input
-                      type="text"
-                      placeholder="Add highlight feature..."
-                      [ngModel]="newBulletText()"
-                      (ngModelChange)="newBulletText.set($event)"
-                      (keyup.enter)="addSidePanelBullet()"
-                      class="flex-1 px-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 text-slate-800 outline-none" />
-                    <button type="button" (click)="addSidePanelBullet()" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-tenant-600 hover:bg-tenant-700 cursor-pointer">
-                      Add
-                    </button>
-                  </div>
-                </div>
-
               </div>
             }
 
@@ -2217,7 +2136,7 @@
         <!-- =================================================================== -->
         @if (rightPanelTab() === 'custom_css') {
           <div class="space-y-4">
-
+            
             <!-- AuthKit Style Overrides Header with Action Menu -->
             <div class="pb-1 relative">
               <div class="flex items-center justify-between">
@@ -2227,8 +2146,8 @@
 
                 <!-- Top Action Menu Button -->
                 <div class="relative">
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     (click)="toggleOverridesMenu($event)"
                     title="Style options"
                     class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer">
@@ -2239,8 +2158,8 @@
                   @if (isOverridesMenuOpen()) {
                     <div class="absolute right-0 top-8 z-40 w-56 p-1.5 bg-white rounded-xl shadow-xl border border-slate-200 text-xs text-slate-700 animate-in fade-in zoom-in-95 duration-100"
                          (click)="$event.stopPropagation()">
-                      <button
-                        type="button"
+                      <button 
+                        type="button" 
                         (click)="toggleRemoveOriginalStyles(); isOverridesMenuOpen.set(false)"
                         class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-left transition-colors cursor-pointer">
                         <span>Remove original element styles</span>
@@ -2248,30 +2167,30 @@
                           <span class="material-symbols-outlined text-sm text-tenant-600 font-bold">check</span>
                         }
                       </button>
-                      <button
-                        type="button"
+                      <button 
+                        type="button" 
                         (click)="formatCustomCss(); isOverridesMenuOpen.set(false)"
                         class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-left transition-colors cursor-pointer">
                         <span class="material-symbols-outlined text-sm text-slate-400">auto_fix_high</span>
                         <span>Format CSS indentation</span>
                       </button>
-                      <button
-                        type="button"
+                      <button 
+                        type="button" 
                         (click)="copyAllCss(); isOverridesMenuOpen.set(false)"
                         class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-left transition-colors cursor-pointer">
                         <span class="material-symbols-outlined text-sm text-slate-400">content_copy</span>
                         <span>Copy all combined CSS</span>
                       </button>
                       <div class="my-1 border-t border-slate-100"></div>
-                      <button
-                        type="button"
+                      <button 
+                        type="button" 
                         (click)="setCssEditorMode(cssEditorMode() === 'guided' ? 'raw' : 'guided'); isOverridesMenuOpen.set(false)"
                         class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-left transition-colors cursor-pointer">
                         <span class="material-symbols-outlined text-sm text-slate-400">{{ cssEditorMode() === 'guided' ? 'code' : 'tune' }}</span>
                         <span>{{ cssEditorMode() === 'guided' ? 'Switch to Raw Freeform Editor' : 'Switch to Scoped Guided Editor' }}</span>
                       </button>
-                      <button
-                        type="button"
+                      <button 
+                        type="button" 
                         (click)="resetAllOverrides(); isOverridesMenuOpen.set(false)"
                         class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 text-rose-600 text-left transition-colors cursor-pointer">
                         <span class="material-symbols-outlined text-sm">restart_alt</span>
@@ -2297,9 +2216,9 @@
               <div class="space-y-2">
                 @for (elem of scopedCssElements(); track elem.id) {
                   <div class="border border-slate-200/90 rounded-xl overflow-hidden bg-white shadow-2xs transition-all hover:border-slate-300">
-
+                    
                     <!-- Accordion Row Header -->
-                    <div
+                    <div 
                       (click)="toggleScopedAccordion(elem.id)"
                       class="flex items-center justify-between px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-100/70 cursor-pointer select-none transition-colors">
                       <div class="flex items-center gap-2 min-w-0">
@@ -2322,8 +2241,8 @@
 
                       <!-- Actions: Eye Toggle, Fullscreen Popout & Three-dots Menu -->
                       <div class="flex items-center gap-1 shrink-0" (click)="$event.stopPropagation()">
-                        <button
-                          type="button"
+                        <button 
+                          type="button" 
                           (click)="toggleScopedEnabled(elem.id, $event)"
                           [title]="elem.enabled ? 'Disable styles for ' + elem.name : 'Enable styles for ' + elem.name"
                           class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer">
@@ -2331,32 +2250,32 @@
                             {{ elem.enabled ? 'visibility' : 'visibility_off' }}
                           </span>
                         </button>
-                        <button
-                          type="button"
+                        <button 
+                          type="button" 
                           (click)="openScopedFullscreen(elem, $event)"
                           title="Open fullscreen editor"
                           class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer">
                           <span class="material-symbols-outlined text-sm">open_in_full</span>
                         </button>
-
+                        
                         <!-- Three-dots Block Menu (Extend with current css vs Remove original css style from block) -->
                         <div class="relative">
-                          <button
-                            type="button"
+                          <button 
+                            type="button" 
                             (click)="toggleBlockMenu(elem.id, $event)"
                             title="Block style options"
                             class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer">
                             <span class="material-symbols-outlined text-sm">more_vert</span>
                           </button>
                           @if (activeBlockMenuId() === elem.id) {
-                            <div
+                            <div 
                               (click)="$event.stopPropagation()"
                               class="absolute right-0 top-7 z-40 w-60 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 text-[11px] text-slate-700">
                               <div class="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-slate-400">
                                 Style Inheritance
                               </div>
-                              <button
-                                type="button"
+                              <button 
+                                type="button" 
                                 (click)="setBlockStyleMode(elem.id, false, $event)"
                                 class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-slate-50 text-left transition-colors cursor-pointer">
                                 <div class="flex flex-col">
@@ -2367,8 +2286,8 @@
                                   <span class="material-symbols-outlined text-sm text-tenant-600 font-bold">check</span>
                                 }
                               </button>
-                              <button
-                                type="button"
+                              <button 
+                                type="button" 
                                 (click)="setBlockStyleMode(elem.id, true, $event)"
                                 class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-slate-50 text-left transition-colors cursor-pointer">
                                 <div class="flex flex-col">
@@ -2388,10 +2307,10 @@
                     <!-- Accordion Body: Sleek Code Editor -->
                     @if (elem.isOpen) {
                       <div class="p-3 bg-[#0d1117] text-slate-200 border-t border-slate-800 animate-in slide-in-from-top-1 duration-150">
-
+                        
                         <!-- Editor Canvas with Line Numbers -->
                         <div class="relative flex font-mono text-[11px] leading-relaxed rounded-lg overflow-hidden border border-slate-800/80 bg-[#090d13]">
-
+                          
                           <!-- Line Number Gutter -->
                           <div class="py-2.5 px-2 bg-[#0d1117]/80 text-slate-500 border-r border-slate-800/60 select-none text-right font-mono text-[10px] leading-relaxed shrink-0 w-7">
                             @for (line of getElementLineNumbers(elem.code); track line) {
@@ -2401,8 +2320,8 @@
 
                           <!-- Code Input Area -->
                           <div class="flex-1 py-2 px-3 text-slate-200 overflow-x-auto relative">
-                            <!-- Editable Body Textarea with full code editing-->
-                            <textarea#codeArea
+                            <!-- Editable Body Textarea with full code editing -->
+                            <textarea #codeArea
                               [value]="elem.code"
                               (input)="onScopedCodeInput(elem.id, codeArea, $event)"
                               (click)="onScopedTextareaClick(elem.id, codeArea)"
@@ -2416,16 +2335,16 @@
                             <!-- Floating Autocomplete Suggestion Popup (Matches Image 2 & 3) -->
                             @if (showAutocomplete() && activeAutocompleteElementId() === elem.id) {
                               <div class="absolute left-4 top-10 z-40 w-72 max-h-64 overflow-y-auto bg-[#161b22] border border-slate-700/80 rounded-xl shadow-2xl p-1.5 text-[11px] font-sans">
-
+                                
                                 <!-- Header with active element context & search -->
                                 <div class="px-2 py-1.5 border-b border-slate-800 flex items-center justify-between">
                                   <div class="flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 rounded-full bg-tenant-500"></span>
                                     <span class="text-[10px] font-semibold text-slate-300">Dependable Child Classes</span>
                                   </div>
-                                  <button
-                                    type="button"
-                                    (click)="showAutocomplete.set(false)"
+                                  <button 
+                                    type="button" 
+                                    (click)="showAutocomplete.set(false)" 
                                     class="text-slate-500 hover:text-white cursor-pointer text-sm leading-none">&times;</button>
                                 </div>
 
@@ -2437,8 +2356,8 @@
                                 <!-- Child Class Suggestions -->
                                 <div class="py-0.5 space-y-0.5">
                                   @for (cls of activeElementSuggestions(); track cls.name) {
-                                    <button
-                                      type="button"
+                                    <button 
+                                      type="button" 
                                       (click)="insertAutocompleteSuggestion(elem.id, cls, codeArea)"
                                       class="w-full px-2.5 py-1.5 flex items-center justify-between rounded-lg hover:bg-slate-800 text-left transition-colors cursor-pointer group">
                                       <div class="flex flex-col min-w-0 pr-2">
@@ -2460,8 +2379,8 @@
                                       CSS Properties
                                     </div>
                                     @for (prop of activePropertySuggestions(); track prop.name) {
-                                      <button
-                                        type="button"
+                                      <button 
+                                        type="button" 
                                         (click)="insertPropertySuggestion(elem.id, prop)"
                                         class="w-full px-2.5 py-1.5 flex items-center justify-between rounded-lg hover:bg-slate-800 text-left transition-colors cursor-pointer group">
                                         <span class="font-mono text-sky-300 font-medium text-[10px] group-hover:text-sky-200">{{ prop.name }}</span>
@@ -2482,8 +2401,8 @@
                             <div class="flex items-center gap-1.5 flex-wrap">
                               <span class="text-slate-500 text-[10px]">Snippets:</span>
                               @for (s of elem.quickSnippets; track s.label) {
-                                <button
-                                  type="button"
+                                <button 
+                                  type="button" 
                                   (click)="insertSnippet(elem.id, s.snippet)"
                                   class="px-2 py-0.5 rounded-md bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60 transition-colors cursor-pointer">
                                   + {{ s.label }}
@@ -2493,8 +2412,8 @@
                           }
 
                           <!-- Autocomplete Trigger Button -->
-                          <button
-                            type="button"
+                          <button 
+                            type="button" 
                             (click)="activeAutocompleteElementId.set(elem.id); autocompleteSearch.set(''); showAutocomplete.set(!showAutocomplete())"
                             class="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer font-sans ml-auto">
                             <span class="material-symbols-outlined text-xs">auto_awesome</span>
@@ -2513,16 +2432,16 @@
               <div class="space-y-2">
                 <div class="flex items-center justify-between text-[11px] text-slate-500">
                   <span>Freeform CSS Editor</span>
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     (click)="setCssEditorMode('guided')"
                     class="text-tenant-600 hover:underline font-bold cursor-pointer">
                     Back to Guided Mode
                   </button>
                 </div>
-                <textarea
-                  [(ngModel)]="formData().customCss"
-                  rows="12"
+                <textarea 
+                  [(ngModel)]="formData().customCss" 
+                  rows="12" 
                   spellcheck="false"
                   placeholder="/* Enter raw CSS rules here */"
                   class="w-full p-3 rounded-xl bg-slate-950 text-emerald-400 font-mono text-xs border border-slate-800 outline-none resize-y">
@@ -2535,8 +2454,8 @@
               <span class="text-[11px] text-slate-500 font-medium">Quick Full-Portal Templates</span>
               <div class="grid grid-cols-2 gap-2">
                 @for (tpl of cssTemplates; track tpl.id) {
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     (click)="applyCssTemplate(tpl)"
                     class="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-purple-50/50 hover:border-purple-300 transition-colors cursor-pointer text-left group">
                     <div class="text-[11px] font-bold text-slate-800 group-hover:text-purple-700">{{ tpl.name }}</div>
@@ -2563,18 +2482,18 @@
 @if (isContentPanelModalOpen()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
        (click)="closeContentPanelModal()">
-
+    
     <!-- Modal Dialog Window -->
     <div class="w-full max-w-2xl bg-[#121824] border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-slate-100 animate-in zoom-in-95 duration-200"
          (click)="$event.stopPropagation()">
-
+      
       <!-- Top Header -->
       <div class="p-6 pb-4">
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-bold text-white tracking-tight">Content panel</h2>
-          <button
+          <button 
             type="button"
-            (click)="closeContentPanelModal()"
+            (click)="closeContentPanelModal()" 
             class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer">
             <span class="material-symbols-outlined text-lg">close</span>
           </button>
@@ -2586,13 +2505,13 @@
 
       <!-- Code Editor Canvas -->
       <div class="px-6 pb-4 flex-1 flex flex-col min-h-0">
-
+        
         <div class="bg-[#090d16] border border-slate-800 rounded-xl overflow-hidden flex flex-col shadow-inner">
-
+          
           <!-- Editor Tabs & Copy Action Header -->
           <div class="flex items-center justify-between px-4 border-b border-slate-800 bg-[#0c111c]">
             <div class="flex items-center gap-6">
-              <button
+              <button 
                 type="button"
                 (click)="setModalEditorTab('html')"
                 [class.text-white]="modalEditorTab() === 'html'"
@@ -2603,7 +2522,7 @@
                 class="py-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer">
                 HTML
               </button>
-              <button
+              <button 
                 type="button"
                 (click)="setModalEditorTab('css')"
                 [class.text-white]="modalEditorTab() === 'css'"
@@ -2617,10 +2536,10 @@
             </div>
 
             <!-- Copy Code Button -->
-            <button
+            <button 
               type="button"
-              (click)="copyModalCode()"
-              title="Copy code to clipboard"
+              (click)="copyModalCode()" 
+              title="Copy code to clipboard" 
               class="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all flex items-center justify-center cursor-pointer">
               <span class="material-symbols-outlined text-base">content_copy</span>
             </button>
@@ -2628,7 +2547,7 @@
 
           <!-- Code Textarea & Gutter -->
           <div class="flex min-h-[280px] max-h-[420px] overflow-hidden bg-[#090d16]">
-
+            
             <!-- Line Numbers Gutter -->
             <div class="w-10 py-3 bg-[#070a12] border-r border-slate-800/80 select-none text-right pr-3 font-mono text-[11px] leading-relaxed text-slate-600 overflow-hidden shrink-0">
               @if (modalEditorTab() === 'html') {
@@ -2676,24 +2595,24 @@
 
       <!-- Action Footer -->
       <div class="p-6 pt-3 border-t border-slate-800 flex items-center justify-between bg-[#0e1420]">
-        <button
+        <button 
           type="button"
-          (click)="clearContentPanel()"
+          (click)="clearContentPanel()" 
           class="text-xs text-rose-400 hover:text-rose-300 font-medium transition-colors flex items-center gap-1 cursor-pointer">
           <span class="material-symbols-outlined text-sm">delete_outline</span>
           <span>Clear content</span>
         </button>
 
         <div class="flex items-center gap-3">
-          <button
+          <button 
             type="button"
-            (click)="closeContentPanelModal()"
+            (click)="closeContentPanelModal()" 
             class="px-4 py-2 text-xs font-semibold text-slate-300 bg-slate-800/90 hover:bg-slate-700 rounded-lg border border-slate-700 transition-all cursor-pointer">
             Cancel
           </button>
-          <button
+          <button 
             type="button"
-            (click)="saveContentPanelModal()"
+            (click)="saveContentPanelModal()" 
             class="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-lg shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
             <span>Save changes</span>
           </button>
@@ -2724,9 +2643,9 @@
             Scoped rules are applied immediately to the live preview canvas.
           </p>
         </div>
-        <button
+        <button 
           type="button"
-          (click)="closeScopedFullscreen()"
+          (click)="closeScopedFullscreen()" 
           class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer">
           <span class="material-symbols-outlined text-lg">close</span>
         </button>
@@ -2734,7 +2653,7 @@
 
       <div class="p-5 bg-[#090d13] font-mono text-xs">
         <div class="text-purple-400 font-bold mb-1">{{ el.selector }} &#123;</div>
-        <textarea
+        <textarea 
           [value]="el.code"
           (input)="onScopedCodeChange(el.id, $any($event.target).value)"
           rows="10"
@@ -2748,8 +2667,8 @@
           <div class="mt-3 flex items-center gap-2 flex-wrap">
             <span class="text-slate-500 text-xs font-sans">Quick presets:</span>
             @for (s of el.quickSnippets; track s.label) {
-              <button
-                type="button"
+              <button 
+                type="button" 
                 (click)="insertSnippet(el.id, s.snippet)"
                 class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white text-xs font-sans border border-slate-700 transition-colors cursor-pointer">
                 + {{ s.label }}
@@ -2764,7 +2683,7 @@
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>Live preview active</span>
         </div>
-        <button
+        <button 
           type="button"
           (click)="closeScopedFullscreen()"
           class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-tenant-600 hover:bg-tenant-700 transition-colors cursor-pointer">
