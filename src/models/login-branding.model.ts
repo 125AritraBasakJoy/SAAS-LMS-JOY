@@ -80,9 +80,7 @@ export interface LoginBrandingConfig {
     showSoc2Badge: boolean;
     showIsoBadge: boolean;
   };
-  customHtml?: string;
   customCss?: string;
-  useCustomContentPanel?: boolean;
   status: 'Published' | 'Draft';
   version: number;
   lastUpdatedBy: string;
@@ -277,127 +275,6 @@ export const CSS_TEMPLATES = [
   }
 ];
 
-export function getHeroPanelDefaultHtml(config?: Partial<LoginBrandingConfig>): string {
-  const headline = config?.headline || 'Welcome to BRAC Learning Portal';
-  const subheadline = config?.subheadline || 'Sign in to access your assigned curriculum, certifications, virtual classrooms and progress transcripts.';
-
-  return `<div class="space-y-4 max-w-md w-full relative">
-  <!-- Ambient Subtle Glow Accent -->
-  <div class="absolute -top-10 -right-10 w-48 h-48 bg-[#EC008C]/15 rounded-full blur-3xl pointer-events-none"></div>
-
-  <!-- Badge & Icon -->
-  <div class="flex items-center gap-2">
-    <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-[#EC008C]/20 border border-[#EC008C]/30 text-[#EC008C]">
-      <span class="material-symbols-outlined text-base">verified_user</span>
-    </div>
-    <span class="text-[11px] font-extrabold uppercase tracking-widest text-[#EC008C]">ENTERPRISE PORTAL</span>
-  </div>
-
-  <!-- Main Headline -->
-  <div>
-    <h1 class="text-xl sm:text-3xl font-extrabold tracking-tight leading-tight text-white">
-      ${headline}
-    </h1>
-  </div>
-
-  <!-- Subheadline -->
-  <p class="text-xs sm:text-sm leading-relaxed text-white/85">
-    ${subheadline}
-  </p>
-
-  <!-- Feature Highlights List -->
-  <div class="space-y-2.5 pt-1">
-    <div class="flex items-start gap-2.5 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors hero-feature-item">
-      <div class="w-5 h-5 rounded-md bg-[#EC008C]/20 border border-[#EC008C]/40 flex items-center justify-center shrink-0 mt-0.5 text-[#EC008C]">
-        <span class="material-symbols-outlined text-xs">shield_lock</span>
-      </div>
-      <div class="text-xs min-w-0 text-white">
-        <div class="font-bold truncate">Protected by Cloud Security Shield</div>
-        <div class="text-[10px] text-white/70 mt-0.5">256-bit AES encryption & adaptive threat radar</div>
-      </div>
-    </div>
-    <div class="flex items-start gap-2.5 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors hero-feature-item">
-      <div class="w-5 h-5 rounded-md bg-[#EC008C]/20 border border-[#EC008C]/40 flex items-center justify-center shrink-0 mt-0.5 text-[#EC008C]">
-        <span class="material-symbols-outlined text-xs">auto_awesome</span>
-      </div>
-      <div class="text-xs min-w-0 text-white">
-        <div class="font-bold truncate">Adaptive AI Learning Path</div>
-        <div class="text-[10px] text-white/70 mt-0.5">Real-time skill cluster mapping and smart recommendations</div>
-      </div>
-    </div>
-    <div class="flex items-start gap-2.5 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors hero-feature-item">
-      <div class="w-5 h-5 rounded-md bg-[#EC008C]/20 border border-[#EC008C]/40 flex items-center justify-center shrink-0 mt-0.5 text-[#EC008C]">
-        <span class="material-symbols-outlined text-xs">sync_saved_locally</span>
-      </div>
-      <div class="text-xs min-w-0 text-white">
-        <div class="font-bold truncate">Real-time Transcript Sync</div>
-        <div class="text-[10px] text-white/70 mt-0.5">Instant credentials and verifiable digital certificates</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stats Row -->
-  <div class="pt-3 border-t border-white/10 grid grid-cols-2 gap-3 text-white">
-    <div class="hero-stat-box">
-      <div class="text-lg sm:text-xl font-black text-[#EC008C] tracking-tight">24,500+</div>
-      <div class="text-[10px] text-white/70 uppercase font-semibold tracking-wider">Active Learners</div>
-    </div>
-    <div class="hero-stat-box">
-      <div class="text-lg sm:text-xl font-black text-emerald-400 tracking-tight">99.99%</div>
-      <div class="text-[10px] text-white/70 uppercase font-semibold tracking-wider">SSO Uptime</div>
-    </div>
-  </div>
-
-  <!-- Security Badges Footer in Hero -->
-  <div class="pt-1 flex items-center gap-2.5 text-[11px] text-white/75">
-    <div class="flex items-center gap-1.5 font-medium">
-      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span>Cloud Security Shield</span>
-    </div>
-    <div>·</div>
-    <div class="flex items-center gap-1">
-      <span class="material-symbols-outlined text-xs text-slate-300">verified</span>
-      <span>SOC 2 Type II</span>
-    </div>
-  </div>
-</div>`;
-}
-
-export function getHeroPanelDefaultCss(): string {
-  return `/* Custom Hero Content Panel & Card CSS Overrides */
-.hero-feature-item {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-feature-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateX(4px);
-  border-color: rgba(236, 0, 140, 0.4);
-}
-
-.hero-stat-box {
-  transition: transform 0.2s ease;
-}
-
-.hero-stat-box:hover {
-  transform: translateY(-2px);
-}
-
-.auth-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.auth-primary-btn {
-  letter-spacing: 0.025em;
-  transition: all 0.2s ease;
-}
-
-.auth-primary-btn:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-}`;
-}
-
 export const DEFAULT_LOGIN_BRANDING: LoginBrandingConfig = {
   id: 'branding-brac-default',
   tenantId: 'tenant-brac',
@@ -471,9 +348,20 @@ export const DEFAULT_LOGIN_BRANDING: LoginBrandingConfig = {
     showSoc2Badge: true,
     showIsoBadge: true
   },
-  customHtml: getHeroPanelDefaultHtml({ layout: 'split_right' }),
-  customCss: getHeroPanelDefaultCss(),
-  useCustomContentPanel: true,
+  customCss: `/* Custom Login Portal CSS Overrides */
+.auth-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-primary-btn {
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+}
+
+.auth-primary-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}`,
   status: 'Published',
   version: 2.4,
   lastUpdatedBy: 'Farhana Ahmed (System Admin)',
