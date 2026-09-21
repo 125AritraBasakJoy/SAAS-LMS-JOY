@@ -46,6 +46,7 @@ export interface AssessmentQuestion {
   prompt?: string;
   required: boolean;
   points: number;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
   options?: AssessmentQuestionOption[];
   matchingPairs?: MatchingPair[];
   correctSequence?: string[]; // Item IDs or texts in correct order for ordering
