@@ -137,7 +137,7 @@ export class ForbiddenComponent {
       case 'system_admin': return 'Global System Administrator';
       case 'tenant_admin': return 'Organization Administrator';
       case 'lms_admin': return 'LMS Portal Administrator';
-      case 'instructor': return 'Faculty Instructor';
+      case 'instructor': return 'Instructor';
       case 'learner': return 'Enrolled Learner';
       default: return 'User';
     }

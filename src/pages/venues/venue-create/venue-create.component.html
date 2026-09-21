@@ -52,6 +52,7 @@
       [steps]="steps"
       [currentStep]="currentStep()"
       [completedSteps]="completedSteps()"
+      [showNumbers]="false"
       orientation="horizontal"
       (stepChange)="goToStep($event)">
     </app-stepper>
@@ -69,7 +70,7 @@
         </span>
       </div>
       <div class="text-[11px] text-text-secondary">
-        Stage <strong>{{ currentStep() }}</strong> of {{ steps.length }}: <span class="font-semibold text-text-primary">{{ steps[currentStep() - 1].title }}</span>
+        Current Section: <span class="font-semibold text-text-primary">{{ steps[currentStep() - 1].title }}</span>
       </div>
     </div>
   </div>
@@ -370,6 +371,72 @@
                       <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
                         <input type="checkbox" formControlName="banquet" class="accent-tenant-500 rounded cursor-pointer" />
                         <span class="text-xs font-medium text-text-primary">Banquet</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Room-Wise Specific Amenities -->
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <label class="block text-[11px] font-bold text-text-secondary uppercase tracking-wider">Room-Specific Amenities</label>
+                      <span class="text-[10px] text-text-secondary">Configured per room</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityAirConditioning" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-sky-500">ac_unit</span>
+                          <span>AC</span>
+                        </span>
+                      </label>
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityDedicatedWifi" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-indigo-500">wifi</span>
+                          <span>Dedicated Wi-Fi</span>
+                        </span>
+                      </label>
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityWhiteboard" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-emerald-500">draw</span>
+                          <span>Whiteboard</span>
+                        </span>
+                      </label>
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityPowerOutlets" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-amber-500">power</span>
+                          <span>Power Plugs</span>
+                        </span>
+                      </label>
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityVideoConferenceCam" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-purple-500">videocam</span>
+                          <span>VC Cam</span>
+                        </span>
+                      </label>
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityWheelchairAccessible" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-teal-500">accessible</span>
+                          <span>Accessible</span>
+                        </span>
+                      </label>
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityWaterDispenser" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-cyan-500">water_drop</span>
+                          <span>Water</span>
+                        </span>
+                      </label>
+                      <label class="flex items-center gap-2 p-2 rounded-xl bg-base-100 border border-base-300 cursor-pointer hover:border-tenant-300">
+                        <input type="checkbox" formControlName="amenityNaturalLight" class="accent-tenant-500 rounded cursor-pointer" />
+                        <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+                          <span class="material-symbols-outlined text-xs text-amber-500">wb_sunny</span>
+                          <span>Daylight</span>
+                        </span>
                       </label>
                     </div>
                   </div>

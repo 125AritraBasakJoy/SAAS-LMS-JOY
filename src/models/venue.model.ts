@@ -27,6 +27,27 @@ export interface VenueFacilities {
   otherTags: string[];
 }
 
+export interface RoomAmenities {
+  airConditioning?: boolean;
+  highSpeedWifi?: boolean;
+  dedicatedWifi?: boolean;
+  smartWhiteboard?: boolean;
+  whiteboard?: boolean;
+  videoConferencingKit?: boolean;
+  videoConferenceCam?: boolean;
+  recordingCamera?: boolean;
+  powerOutletsPerSeat?: boolean;
+  refreshmentStation?: boolean;
+  waterDispenser?: boolean;
+  wheelchairAccessible?: boolean;
+  naturalDaylight?: boolean;
+  naturalLight?: boolean;
+  ergonomicSeating?: boolean;
+  audioAmplifier?: boolean;
+  breakoutArea?: boolean;
+  otherAmenities?: string[];
+}
+
 export interface RoomEquipment {
   projector: boolean;
   soundSystem: boolean;
@@ -45,6 +66,7 @@ export interface Room {
   name: string;
   capacity: number; // Max trainees
   equipment: RoomEquipment;
+  amenities?: RoomAmenities;
   seatingLayouts: SeatingLayout[];
   status: RoomStatus;
   usedInClassesCount?: number;
@@ -54,11 +76,39 @@ export interface Room {
   updatedAt?: string;
 }
 
+export type VenueCategory = 'brac_internal' | 'external';
+export type VenueRoom = Room;
+
+export function getRoomAmenitiesList(amenities?: RoomAmenities | string[]): string[] {
+  if (!amenities) return ['Standard Training Setup'];
+  if (Array.isArray(amenities)) return amenities.length > 0 ? amenities : ['Standard Training Setup'];
+
+  const list: string[] = [];
+  if (amenities.airConditioning) list.push('Air Conditioned');
+  if (amenities.highSpeedWifi || amenities.dedicatedWifi) list.push('High-Speed Wi-Fi');
+  if (amenities.smartWhiteboard) list.push('Interactive Smart Board');
+  else if (amenities.whiteboard) list.push('Whiteboard');
+  if (amenities.videoConferencingKit || amenities.videoConferenceCam) list.push('Video Conferencing Kit');
+  if (amenities.recordingCamera) list.push('Session Recording Cam');
+  if (amenities.powerOutletsPerSeat) list.push('Power Outlets per Seat');
+  if (amenities.refreshmentStation || amenities.waterDispenser) list.push('Refreshment & Water');
+  if (amenities.wheelchairAccessible) list.push('Wheelchair Accessible');
+  if (amenities.naturalDaylight || amenities.naturalLight) list.push('Natural Daylight');
+  if (amenities.ergonomicSeating) list.push('Ergonomic Chairs');
+  if (amenities.audioAmplifier) list.push('Audio Amplifier');
+  if (amenities.breakoutArea) list.push('Breakout Discussion Area');
+  if (amenities.otherAmenities && Array.isArray(amenities.otherAmenities)) {
+    list.push(...amenities.otherAmenities);
+  }
+  return list.length > 0 ? list : ['Standard Setup'];
+}
+
 export interface Venue {
   venueId: string;
   code: string;
   name: string;
   type: VenueType; // BRD §4.11: Physical
+  venueCategory?: VenueCategory; // 'brac_internal' (BRAC Owned / In-House) or 'external' (Partner / Rented / Hotel)
   address: VenueAddress;
   geo?: VenueGeo;
   facilities: VenueFacilities;
@@ -105,6 +155,7 @@ export const INITIAL_VENUES: Venue[] = [
     code: 'DHK-CENTRAL',
     name: 'Dhaka Executive Learning Center',
     type: 'physical',
+    venueCategory: 'brac_internal',
     address: {
       line1: 'Plot 75, Bir Uttam Mir Shawkat Sarak, Gulshan-1',
       city: 'Dhaka',
@@ -137,7 +188,7 @@ export const INITIAL_VENUES: Venue[] = [
       email: 'farhan.kabir@grameenphone.com',
       phone: '+880 1711-223344'
     },
-    createdBy: 'LMS Academic Operations',
+    createdBy: 'System Admin',
     createdAt: '10/01/2026 09:30:00',
     updatedAt: '12/03/2026 14:15:00',
     rooms: [
@@ -156,6 +207,21 @@ export const INITIAL_VENUES: Venue[] = [
           videoConferencing: true,
           airConditioning: true,
           otherTags: ['Dual 4K Projectors', 'Wireless Lavalier Mics', 'Polycom Studio']
+        },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: true,
+          recordingCamera: true,
+          powerOutletsPerSeat: true,
+          refreshmentStation: true,
+          wheelchairAccessible: true,
+          naturalDaylight: false,
+          ergonomicSeating: true,
+          audioAmplifier: true,
+          breakoutArea: true,
+          otherAmenities: ['Surround Stage Lighting', 'Translation Booth']
         },
         seatingLayouts: ['theatre', 'classroom', 'banquet'],
         status: 'active',
@@ -179,6 +245,21 @@ export const INITIAL_VENUES: Venue[] = [
           airConditioning: true,
           otherTags: ['85" Interactive Touch Display', 'Ceiling Array Mic']
         },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: true,
+          recordingCamera: false,
+          powerOutletsPerSeat: true,
+          refreshmentStation: false,
+          wheelchairAccessible: true,
+          naturalDaylight: true,
+          ergonomicSeating: true,
+          audioAmplifier: false,
+          breakoutArea: true,
+          otherAmenities: ['Movable Whiteboard Partitions']
+        },
         seatingLayouts: ['classroom', 'uShape', 'cluster'],
         status: 'active',
         usedInClassesCount: 4,
@@ -201,6 +282,21 @@ export const INITIAL_VENUES: Venue[] = [
           airConditioning: true,
           otherTags: ['Executive Ergonomic Chairs', 'Video Soundbar']
         },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: false,
+          videoConferencingKit: true,
+          recordingCamera: true,
+          powerOutletsPerSeat: true,
+          refreshmentStation: true,
+          wheelchairAccessible: false,
+          naturalDaylight: true,
+          ergonomicSeating: true,
+          audioAmplifier: false,
+          breakoutArea: false,
+          otherAmenities: ['Dedicated Coffee Machine', 'Executive Mini Bar']
+        },
         seatingLayouts: ['boardroom', 'uShape'],
         status: 'active',
         usedInClassesCount: 2,
@@ -214,6 +310,7 @@ export const INITIAL_VENUES: Venue[] = [
     code: 'CTG-PORT',
     name: 'Chittagong Coastal Training Institute',
     type: 'physical',
+    venueCategory: 'brac_internal',
     address: {
       line1: 'Agrabad Commercial Area, Sheikh Mujib Road',
       city: 'Chittagong',
@@ -246,7 +343,7 @@ export const INITIAL_VENUES: Venue[] = [
       email: 'nusrat.jahan@grameenphone.com',
       phone: '+880 1819-334455'
     },
-    createdBy: 'Regional LMS Admin',
+    createdBy: 'System Admin',
     createdAt: '15/01/2026 11:00:00',
     updatedAt: '05/03/2026 16:40:00',
     rooms: [
@@ -265,6 +362,20 @@ export const INITIAL_VENUES: Venue[] = [
           videoConferencing: true,
           airConditioning: true,
           otherTags: ['Laser Projector', 'Boundary Microphones']
+        },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: true,
+          recordingCamera: false,
+          powerOutletsPerSeat: true,
+          refreshmentStation: true,
+          wheelchairAccessible: true,
+          naturalDaylight: true,
+          ergonomicSeating: true,
+          audioAmplifier: true,
+          breakoutArea: true
         },
         seatingLayouts: ['theatre', 'classroom', 'uShape'],
         status: 'active',
@@ -288,6 +399,20 @@ export const INITIAL_VENUES: Venue[] = [
           airConditioning: true,
           otherTags: ['Computer Terminals', 'Smart Whiteboard']
         },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: false,
+          recordingCamera: false,
+          powerOutletsPerSeat: true,
+          refreshmentStation: false,
+          wheelchairAccessible: true,
+          naturalDaylight: false,
+          ergonomicSeating: true,
+          audioAmplifier: false,
+          breakoutArea: false
+        },
         seatingLayouts: ['classroom', 'cluster'],
         status: 'active',
         usedInClassesCount: 3,
@@ -301,6 +426,7 @@ export const INITIAL_VENUES: Venue[] = [
     code: 'SYL-HUB',
     name: 'Sylhet Highlands Innovation & Learning Hub',
     type: 'physical',
+    venueCategory: 'brac_internal',
     address: {
       line1: 'Subidbazar VIP Road, Airport Junction',
       city: 'Sylhet',
@@ -333,7 +459,7 @@ export const INITIAL_VENUES: Venue[] = [
       email: 'tariqul.i@brac.net',
       phone: '+880 1722-667788'
     },
-    createdBy: 'Field Ops Lead',
+    createdBy: 'System Admin',
     createdAt: '22/01/2026 14:00:00',
     updatedAt: '28/02/2026 10:20:00',
     rooms: [
@@ -353,6 +479,20 @@ export const INITIAL_VENUES: Venue[] = [
           airConditioning: true,
           otherTags: ['Audio Visual Pod', 'Wireless Presentation']
         },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: true,
+          recordingCamera: false,
+          powerOutletsPerSeat: true,
+          refreshmentStation: true,
+          wheelchairAccessible: true,
+          naturalDaylight: true,
+          ergonomicSeating: true,
+          audioAmplifier: true,
+          breakoutArea: true
+        },
         seatingLayouts: ['theatre', 'classroom'],
         status: 'active',
         usedInClassesCount: 5,
@@ -366,6 +506,7 @@ export const INITIAL_VENUES: Venue[] = [
     code: 'RAJ-TECH',
     name: 'Rajshahi Tech & Agritech Academy',
     type: 'physical',
+    venueCategory: 'brac_internal',
     address: {
       line1: 'Biman Crossing, Nawdapara',
       city: 'Rajshahi',
@@ -418,11 +559,223 @@ export const INITIAL_VENUES: Venue[] = [
           airConditioning: true,
           otherTags: ['Demonstration Benches']
         },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: false,
+          videoConferencingKit: false,
+          recordingCamera: false,
+          powerOutletsPerSeat: true,
+          refreshmentStation: false,
+          wheelchairAccessible: false,
+          naturalDaylight: true,
+          ergonomicSeating: false,
+          audioAmplifier: false,
+          breakoutArea: false
+        },
         seatingLayouts: ['classroom', 'cluster'],
         status: 'inactive',
         usedInClassesCount: 3,
         floorLevel: 'Annex Building',
         createdAt: '01/02/2026 08:30:00'
+      }
+    ]
+  },
+  {
+    venueId: 'venue-005',
+    code: 'DHK-RADISSON',
+    name: 'Radisson Blu Water Garden Convention Center',
+    type: 'physical',
+    venueCategory: 'external',
+    address: {
+      line1: 'Airport Road, Dhaka Cantonment',
+      city: 'Dhaka',
+      postcode: '1206',
+      country: 'Bangladesh',
+      formatted: 'Airport Road, Dhaka Cantonment, Dhaka 1206'
+    },
+    geo: {
+      lat: 23.8167,
+      lng: 90.4072,
+      mapUrl: 'https://maps.google.com/?q=23.8167,90.4072'
+    },
+    facilities: {
+      internet: true,
+      parking: true,
+      accessibility: true,
+      cafeteria: true,
+      powerBackup: true,
+      securityPersonnel: true,
+      otherTags: ['5-Star Luxury Facilities', 'Valet Parking', 'Executive Dining', 'Tier-3 Power Redundancy']
+    },
+    organizationId: 'org-01',
+    organizationName: 'Grameenphone Corporate Academy',
+    lmsId: 'lms-01',
+    lmsName: 'Enterprise Leadership Portal',
+    status: 'active',
+    usedInClassesCount: 11,
+    contactPerson: {
+      name: 'Ashrafuzzaman Chowdhury',
+      email: 'ashraf.chowdhury@radissonbd.com',
+      phone: '+880 1713-998877'
+    },
+    createdBy: 'System Admin',
+    createdAt: '05/02/2026 10:00:00',
+    updatedAt: '15/03/2026 11:30:00',
+    rooms: [
+      {
+        roomId: 'room-501',
+        venueId: 'venue-005',
+        venueName: 'Radisson Blu Water Garden Convention Center',
+        name: 'Utshab Grand Ballroom',
+        capacity: 120,
+        equipment: {
+          projector: true,
+          soundSystem: true,
+          microphone: true,
+          displayScreen: true,
+          whiteboard: true,
+          videoConferencing: true,
+          airConditioning: true,
+          otherTags: ['4K Video Wall', 'Digital Audio Mixer', 'Cisco TelePresence']
+        },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: true,
+          recordingCamera: true,
+          powerOutletsPerSeat: true,
+          refreshmentStation: true,
+          wheelchairAccessible: true,
+          naturalDaylight: true,
+          ergonomicSeating: true,
+          audioAmplifier: true,
+          breakoutArea: true,
+          otherAmenities: ['Banquet Buffet Station', 'VIP Green Room', 'Simultaneous Interpretation']
+        },
+        seatingLayouts: ['theatre', 'classroom', 'banquet', 'uShape'],
+        status: 'active',
+        usedInClassesCount: 7,
+        floorLevel: 'Ground Floor Ballroom Concourse',
+        createdAt: '05/02/2026 10:30:00'
+      },
+      {
+        roomId: 'room-502',
+        venueId: 'venue-005',
+        venueName: 'Radisson Blu Water Garden Convention Center',
+        name: 'Surma Executive Conference Suite',
+        capacity: 35,
+        equipment: {
+          projector: false,
+          soundSystem: true,
+          microphone: true,
+          displayScreen: true,
+          whiteboard: true,
+          videoConferencing: true,
+          airConditioning: true,
+          otherTags: ['98" Sony Pro Bravia', 'Bose Array Audio']
+        },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: true,
+          recordingCamera: true,
+          powerOutletsPerSeat: true,
+          refreshmentStation: true,
+          wheelchairAccessible: true,
+          naturalDaylight: true,
+          ergonomicSeating: true,
+          audioAmplifier: true,
+          breakoutArea: true
+        },
+        seatingLayouts: ['boardroom', 'uShape', 'classroom'],
+        status: 'active',
+        usedInClassesCount: 4,
+        floorLevel: '2nd Floor Mezzanine',
+        createdAt: '05/02/2026 11:00:00'
+      }
+    ]
+  },
+  {
+    venueId: 'venue-006',
+    code: 'CXB-SEACROWN',
+    name: 'Grand Sea Crown Resort & Conference Center',
+    type: 'physical',
+    venueCategory: 'external',
+    address: {
+      line1: 'Marine Drive, Kolatoli Beach Road',
+      city: "Cox's Bazar",
+      postcode: '4700',
+      country: 'Bangladesh',
+      formatted: "Marine Drive, Kolatoli Beach, Cox's Bazar 4700"
+    },
+    geo: {
+      lat: 21.4272,
+      lng: 91.9708,
+      mapUrl: "https://maps.google.com/?q=21.4272,91.9708"
+    },
+    facilities: {
+      internet: true,
+      parking: true,
+      accessibility: true,
+      cafeteria: true,
+      powerBackup: true,
+      securityPersonnel: true,
+      otherTags: ['Ocean Front Venue', 'Resort Lodging', 'Outdoor Team Building Lawns', 'Helipad']
+    },
+    organizationId: 'org-02',
+    organizationName: 'BRAC Social Development Network',
+    lmsId: 'lms-02',
+    lmsName: 'Field Capacity & Social Impact LMS',
+    status: 'active',
+    usedInClassesCount: 6,
+    contactPerson: {
+      name: 'Mohammad Rashed',
+      email: 'events@seacrownresort.com',
+      phone: '+880 1819-778899'
+    },
+    createdBy: 'System Admin',
+    createdAt: '12/02/2026 09:00:00',
+    updatedAt: '01/03/2026 17:00:00',
+    rooms: [
+      {
+        roomId: 'room-601',
+        venueId: 'venue-006',
+        venueName: 'Grand Sea Crown Resort & Conference Center',
+        name: 'Bay View Plenary Hall',
+        capacity: 80,
+        equipment: {
+          projector: true,
+          soundSystem: true,
+          microphone: true,
+          displayScreen: true,
+          whiteboard: true,
+          videoConferencing: true,
+          airConditioning: true,
+          otherTags: ['Dual Projectors', 'Wireless Mics']
+        },
+        amenities: {
+          airConditioning: true,
+          highSpeedWifi: true,
+          smartWhiteboard: true,
+          videoConferencingKit: true,
+          recordingCamera: false,
+          powerOutletsPerSeat: true,
+          refreshmentStation: true,
+          wheelchairAccessible: true,
+          naturalDaylight: true,
+          ergonomicSeating: true,
+          audioAmplifier: true,
+          breakoutArea: true,
+          otherAmenities: ['Ocean View Terrace', 'Dedicated High-Speed Satellite Link']
+        },
+        seatingLayouts: ['classroom', 'theatre', 'cluster', 'banquet'],
+        status: 'active',
+        usedInClassesCount: 6,
+        floorLevel: '3rd Floor Coastal Wing',
+        createdAt: '12/02/2026 09:30:00'
       }
     ]
   }

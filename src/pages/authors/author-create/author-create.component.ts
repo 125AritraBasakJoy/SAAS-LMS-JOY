@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LmsDataService } from '../../../services/lms-data.service';
-import { AuthorProfile, AuthorCreateForm, PersonnelAttachment } from '../../../models/author.model';
+import { AuthorProfile, AuthorCreateForm, PersonnelAttachment, DuplicatePersonnelMatch } from '../../../models/author.model';
 import { CustomSelectComponent, SelectOption } from '../../../components/custom-select/custom-select.component';
 
 @Component({
@@ -47,6 +47,37 @@ export class AuthorCreateComponent implements OnInit {
     }
   ];
 
+  // Role Assignment Options (§ Merged Creation Flow)
+  roleSelection = signal<'author' | 'instructor' | 'both'>('author');
+  roleOptions: SelectOption[] = [
+    {
+      value: 'author',
+      label: 'Content Author Only',
+      icon: 'edit_note',
+      badge: 'Author',
+      badgeClass: 'bg-[#FCE4EC] text-[#D81B60] dark:bg-pink-950/80 dark:text-pink-300 font-semibold'
+    },
+    {
+      value: 'instructor',
+      label: 'Course Instructor Only',
+      icon: 'school',
+      badge: 'Instructor',
+      badgeClass: 'bg-[#FFF3E0] text-[#E65100] dark:bg-orange-950/80 dark:text-orange-300 font-semibold'
+    },
+    {
+      value: 'both',
+      label: 'Both (Author + Instructor)',
+      icon: 'verified_user',
+      badge: 'Dual-Role',
+      badgeClass: 'bg-[#F3E5F5] text-[#7B1FA2] dark:bg-purple-950/80 dark:text-purple-300 font-semibold'
+    }
+  ];
+
+  // Instructor specific fields when role is 'instructor' or 'both'
+  instructorTitle = signal<string>('Senior Faculty Instructor');
+  instructorDepartment = signal<string>('Academic Faculty & Training');
+  instructorTeachingSpecialization = signal<string>('Financial Inclusion, Field Operations, Microfinance');
+
   attachmentCategoryOptions: { value: PersonnelAttachment['category']; label: string; icon: string }[] = [
     { value: 'CV / Resume', label: 'CV / Resume', icon: 'badge' },
     { value: 'Certificate / Credential', label: 'Certificate / Credential', icon: 'verified' },
@@ -85,7 +116,18 @@ export class AuthorCreateComponent implements OnInit {
     'Compliance Directives & Audit Simulations'
   ];
 
-  // Live duplicate guard inspection
+  // Live multi-factor duplicate intelligence inspection (Name, Email, Contact)
+  duplicatePersonnelMatch = computed<DuplicatePersonnelMatch | null>(() => {
+    if (this.isEditMode()) return null;
+    const currentForm = this.form();
+    return this.lms.detectDuplicateAuthor({
+      name: currentForm.name,
+      email: currentForm.email,
+      contactNumber: currentForm.contactNumber
+    }, this.editAuthorId() || undefined);
+  });
+
+  // Legacy fallback
   existingPersonMatch = computed(() => {
     if (this.isEditMode()) return null;
     const email = this.form().email.trim();
@@ -94,11 +136,56 @@ export class AuthorCreateComponent implements OnInit {
     return check.found ? check : null;
   });
 
+  applyDuplicateMatchData(match: DuplicatePersonnelMatch): void {
+    if (match.matchedAuthor) {
+      const a = match.matchedAuthor;
+      this.form.set({
+        name: a.name,
+        email: a.email,
+        contactNumber: a.contactNumber || '',
+        specialization: a.specialization || '',
+        bio: a.bio || '',
+        status: a.status,
+        avatar: a.avatar
+      });
+      if (a.avatar) this.avatarPreview.set(a.avatar);
+      this.lms.showToast(`Applied details from existing Author profile for ${a.name}.`, 'info', 3000);
+    } else if (match.matchedInstructor) {
+      const i = match.matchedInstructor;
+      this.form.update(f => ({
+        ...f,
+        name: i.name,
+        email: i.email,
+        contactNumber: i.contactNumber || f.contactNumber,
+        bio: i.bio || f.bio,
+        avatar: i.avatar || f.avatar
+      }));
+      if (i.avatar) this.avatarPreview.set(i.avatar);
+      this.lms.showToast(`Imported contact and name from Faculty Instructor ${i.name}.`, 'info', 3000);
+    }
+  }
+
+  fillQuickTestDuplicate(type: 'email' | 'name' | 'phone'): void {
+    if (type === 'email') {
+      this.form.update(f => ({ ...f, email: 'mahbubur.r@brac.net' }));
+    } else if (type === 'name') {
+      this.form.update(f => ({ ...f, name: 'Tanvir Hossain' }));
+    } else if (type === 'phone') {
+      this.form.update(f => ({ ...f, contactNumber: '+880 1912-887766' }));
+    }
+    this.lms.showToast(`Filled sample ${type} to trigger duplicate detection banner.`, 'info', 2500);
+  }
+
   isSubmitting = signal<boolean>(false);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') || this.route.snapshot.queryParamMap.get('id');
     const email = this.route.snapshot.queryParamMap.get('email');
+    const roleParam = this.route.snapshot.queryParamMap.get('role');
+    
+    if (roleParam === 'instructor' || roleParam === 'both' || roleParam === 'author') {
+      this.roleSelection.set(roleParam);
+    }
     
     let author = id ? this.lms.getAuthorById(id) : undefined;
     if (!author && email) {
@@ -425,19 +512,78 @@ export class AuthorCreateComponent implements OnInit {
         }, 800);
       }
     } else {
-      const result = this.lms.addAuthor({
-        ...data,
-        avatar,
-        attachments
-      });
-      this.isSubmitting.set(false);
-      if (result.success) {
-        this.successMessage.set(`Author "${result.author.name}" created successfully with ${attachments.length} attached document(s) and added to the organization pool.`);
-        this.showSuccessAlert.set(true);
-        this.lms.showToast('New Author profile created successfully!', 'success', 3000, 'Author Onboarded');
-        setTimeout(() => {
-          this.router.navigate(['/authors', result.author.id]);
-        }, 800);
+      const chosenRole = this.roleSelection();
+
+      if (chosenRole === 'instructor') {
+        // Create as Course Instructor Only
+        const instResult = this.lms.addInstructor({
+          name: data.name.trim(),
+          email: data.email.trim(),
+          contactNumber: data.contactNumber?.trim() || '',
+          title: this.instructorTitle().trim() || 'Senior Faculty Instructor',
+          department: this.instructorDepartment().trim() || 'Academic Faculty & Training',
+          specialization: this.instructorTeachingSpecialization().trim() || data.specialization.trim() || 'Pedagogy & Training',
+          bio: data.bio?.trim() || '',
+          status: data.status,
+          avatar,
+          attachments
+        });
+
+        this.isSubmitting.set(false);
+        if (instResult.success) {
+          this.successMessage.set(`Instructor profile "${instResult.instructor.name}" created successfully and enrolled into Faculty Pool.`);
+          this.showSuccessAlert.set(true);
+          this.lms.showToast('Instructor profile created successfully!', 'success', 3000, 'Instructor Onboarded');
+          setTimeout(() => {
+            this.router.navigate(['/instructors', instResult.instructor.id]);
+          }, 800);
+        }
+      } else if (chosenRole === 'both') {
+        // Create Dual Role (Both Author & Instructor)
+        const authorResult = this.lms.addAuthor({
+          ...data,
+          avatar,
+          attachments
+        });
+
+        if (authorResult.success) {
+          const specs = this.instructorTeachingSpecialization().trim()
+            ? this.instructorTeachingSpecialization().split(',').map(s => s.trim()).filter(Boolean)
+            : [data.specialization.trim() || 'Curriculum Pedagogy'];
+
+          this.lms.tagAuthorAsInstructor(authorResult.author.id, {
+            title: this.instructorTitle().trim() || 'Senior Faculty Instructor',
+            department: this.instructorDepartment().trim() || 'Academic Faculty & Training',
+            specialization: specs,
+            status: data.status
+          });
+
+          this.isSubmitting.set(false);
+          this.successMessage.set(`Dual-Role Profile created! "${authorResult.author.name}" is now active as both a Content Author and Faculty Instructor.`);
+          this.showSuccessAlert.set(true);
+          this.lms.showToast('Dual-Role (Author + Instructor) profile created and linked!', 'success', 3500, 'Dual Role Created');
+          setTimeout(() => {
+            this.router.navigate(['/authors', authorResult.author.id]);
+          }, 800);
+        } else {
+          this.isSubmitting.set(false);
+        }
+      } else {
+        // Content Author Only
+        const result = this.lms.addAuthor({
+          ...data,
+          avatar,
+          attachments
+        });
+        this.isSubmitting.set(false);
+        if (result.success) {
+          this.successMessage.set(`Author "${result.author.name}" created successfully with ${attachments.length} attached document(s) and added to the organization pool.`);
+          this.showSuccessAlert.set(true);
+          this.lms.showToast('New Author profile created successfully!', 'success', 3000, 'Author Onboarded');
+          setTimeout(() => {
+            this.router.navigate(['/authors', result.author.id]);
+          }, 800);
+        }
       }
     }
   }

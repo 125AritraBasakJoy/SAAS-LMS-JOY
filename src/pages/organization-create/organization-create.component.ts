@@ -134,7 +134,7 @@ export class OrganizationCreateComponent implements OnInit, OnDestroy {
   // Available LMS Instances for Custom batching
   availableLmsNodes = [
     { id: 'LMS-Core-01', name: 'LMS Main Campus (Core)' },
-    { id: 'LMS-Branch-02', name: 'LMS Medical & Health Faculty' },
+    { id: 'LMS-Branch-02', name: 'LMS Medical & Health Division' },
     { id: 'LMS-Branch-03', name: 'LMS Engineering & CS Node' },
     { id: 'LMS-Branch-04', name: 'LMS Executive Business Lab' }
   ];

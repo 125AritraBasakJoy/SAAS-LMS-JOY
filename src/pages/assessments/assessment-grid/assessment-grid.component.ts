@@ -48,6 +48,7 @@ export class AssessmentGridComponent {
   selectedType = signal<string>('all');
   selectedScoringMode = signal<string>('all');
   selectedCategory = signal<string>('all');
+  selectedAlignment = signal<string>('all'); // 'all', 'independent', 'plan', 'course'
   filterHasManualGrading = signal<string>('all'); // 'all', 'yes', 'no'
   filterHasPassMark = signal<string>('all'); // 'all', 'yes', 'no'
   sortBy = signal<string>('latest');
@@ -99,6 +100,13 @@ export class AssessmentGridComponent {
     { value: 'unscored', label: 'Unscored (Participation/Survey)', icon: 'check_circle' }
   ];
 
+  alignmentOptions: SelectOption[] = [
+    { value: 'all', label: 'All Alignment Types' },
+    { value: 'independent', label: 'Independent Assessments', icon: 'hub' },
+    { value: 'plan', label: 'Plan-Tagged Assessments', icon: 'event_note' },
+    { value: 'course', label: 'Course/Content-Tagged', icon: 'school' }
+  ];
+
   manualGradingOptions: SelectOption[] = [
     { value: 'all', label: 'All Grading Modes' },
     { value: 'yes', label: 'Requires Manual Grading', icon: 'assignment_ind' },
@@ -148,6 +156,7 @@ export class AssessmentGridComponent {
     if (this.selectedType() !== 'all') count++;
     if (this.selectedScoringMode() !== 'all') count++;
     if (this.selectedCategory() !== 'all') count++;
+    if (this.selectedAlignment() !== 'all') count++;
     if (this.filterHasManualGrading() !== 'all') count++;
     if (this.filterHasPassMark() !== 'all') count++;
     return count;
@@ -161,6 +170,7 @@ export class AssessmentGridComponent {
     const total = list.length;
     const published = list.filter(a => a.status === 'published').length;
     const draft = list.filter(a => a.status === 'draft').length;
+    const independent = list.filter(a => a.isIndependent || a.originType === 'independent' || (!a.taggedPlanId && !a.taggedCourseId)).length;
     const manualGradedCount = list.filter(a => {
       const ver = a.versions.find(v => v.versionId === a.currentVersionId) || a.versions[0];
       return ver?.questions.some(q => q.manualGraded);
@@ -173,6 +183,7 @@ export class AssessmentGridComponent {
       total,
       published,
       draft,
+      independent,
       manualGradedCount,
       totalAttempts: attempts.length,
       passRate
@@ -187,6 +198,7 @@ export class AssessmentGridComponent {
     const type = this.selectedType();
     const mode = this.selectedScoringMode();
     const category = this.selectedCategory();
+    const alignment = this.selectedAlignment();
     const manualFilter = this.filterHasManualGrading();
     const passMarkFilter = this.filterHasPassMark();
 
@@ -197,8 +209,21 @@ export class AssessmentGridComponent {
           a.title.toLowerCase().includes(q) ||
           a.code.toLowerCase().includes(q) ||
           a.categoryTags.some(tag => tag.toLowerCase().includes(q)) ||
-          (a.description && a.description.toLowerCase().includes(q))
+          (a.description && a.description.toLowerCase().includes(q)) ||
+          (a.taggedPlanTitle && a.taggedPlanTitle.toLowerCase().includes(q)) ||
+          (a.taggedCourseTitle && a.taggedCourseTitle.toLowerCase().includes(q))
       );
+    }
+
+    // Alignment filter
+    if (alignment !== 'all') {
+      if (alignment === 'independent') {
+        list = list.filter(a => a.isIndependent || a.originType === 'independent' || (!a.taggedPlanId && !a.taggedCourseId));
+      } else if (alignment === 'plan') {
+        list = list.filter(a => a.originType === 'plan' || !!a.taggedPlanId || a.usedInReferences?.some(r => r.type === 'plan'));
+      } else if (alignment === 'course') {
+        list = list.filter(a => a.originType === 'course' || a.originType === 'content' || !!a.taggedCourseId || a.usedInReferences?.some(r => r.type === 'course'));
+      }
     }
 
     // Status filter
@@ -271,6 +296,7 @@ export class AssessmentGridComponent {
       this.selectedType() !== 'all' ||
       this.selectedScoringMode() !== 'all' ||
       this.selectedCategory() !== 'all' ||
+      this.selectedAlignment() !== 'all' ||
       this.filterHasManualGrading() !== 'all' ||
       this.filterHasPassMark() !== 'all'
     );
@@ -429,5 +455,33 @@ export class AssessmentGridComponent {
   onViewHistory(asm: Assessment): void {
     this.historyAssessment.set(asm);
     this.showVersionHistoryModal.set(true);
+  }
+
+  getAlignmentInfo(asm: Assessment): { label: string; icon: string; badgeClass: string; isIndependent: boolean; subtext?: string } {
+    if (asm.taggedCourseTitle || asm.originType === 'course' || asm.originType === 'content') {
+      return {
+        label: 'Course Tagged',
+        icon: 'school',
+        badgeClass: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+        isIndependent: false,
+        subtext: asm.taggedCourseTitle || 'Linked to Course Unit'
+      };
+    }
+    if (asm.taggedPlanTitle || asm.originType === 'plan') {
+      return {
+        label: 'Plan Tagged',
+        icon: 'event_note',
+        badgeClass: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+        isIndependent: false,
+        subtext: asm.taggedPlanTitle || 'Linked to Curriculum Plan'
+      };
+    }
+    return {
+      label: 'Independent',
+      icon: 'hub',
+      badgeClass: 'bg-tenant-500/10 text-tenant-700 dark:text-tenant-300 border-tenant-500/30',
+      isIndependent: true,
+      subtext: 'Universal Assessment Bank'
+    };
   }
 }

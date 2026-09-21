@@ -260,15 +260,14 @@ export class InstructorGridComponent {
   });
 
   resolutionOptions = computed<SelectOption[]>(() => {
-    const options: SelectOption[] = [
-      { value: 'remove', label: 'Remove Tag from this Layer', icon: 'delete' }
-    ];
+    const options: SelectOption[] = [];
     for (const rep of this.replacementInstructors()) {
       options.push({
         value: rep.id,
         label: `Reassign to: ${rep.name}`,
-        sublabel: `${rep.email} • ${rep.specialization.join(', ')}`,
-        avatar: rep.avatar
+        sublabel: `${rep.email} • ${Array.isArray(rep.specialization) ? rep.specialization.join(', ') : rep.specialization}`,
+        avatar: rep.avatar,
+        icon: 'swap_horiz'
       });
     }
     return options;
@@ -476,14 +475,7 @@ export class InstructorGridComponent {
     let allResolved = true;
     for (const rec of records) {
       const selected = selections[rec.id];
-      if (selected === 'remove') {
-        this.lms.resolveInstructorAssignment({
-          assignmentId: rec.id,
-          courseId: rec.courseId,
-          layer: rec.layer,
-          action: 'remove'
-        });
-      } else if (selected && selected !== '') {
+      if (selected && selected !== 'remove' && selected !== '') {
         this.lms.resolveInstructorAssignment({
           assignmentId: rec.id,
           courseId: rec.courseId,
@@ -497,7 +489,7 @@ export class InstructorGridComponent {
     }
 
     if (!allResolved) {
-      this.lms.showToast('Please specify an action (reassign or remove) for every active course assignment before deactivating.', 'error', 4000, 'Action Required');
+      this.lms.showToast('LMS governance requires reassigning all active course assignments to a qualified instructor before deactivating. Removal without reassignment is prohibited.', 'warning', 4500, 'Reassignment Required');
       return;
     }
 

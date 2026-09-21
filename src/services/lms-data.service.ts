@@ -136,6 +136,8 @@ import {
   AuthorKind,
   CourseStatus,
   DifficultyLevel,
+  CourseAuthorVersionRecord,
+  CourseInstructorDeliveryRecord,
   MOCK_INSTRUCTORS_REPO,
   MOCK_CREATORS_REPO,
   LAYER_LABEL_PRESETS,
@@ -214,8 +216,11 @@ import {
   AuthorshipRecord,
   AuthorCreateForm,
   DeactivationBlockResolution,
+  DuplicatePersonnelMatch,
+  ContentRepositoryItem,
   INITIAL_AUTHORS_REPO,
-  INITIAL_AUTHORSHIP_RECORDS
+  INITIAL_AUTHORSHIP_RECORDS,
+  INITIAL_CONTENT_REPOSITORY_ITEMS
 } from '../models/author.model';
 import {
   InstructorProfile,
@@ -2675,6 +2680,7 @@ export class LmsDataService {
   // Author Profile Store (Organization-Scoped Author Pool)
   authors = signal<AuthorProfile[]>(INITIAL_AUTHORS_REPO);
   authorshipRecords = signal<AuthorshipRecord[]>(INITIAL_AUTHORSHIP_RECORDS);
+  contentRepositoryItems = signal<ContentRepositoryItem[]>(INITIAL_CONTENT_REPOSITORY_ITEMS);
 
   activeAuthors = computed<AuthorProfile[]>(() => {
     return this.authors().filter(a => a.status === 'Active');
@@ -2690,7 +2696,23 @@ export class LmsDataService {
 
   // Venue Management Store (BRD §4.11)
   venues = signal<Venue[]>(INITIAL_VENUES);
-  venuePermissions = signal<VenuePermissions>(DEFAULT_VENUE_PERMISSIONS);
+  venuePermissions = computed<VenuePermissions>(() => {
+    const role = this.activeRole();
+    const isSys = role === 'system_admin' || (role as any) === 'super_admin';
+    const isOrg = role === 'tenant_admin';
+    const isLms = role === 'lms_admin';
+    const isInst = role === 'instructor';
+
+    return {
+      canViewFeature: true,
+      canCreateVenue: isSys, // Venue management master config by System Admin, not LMS Admin
+      canEditVenue: isSys,
+      canDeactivateVenue: isSys,
+      canManageRooms: isSys,
+      canTagVenueInDelivery: isSys || isOrg || isLms || isInst, // LMS Admin just attaches with toggle BRAC internal or external
+      canManageDashboardStudio: isSys || isOrg
+    };
+  });
 
   activeVenues = computed<Venue[]>(() => {
     return this.venues().filter(v => v.status === 'active');
@@ -9075,6 +9097,353 @@ export class LmsDataService {
     return { found: false };
   }
 
+  /**
+   * Multi-factor Duplicate Detection Algorithm
+   * Detects potential duplicate author/instructor records based on:
+   * 1. Institutional Email (Exact match or user prefix)
+   * 2. Full Name similarity (Levenshtein/Token matching)
+   * 3. Contact Phone Number (digits normalization)
+   */
+  detectDuplicateAuthor(data: { name: string; email: string; contactNumber?: string }, excludeAuthorId?: string): DuplicatePersonnelMatch | null {
+    const cleanEmail = (data.email || '').trim().toLowerCase();
+    const cleanName = (data.name || '').trim().toLowerCase();
+    const cleanPhone = (data.contactNumber || '').replace(/\D/g, '');
+
+    if (!cleanEmail && !cleanName && (!cleanPhone || cleanPhone.length < 5)) {
+      return null;
+    }
+
+    const allAuthors = this.authors().filter(a => !excludeAuthorId || a.id !== excludeAuthorId);
+    const allInstructors = this.instructors();
+    const allUsers = this.users();
+
+    // Check across authors pool
+    for (const auth of allAuthors) {
+      const authEmail = (auth.email || '').trim().toLowerCase();
+      const authName = (auth.name || '').trim().toLowerCase();
+      const authPhone = (auth.contactNumber || '').replace(/\D/g, '');
+
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (cleanEmail && authEmail && cleanEmail === authEmail) {
+        score += 65;
+        reasons.push(`Exact institutional email match (${auth.email})`);
+      } else if (cleanEmail && authEmail && cleanEmail.split('@')[0] === authEmail.split('@')[0]) {
+        score += 35;
+        reasons.push(`Matching email username prefix (${cleanEmail.split('@')[0]})`);
+      }
+
+      if (cleanName && authName) {
+        if (cleanName === authName) {
+          score += 45;
+          reasons.push(`Identical full name (${auth.name})`);
+        } else if (cleanName.includes(authName) || authName.includes(cleanName) || this.computeNameSimilarity(cleanName, authName) > 0.8) {
+          score += 30;
+          reasons.push(`High phonetic & textual name similarity with "${auth.name}"`);
+        }
+      }
+
+      if (cleanPhone && cleanPhone.length >= 6 && authPhone && authPhone.length >= 6) {
+        if (cleanPhone === authPhone || cleanPhone.endsWith(authPhone.slice(-8)) || authPhone.endsWith(cleanPhone.slice(-8))) {
+          score += 40;
+          reasons.push(`Matching contact phone number (${auth.contactNumber})`);
+        }
+      }
+
+      if (score >= 45) {
+        const conf = Math.min(Math.round(score), 100);
+        return {
+          confidencePercentage: conf,
+          personName: auth.name,
+          personEmail: auth.email,
+          personContact: auth.contactNumber,
+          personAvatar: auth.avatar,
+          matchedRoles: auth.isInstructor ? ['Author', 'Instructor'] : ['Author'],
+          reasons,
+          matchedAuthor: auth
+        };
+      }
+    }
+
+    // Check across instructors pool
+    for (const inst of allInstructors) {
+      const instEmail = (inst.email || '').trim().toLowerCase();
+      const instName = (inst.name || '').trim().toLowerCase();
+      const instPhone = (inst.contactNumber || '').replace(/\D/g, '');
+
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (cleanEmail && instEmail && cleanEmail === instEmail) {
+        score += 65;
+        reasons.push(`Exact institutional email match with existing Instructor (${inst.email})`);
+      } else if (cleanEmail && instEmail && cleanEmail.split('@')[0] === instEmail.split('@')[0]) {
+        score += 35;
+        reasons.push(`Matching email username prefix with Instructor (${cleanEmail.split('@')[0]})`);
+      }
+
+      if (cleanName && instName) {
+        if (cleanName === instName) {
+          score += 45;
+          reasons.push(`Identical full name with Faculty Instructor "${inst.name}"`);
+        } else if (cleanName.includes(instName) || instName.includes(cleanName) || this.computeNameSimilarity(cleanName, instName) > 0.8) {
+          score += 30;
+          reasons.push(`High name similarity with Faculty Instructor "${inst.name}"`);
+        }
+      }
+
+      if (cleanPhone && cleanPhone.length >= 6 && instPhone && instPhone.length >= 6) {
+        if (cleanPhone === instPhone || cleanPhone.endsWith(instPhone.slice(-8)) || instPhone.endsWith(cleanPhone.slice(-8))) {
+          score += 40;
+          reasons.push(`Matching contact phone with Instructor profile (${inst.contactNumber})`);
+        }
+      }
+
+      if (score >= 45) {
+        const conf = Math.min(Math.round(score), 100);
+        return {
+          confidencePercentage: conf,
+          personName: inst.name,
+          personEmail: inst.email,
+          personContact: inst.contactNumber,
+          personAvatar: inst.avatar,
+          matchedRoles: inst.isAuthor ? ['Author', 'Instructor'] : ['Instructor'],
+          reasons,
+          matchedInstructor: inst
+        };
+      }
+    }
+
+    // Check users
+    for (const usr of allUsers) {
+      const usrEmail = (usr.email || '').trim().toLowerCase();
+      const usrName = (usr.name || '').trim().toLowerCase();
+      const usrPhone = (usr.phone || '').replace(/\D/g, '');
+
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (cleanEmail && usrEmail && cleanEmail === usrEmail) {
+        score += 60;
+        reasons.push(`Email already registered for enterprise user account (${usr.email})`);
+      }
+      if (cleanName && usrName && cleanName === usrName) {
+        score += 40;
+        reasons.push(`Identical full name with platform user "${usr.name}"`);
+      }
+      if (cleanPhone && cleanPhone.length >= 6 && usrPhone && usrPhone.length >= 6 && (cleanPhone === usrPhone || cleanPhone.endsWith(usrPhone.slice(-8)))) {
+        score += 35;
+        reasons.push(`Matching registered contact phone (${usr.phone})`);
+      }
+
+      if (score >= 50) {
+        const conf = Math.min(Math.round(score), 100);
+        return {
+          confidencePercentage: conf,
+          personName: usr.name,
+          personEmail: usr.email,
+          personContact: usr.phone,
+          personAvatar: usr.avatar,
+          matchedRoles: ['User'],
+          reasons
+        };
+      }
+    }
+
+    return null;
+  }
+
+  detectDuplicateInstructor(data: { name: string; email: string; contactNumber?: string }, excludeInstructorId?: string): DuplicatePersonnelMatch | null {
+    const cleanEmail = (data.email || '').trim().toLowerCase();
+    const cleanName = (data.name || '').trim().toLowerCase();
+    const cleanPhone = (data.contactNumber || '').replace(/\D/g, '');
+
+    if (!cleanEmail && !cleanName && (!cleanPhone || cleanPhone.length < 5)) {
+      return null;
+    }
+
+    const allInstructors = this.instructors().filter(i => !excludeInstructorId || i.id !== excludeInstructorId);
+    const allAuthors = this.authors();
+    const allUsers = this.users();
+
+    // Check across instructors pool
+    for (const inst of allInstructors) {
+      const instEmail = (inst.email || '').trim().toLowerCase();
+      const instName = (inst.name || '').trim().toLowerCase();
+      const instPhone = (inst.contactNumber || '').replace(/\D/g, '');
+
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (cleanEmail && instEmail && cleanEmail === instEmail) {
+        score += 65;
+        reasons.push(`Exact institutional email match (${inst.email})`);
+      } else if (cleanEmail && instEmail && cleanEmail.split('@')[0] === instEmail.split('@')[0]) {
+        score += 35;
+        reasons.push(`Matching email username prefix (${cleanEmail.split('@')[0]})`);
+      }
+
+      if (cleanName && instName) {
+        if (cleanName === instName) {
+          score += 45;
+          reasons.push(`Identical full name (${inst.name})`);
+        } else if (cleanName.includes(instName) || instName.includes(cleanName) || this.computeNameSimilarity(cleanName, instName) > 0.8) {
+          score += 30;
+          reasons.push(`High phonetic & textual name similarity with "${inst.name}"`);
+        }
+      }
+
+      if (cleanPhone && cleanPhone.length >= 6 && instPhone && instPhone.length >= 6) {
+        if (cleanPhone === instPhone || cleanPhone.endsWith(instPhone.slice(-8)) || instPhone.endsWith(cleanPhone.slice(-8))) {
+          score += 40;
+          reasons.push(`Matching contact phone number (${inst.contactNumber})`);
+        }
+      }
+
+      if (score >= 45) {
+        const conf = Math.min(Math.round(score), 100);
+        return {
+          confidencePercentage: conf,
+          personName: inst.name,
+          personEmail: inst.email,
+          personContact: inst.contactNumber,
+          personAvatar: inst.avatar,
+          matchedRoles: inst.isAuthor ? ['Author', 'Instructor'] : ['Instructor'],
+          reasons,
+          matchedInstructor: inst
+        };
+      }
+    }
+
+    // Check across authors pool
+    for (const auth of allAuthors) {
+      const authEmail = (auth.email || '').trim().toLowerCase();
+      const authName = (auth.name || '').trim().toLowerCase();
+      const authPhone = (auth.contactNumber || '').replace(/\D/g, '');
+
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (cleanEmail && authEmail && cleanEmail === authEmail) {
+        score += 65;
+        reasons.push(`Exact institutional email match with existing Content Author (${auth.email})`);
+      } else if (cleanEmail && authEmail && cleanEmail.split('@')[0] === authEmail.split('@')[0]) {
+        score += 35;
+        reasons.push(`Matching email username prefix with Author (${cleanEmail.split('@')[0]})`);
+      }
+
+      if (cleanName && authName) {
+        if (cleanName === authName) {
+          score += 45;
+          reasons.push(`Identical full name with Content Author "${auth.name}"`);
+        } else if (cleanName.includes(authName) || authName.includes(cleanName) || this.computeNameSimilarity(cleanName, authName) > 0.8) {
+          score += 30;
+          reasons.push(`High name similarity with Content Author "${auth.name}"`);
+        }
+      }
+
+      if (cleanPhone && cleanPhone.length >= 6 && authPhone && authPhone.length >= 6) {
+        if (cleanPhone === authPhone || cleanPhone.endsWith(authPhone.slice(-8)) || authPhone.endsWith(cleanPhone.slice(-8))) {
+          score += 40;
+          reasons.push(`Matching contact phone with Author profile (${auth.contactNumber})`);
+        }
+      }
+
+      if (score >= 45) {
+        const conf = Math.min(Math.round(score), 100);
+        return {
+          confidencePercentage: conf,
+          personName: auth.name,
+          personEmail: auth.email,
+          personContact: auth.contactNumber,
+          personAvatar: auth.avatar,
+          matchedRoles: auth.isInstructor ? ['Author', 'Instructor'] : ['Author'],
+          reasons,
+          matchedAuthor: auth
+        };
+      }
+    }
+
+    // Check users
+    for (const usr of allUsers) {
+      const usrEmail = (usr.email || '').trim().toLowerCase();
+      const usrName = (usr.name || '').trim().toLowerCase();
+      const usrPhone = (usr.phone || '').replace(/\D/g, '');
+
+      let score = 0;
+      const reasons: string[] = [];
+
+      if (cleanEmail && usrEmail && cleanEmail === usrEmail) {
+        score += 60;
+        reasons.push(`Email already registered for enterprise user account (${usr.email})`);
+      }
+      if (cleanName && usrName && cleanName === usrName) {
+        score += 40;
+        reasons.push(`Identical full name with platform user "${usr.name}"`);
+      }
+      if (cleanPhone && cleanPhone.length >= 6 && usrPhone && usrPhone.length >= 6 && (cleanPhone === usrPhone || cleanPhone.endsWith(usrPhone.slice(-8)))) {
+        score += 35;
+        reasons.push(`Matching registered contact phone (${usr.phone})`);
+      }
+
+      if (score >= 50) {
+        const conf = Math.min(Math.round(score), 100);
+        return {
+          confidencePercentage: conf,
+          personName: usr.name,
+          personEmail: usr.email,
+          personContact: usr.phone,
+          personAvatar: usr.avatar,
+          matchedRoles: ['User'],
+          reasons
+        };
+      }
+    }
+
+    return null;
+  }
+
+  private computeNameSimilarity(s1: string, s2: string): number {
+    const longer = s1.length > s2.length ? s1 : s2;
+    const shorter = s1.length > s2.length ? s2 : s1;
+    if (longer.length === 0) return 1.0;
+    
+    // Check words overlap
+    const words1 = s1.split(/\s+/);
+    const words2 = s2.split(/\s+/);
+    const commonWords = words1.filter(w => words2.includes(w));
+    if (commonWords.length > 0 && commonWords.length === Math.min(words1.length, words2.length)) {
+      return 0.9;
+    }
+    
+    return (longer.length - this.levenshteinDistance(longer, shorter)) / longer.length;
+  }
+
+  private levenshteinDistance(a: string, b: string): number {
+    const matrix: number[][] = [];
+    for (let i = 0; i <= b.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[b.length][a.length];
+  }
+
   addAuthor(formData: AuthorCreateForm): { success: boolean; author: AuthorProfile; isExistingPersonLinked: boolean } {
     const cleanEmail = formData.email.trim();
     const cleanName = formData.name.trim();
@@ -9234,6 +9603,151 @@ export class LmsDataService {
     return true;
   }
 
+  tagAuthorAsInstructor(
+    authorId: string,
+    options?: {
+      title?: string;
+      department?: string;
+      specialization?: string[];
+      status?: 'Active' | 'Inactive';
+    }
+  ): { success: boolean; instructor?: InstructorProfile; message?: string } {
+    const author = this.getAuthorById(authorId);
+    if (!author) {
+      this.showToast('Author profile not found.', 'error', 3000);
+      return { success: false, message: 'Author profile not found.' };
+    }
+
+    // Check if instructor profile already exists
+    const existingInstructor = this.getInstructorByEmail(author.email) || (author.instructorId ? this.getInstructorById(author.instructorId) : undefined);
+
+    if (existingInstructor) {
+      this.authors.update(list => list.map(a => a.id === author.id ? { ...a, isInstructor: true, instructorId: existingInstructor.id } : a));
+      this.instructors.update(list => list.map(i => i.id === existingInstructor.id ? { ...i, isAuthor: true, authorId: author.id } : i));
+      this.showToast(`"${author.name}" is already an Instructor (${existingInstructor.name}). Profiles are now linked.`, 'info', 3500, 'Instructor Linked');
+      return { success: true, instructor: existingInstructor };
+    }
+
+    const instructorId = `inst-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    const specs: string[] = options?.specialization && options.specialization.length > 0
+      ? options.specialization
+      : (author.specialization ? author.specialization.split(',').map(s => s.trim()).filter(Boolean) : ['General Pedagogy']);
+
+    const newInstructor: InstructorProfile = {
+      id: instructorId,
+      personId: author.personId || `person-${author.id}`,
+      name: author.name,
+      email: author.email,
+      contactNumber: author.contactNumber,
+      bio: author.bio,
+      specialization: specs.length > 0 ? specs : ['General Pedagogy'],
+      avatar: author.avatar || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 999999)}?auto=format&fit=crop&w=200&q=80`,
+      status: options?.status || author.status || 'Active',
+      isAuthor: true,
+      authorId: author.id,
+      department: options?.department?.trim() || 'Academic Faculty & Instruction',
+      title: options?.title?.trim() || 'Senior Faculty Instructor',
+      organizationId: author.organizationId || this.activeTenantId() || 'tenant-brac',
+      createdAt: formattedDate,
+      assignmentsCount: 0,
+      rating: 5.0,
+      isProfileComplete: author.isProfileComplete,
+      incompleteReason: author.incompleteReason,
+      attachments: author.attachments ? [...author.attachments] : []
+    };
+
+    this.instructors.update(list => [newInstructor, ...list]);
+    this.authors.update(list => list.map(a => a.id === author.id ? { ...a, isInstructor: true, instructorId } : a));
+
+    this.users.update(list => list.map(u => {
+      if (u.email.toLowerCase() === author.email.toLowerCase()) {
+        return {
+          ...u,
+          role: 'instructor',
+          instructorId,
+          authorId: author.id
+        };
+      }
+      return u;
+    }));
+
+    this.showToast(`"${author.name}" has been successfully tagged as an Instructor and added to the Faculty pool.`, 'success', 4000, 'Instructor Role Added');
+    this.logAction('Instructor Role Added', `Tagged Author ${author.name} (${author.email}) with Instructor role (${instructorId})`, 'success');
+
+    return { success: true, instructor: newInstructor };
+  }
+
+  tagInstructorAsAuthor(
+    instructorId: string,
+    options?: {
+      specialization?: string;
+      status?: 'Active' | 'Inactive';
+    }
+  ): { success: boolean; author?: AuthorProfile; message?: string } {
+    const instructor = this.getInstructorById(instructorId);
+    if (!instructor) {
+      this.showToast('Instructor profile not found.', 'error', 3000);
+      return { success: false, message: 'Instructor profile not found.' };
+    }
+
+    const existingAuthor = this.getAuthorByEmail(instructor.email) || (instructor.authorId ? this.getAuthorById(instructor.authorId) : undefined);
+
+    if (existingAuthor) {
+      this.instructors.update(list => list.map(i => i.id === instructor.id ? { ...i, isAuthor: true, authorId: existingAuthor.id } : i));
+      this.authors.update(list => list.map(a => a.id === existingAuthor.id ? { ...a, isInstructor: true, instructorId: instructor.id } : a));
+      this.showToast(`"${instructor.name}" is already an Author (${existingAuthor.name}). Profiles are now linked.`, 'info', 3500, 'Author Linked');
+      return { success: true, author: existingAuthor };
+    }
+
+    const authorId = `auth-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    const spec = options?.specialization || (Array.isArray(instructor.specialization) ? instructor.specialization.join(', ') : instructor.specialization) || 'Curricular Content & Assessments';
+
+    const newAuthor: AuthorProfile = {
+      id: authorId,
+      personId: instructor.personId || `person-${instructor.id}`,
+      name: instructor.name,
+      email: instructor.email,
+      contactNumber: instructor.contactNumber,
+      bio: instructor.bio,
+      specialization: spec,
+      avatar: instructor.avatar,
+      status: options?.status || instructor.status || 'Active',
+      isInstructor: true,
+      instructorId: instructor.id,
+      organizationId: instructor.organizationId || this.activeTenantId() || 'tenant-brac',
+      createdAt: formattedDate,
+      authoredItemsCount: 0,
+      isProfileComplete: instructor.isProfileComplete,
+      incompleteReason: instructor.incompleteReason,
+      attachments: instructor.attachments ? [...instructor.attachments] : []
+    };
+
+    this.authors.update(list => [newAuthor, ...list]);
+    this.instructors.update(list => list.map(i => i.id === instructor.id ? { ...i, isAuthor: true, authorId } : i));
+
+    this.users.update(list => list.map(u => {
+      if (u.email.toLowerCase() === instructor.email.toLowerCase()) {
+        return {
+          ...u,
+          authorId,
+          instructorId: instructor.id
+        };
+      }
+      return u;
+    }));
+
+    this.showToast(`"${instructor.name}" has been successfully tagged as an Author and added to the Content Authors pool.`, 'success', 4000, 'Author Role Added');
+    this.logAction('Author Role Added', `Tagged Instructor ${instructor.name} (${instructor.email}) with Author role (${authorId})`, 'success');
+
+    return { success: true, author: newAuthor };
+  }
+
   checkAuthorDeactivationBlocked(authorId: string): { isBlocked: boolean; activeCreditsCount: number; activeRecords: AuthorshipRecord[] } {
     const targetAuthor = this.getAuthorById(authorId);
     if (!targetAuthor) return { isBlocked: false, activeCreditsCount: 0, activeRecords: [] };
@@ -9323,6 +9837,206 @@ export class LmsDataService {
     this.authors.update(list => list.map(a => a.id === authorId ? { ...a, status: 'Active' } : a));
     this.showToast(`${author.name} has been activated.`, 'success', 3000, 'Author Activated');
     this.logAction('Author Activated', `Activated Author profile for ${author.name}`, 'info');
+  }
+
+  // =========================================================================
+  // CONTENT REPOSITORY & AUTHOR ALIGNMENT (§BRD Content Lifecycle)
+  // =========================================================================
+
+  getContentRepositoryItemById(itemId: string): ContentRepositoryItem | undefined {
+    return this.contentRepositoryItems().find(item => item.id === itemId);
+  }
+
+  getAuthorContentRepositoryItems(authorId: string): ContentRepositoryItem[] {
+    const author = this.getAuthorById(authorId);
+    if (!author) return [];
+    return this.contentRepositoryItems().filter(item => 
+      item.authorId === author.id || 
+      item.authorEmail.toLowerCase() === author.email.toLowerCase()
+    );
+  }
+
+  addContentRepositoryItem(itemData: Partial<ContentRepositoryItem>): ContentRepositoryItem {
+    const user = this.activeUser();
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+    const newId = `repo-${Date.now().toString().slice(-6)}`;
+
+    const newItem: ContentRepositoryItem = {
+      id: newId,
+      title: itemData.title?.trim() || 'Untitled Content Asset',
+      family: itemData.family || 'learning',
+      subtype: itemData.subtype || 'video',
+      description: itemData.description?.trim() || '',
+      authorId: itemData.authorId || user.id,
+      authorName: itemData.authorName || user.name,
+      authorEmail: itemData.authorEmail || user.email,
+      authorAvatar: itemData.authorAvatar || user.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
+      authorRole: itemData.authorRole || 'Primary Course Author',
+      organizationId: itemData.organizationId || this.activeTenantId() || 'tenant-brac',
+      category: itemData.category || 'Curricular Content',
+      difficulty: itemData.difficulty || 'Intermediate',
+      durationMinutes: itemData.durationMinutes || 15,
+      version: String(itemData.version || 'v1.0'),
+      status: itemData.status || 'Draft',
+      tags: itemData.tags || ['General'],
+      createdAt: formattedDate,
+      updatedAt: formattedDate,
+      coursesUsedCount: itemData.coursesUsedCount || 0,
+      coursesUsed: itemData.coursesUsed || []
+    };
+
+    this.contentRepositoryItems.update(list => [newItem, ...list]);
+    this.showToast(`Content item "${newItem.title}" added to Content Repository.`, 'success', 3500, 'Content Created');
+    this.logAction('Content Repository Item Added', `Added content "${newItem.title}" by author ${newItem.authorName}`, 'success');
+    return newItem;
+  }
+
+  updateContentRepositoryItem(itemId: string, updates: Partial<ContentRepositoryItem>): boolean {
+    const existing = this.getContentRepositoryItemById(itemId);
+    if (!existing) return false;
+
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    this.contentRepositoryItems.update(list => list.map(item => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          ...updates,
+          updatedAt: formattedDate
+        };
+      }
+      return item;
+    }));
+
+    this.showToast(`Content item "${updates.title || existing.title}" updated.`, 'success', 3000, 'Content Updated');
+    return true;
+  }
+
+  deleteContentRepositoryItem(itemId: string): boolean {
+    const existing = this.getContentRepositoryItemById(itemId);
+    if (!existing) return false;
+
+    if (existing.coursesUsed && existing.coursesUsed.length > 0) {
+      this.showToast(`Cannot delete "${existing.title}" because it is linked to ${existing.coursesUsed.length} active course(s).`, 'error', 4500, 'Delete Blocked');
+      return false;
+    }
+
+    this.contentRepositoryItems.update(list => list.filter(item => item.id !== itemId));
+    this.showToast(`Content item "${existing.title}" removed from repository.`, 'info', 3000, 'Content Removed');
+    return true;
+  }
+
+  // =========================================================================
+  // COURSE AUTHOR & INSTRUCTOR VERSION HISTORY AUDIT ENGINE
+  // =========================================================================
+
+  getCourseAuthorHistory(courseId: string): CourseAuthorVersionRecord[] {
+    const course = this.getCourseEntityById(courseId);
+    if (!course) return [];
+    return course.authorHistory || [];
+  }
+
+  getCourseInstructorHistory(courseId: string): CourseInstructorDeliveryRecord[] {
+    const course = this.getCourseEntityById(courseId);
+    if (!course) return [];
+    return course.instructorHistory || [];
+  }
+
+  getAuthorCourseVersionHistory(authorId: string): { course: CourseEntity; records: CourseAuthorVersionRecord[] }[] {
+    const author = this.getAuthorById(authorId);
+    if (!author) return [];
+
+    const results: { course: CourseEntity; records: CourseAuthorVersionRecord[] }[] = [];
+    for (const course of this.courseEntities()) {
+      const records = (course.authorHistory || []).filter(h => 
+        h.authorId === author.id || 
+        h.authorEmail.toLowerCase() === author.email.toLowerCase()
+      );
+      if (records.length > 0) {
+        results.push({ course, records });
+      }
+    }
+    return results;
+  }
+
+  getInstructorTeachingHistory(instructorId: string): { course: CourseEntity; records: CourseInstructorDeliveryRecord[] }[] {
+    const instructor = this.getInstructorById(instructorId);
+    if (!instructor) return [];
+
+    const results: { course: CourseEntity; records: CourseInstructorDeliveryRecord[] }[] = [];
+    for (const course of this.courseEntities()) {
+      const records = (course.instructorHistory || []).filter(h => 
+        h.instructorId === instructor.id || 
+        h.instructorEmail.toLowerCase() === instructor.email.toLowerCase()
+      );
+      if (records.length > 0) {
+        results.push({ course, records });
+      }
+    }
+    return results;
+  }
+
+  recordCourseAuthorVersion(courseId: string, record: Partial<CourseAuthorVersionRecord>): CourseAuthorVersionRecord {
+    const course = this.getCourseEntityById(courseId);
+    const now = new Date();
+    const formatted = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const newRecord: CourseAuthorVersionRecord = {
+      id: `auth-hist-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      versionLabel: record.versionLabel || course?.version.label || 'v1.0',
+      versionNumber: record.versionNumber || course?.version.versionNumber || 1,
+      authorId: record.authorId || this.activeUser().id,
+      authorName: record.authorName || this.activeUser().name,
+      authorEmail: record.authorEmail || this.activeUser().email,
+      authorAvatar: record.authorAvatar,
+      authorRole: record.authorRole || 'Primary Course Author',
+      timestamp: formatted,
+      changeSummary: record.changeSummary || 'Updated course content modules.',
+      affectedUnitsCount: record.affectedUnitsCount || (record.authoredUnits?.length || 1),
+      authoredUnits: record.authoredUnits || []
+    };
+
+    if (course) {
+      const existingHistory = course.authorHistory || [];
+      const updatedHistory = [newRecord, ...existingHistory];
+      this.courseEntities.update(list => list.map(c => c.courseId === courseId ? { ...c, authorHistory: updatedHistory } : c));
+    }
+
+    return newRecord;
+  }
+
+  recordCourseInstructorDelivery(courseId: string, record: Partial<CourseInstructorDeliveryRecord>): CourseInstructorDeliveryRecord {
+    const course = this.getCourseEntityById(courseId);
+    const now = new Date();
+    const formatted = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    const newRecord: CourseInstructorDeliveryRecord = {
+      id: `inst-hist-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      layerNodeId: record.layerNodeId || 'root',
+      layerTitle: record.layerTitle || 'Entire Course Curriculum',
+      layerDepth: record.layerDepth || 1,
+      instructorId: record.instructorId || this.activeUser().id,
+      instructorName: record.instructorName || this.activeUser().name,
+      instructorEmail: record.instructorEmail || this.activeUser().email,
+      instructorAvatar: record.instructorAvatar,
+      instructorTitle: record.instructorTitle || 'Faculty Instructor',
+      cohortOrTerm: record.cohortOrTerm || 'General Cohort Delivery',
+      assignedDate: formatted,
+      status: record.status || 'Active',
+      learnerCount: record.learnerCount || 0,
+      averageRating: record.averageRating || 5.0,
+      notes: record.notes
+    };
+
+    if (course) {
+      const existingHistory = course.instructorHistory || [];
+      const updatedHistory = [newRecord, ...existingHistory];
+      this.courseEntities.update(list => list.map(c => c.courseId === courseId ? { ...c, instructorHistory: updatedHistory } : c));
+    }
+
+    return newRecord;
   }
 
   // =========================================================================
@@ -9719,6 +10433,7 @@ export class LmsDataService {
       name: roomData.name?.trim() || 'Room New',
       capacity: Number(roomData.capacity) || 30,
       equipment: roomData.equipment || { projector: true, soundSystem: true, microphone: true, displayScreen: true, otherTags: [] },
+      amenities: roomData.amenities,
       seatingLayouts: roomData.seatingLayouts && roomData.seatingLayouts.length > 0 ? roomData.seatingLayouts : ['theatre', 'classroom'],
       status: roomData.status || 'active',
       usedInClassesCount: 0,

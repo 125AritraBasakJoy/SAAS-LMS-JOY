@@ -45,6 +45,27 @@
 
       <!-- Action Toolbar -->
       <div class="flex flex-wrap items-center gap-2.5">
+        <!-- Dual-Role Profile Switcher Toggle -->
+        @if (instructor()!.isAuthor || linkedAuthor()) {
+          <div class="inline-flex items-center p-1 rounded-2xl bg-base-200 border border-base-300 shadow-xs mr-1">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-base-100 text-tenant-700 dark:text-tenant-300 text-xs font-bold shadow-xs border border-tenant-200/50">
+              <span class="material-symbols-outlined text-sm text-tenant-600">school</span>
+              <span>Instructor View</span>
+            </span>
+            <button
+              type="button"
+              (click)="switchToAuthorView()"
+              id="toggle-switch-to-author-profile"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100/60 text-xs font-semibold transition-all cursor-pointer"
+              title="Switch to Author profile view for this individual"
+            >
+              <span class="material-symbols-outlined text-sm text-indigo-500">edit_note</span>
+              <span>Author View</span>
+              <span class="material-symbols-outlined text-xs text-slate-400">arrow_forward</span>
+            </button>
+          </div>
+        }
+
         <a
           routerLink="/instructors"
           class="px-3.5 py-2 rounded-xl border border-base-300 bg-base-100 hover:bg-base-200 text-xs font-semibold text-text-secondary transition-colors"
@@ -52,6 +73,19 @@
           <span class="material-symbols-outlined text-sm align-middle mr-1">arrow_back</span>
           Directory
         </a>
+
+        @if (!instructor()!.isAuthor && !linkedAuthor()) {
+          <button
+            type="button"
+            (click)="openTagAuthorModal()"
+            id="btn-tag-instructor-as-author"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-tenant-600 hover:bg-tenant-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            title="Tag this instructor as a Content Author so they can be credited on videos, docs, and assessments"
+          >
+            <span class="material-symbols-outlined text-base">edit_note</span>
+            <span>Tag as Author</span>
+          </button>
+        }
 
         <!-- In-System Email Message (§5) -->
         <button
@@ -177,195 +211,672 @@
       </div>
     </div>
 
-    <!-- Attached Documents & Media Files Section -->
-    @if (instructor()!.attachments && instructor()!.attachments!.length > 0) {
-      <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm p-6 space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-base-300">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 dark:text-tenant-400 flex items-center justify-center">
-              <span class="material-symbols-outlined text-lg">folder_open</span>
+    <!-- Navigation View Switcher -->
+    <div class="flex items-center gap-2 border-b border-base-300 pb-1 overflow-x-auto">
+      <button
+        type="button"
+        (click)="activeTab.set('dashboard')"
+        [class.border-tenant-600]="activeTab() === 'dashboard'"
+        [class.text-tenant-600]="activeTab() === 'dashboard'"
+        [class.font-bold]="activeTab() === 'dashboard'"
+        [class.border-transparent]="activeTab() !== 'dashboard'"
+        [class.text-text-secondary]="activeTab() !== 'dashboard'"
+        class="flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs transition-colors whitespace-nowrap cursor-pointer hover:text-tenant-600"
+      >
+        <span class="material-symbols-outlined text-base">analytics</span>
+        <span>Instruction Performance Dashboard</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="activeTab.set('delivery-history')"
+        [class.border-tenant-600]="activeTab() === 'delivery-history'"
+        [class.text-tenant-600]="activeTab() === 'delivery-history'"
+        [class.font-bold]="activeTab() === 'delivery-history'"
+        [class.border-transparent]="activeTab() !== 'delivery-history'"
+        [class.text-text-secondary]="activeTab() !== 'delivery-history'"
+        class="flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs transition-colors whitespace-nowrap cursor-pointer hover:text-tenant-600"
+      >
+        <span class="material-symbols-outlined text-base">history_edu</span>
+        <span>Course Delivery &amp; Version History</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-base-200 border border-base-300 text-text-secondary">
+          {{ teachingDeliveryHistory().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        (click)="activeTab.set('matrix')"
+        [class.border-tenant-600]="activeTab() === 'matrix'"
+        [class.text-tenant-600]="activeTab() === 'matrix'"
+        [class.font-bold]="activeTab() === 'matrix'"
+        [class.border-transparent]="activeTab() !== 'matrix'"
+        [class.text-text-secondary]="activeTab() !== 'matrix'"
+        class="flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs transition-colors whitespace-nowrap cursor-pointer hover:text-tenant-600"
+      >
+        <span class="material-symbols-outlined text-base">table_chart</span>
+        <span>Teaching Matrix &amp; Ratings</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-base-200 border border-base-300 text-text-secondary">
+          {{ assignmentHistory().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        (click)="activeTab.set('credentials')"
+        [class.border-tenant-600]="activeTab() === 'credentials'"
+        [class.text-tenant-600]="activeTab() === 'credentials'"
+        [class.font-bold]="activeTab() === 'credentials'"
+        [class.border-transparent]="activeTab() !== 'credentials'"
+        [class.text-text-secondary]="activeTab() !== 'credentials'"
+        class="flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs transition-colors whitespace-nowrap cursor-pointer hover:text-tenant-600"
+      >
+        <span class="material-symbols-outlined text-base">verified_user</span>
+        <span>Credentials &amp; Repository</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-base-200 border border-base-300 text-text-secondary">
+          {{ instructor()!.attachments?.length || 0 }}
+        </span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Instruction Performance Dashboard -->
+    @if (activeTab() === 'dashboard') {
+      <div class="space-y-6">
+        <!-- 5 Executive KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <!-- KPI 1: Overall Rating -->
+          <div class="p-4 rounded-2xl bg-base-100 border border-base-300 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between text-text-secondary">
+              <span class="text-xs font-semibold">Faculty Rating</span>
+              <span class="material-symbols-outlined text-amber-500 text-lg">star</span>
             </div>
-            <div>
-              <h3 class="text-sm font-bold text-text-primary">Attached Documents, Media &amp; Faculty Credentials</h3>
-              <p class="text-xs text-text-secondary">{{ instructor()!.attachments!.length }} file(s) available in faculty repository</p>
+            <div class="mt-2">
+              <div class="text-2xl font-black text-text-primary flex items-baseline gap-1">
+                <span>{{ kpiStats().avgRating }}</span>
+                <span class="text-xs text-text-secondary font-normal">/ 5.0</span>
+              </div>
+              <p class="text-[11px] text-text-secondary mt-1">Based on verified student reviews</p>
             </div>
           </div>
-          <button
-            type="button"
-            (click)="openEditModal()"
-            class="text-xs font-semibold text-tenant-600 dark:text-tenant-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
-          >
-            <span class="material-symbols-outlined text-sm">add</span>
-            <span>Upload More</span>
-          </button>
+
+          <!-- KPI 2: Completion Rate -->
+          <div class="p-4 rounded-2xl bg-base-100 border border-base-300 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between text-text-secondary">
+              <span class="text-xs font-semibold">Learner Completion</span>
+              <span class="material-symbols-outlined text-emerald-500 text-lg">trending_up</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-2xl font-black text-emerald-600 flex items-baseline gap-1">
+                <span>{{ kpiStats().completionRate }}%</span>
+              </div>
+              <p class="text-[11px] text-text-secondary mt-1">Average cohort success rate</p>
+            </div>
+          </div>
+
+          <!-- KPI 3: Learners Reached -->
+          <div class="p-4 rounded-2xl bg-base-100 border border-base-300 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between text-text-secondary">
+              <span class="text-xs font-semibold">Learners Reached</span>
+              <span class="material-symbols-outlined text-tenant-500 text-lg">groups</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-2xl font-black text-text-primary">
+                {{ kpiStats().learnersReached | number }}
+              </div>
+              <p class="text-[11px] text-text-secondary mt-1">Across all assigned units</p>
+            </div>
+          </div>
+
+          <!-- KPI 4: Assigned Layers Count -->
+          <div class="p-4 rounded-2xl bg-base-100 border border-base-300 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between text-text-secondary">
+              <span class="text-xs font-semibold">Assigned Layer Units</span>
+              <span class="material-symbols-outlined text-indigo-500 text-lg">layers</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-2xl font-black text-indigo-600">
+                {{ kpiStats().assignedUnitsCount }}
+              </div>
+              <p class="text-[11px] text-text-secondary mt-1">Modules, lessons &amp; courses</p>
+            </div>
+          </div>
+
+          <!-- KPI 5: Active Courses -->
+          <div class="p-4 rounded-2xl bg-base-100 border border-base-300 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between text-text-secondary">
+              <span class="text-xs font-semibold">Active Courses</span>
+              <span class="material-symbols-outlined text-teal-500 text-lg">school</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-2xl font-black text-teal-600">
+                {{ kpiStats().activeCoursesCount }}
+              </div>
+              <p class="text-[11px] text-text-secondary mt-1">Live curricular deployments</p>
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          @for (att of instructor()!.attachments!; track att.id) {
-            <div class="p-3.5 rounded-2xl bg-base-200/50 border border-base-300 hover:border-tenant-500/50 transition-all flex flex-col justify-between space-y-3 group">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-xl bg-base-100 text-tenant-600 dark:text-tenant-400 flex items-center justify-center shrink-0 border border-base-300 shadow-2xs">
-                  @if (att.isImage && att.url) {
-                    <img [src]="att.url" [alt]="att.name" class="w-10 h-10 rounded-xl object-cover" />
-                  } @else {
-                    <span class="material-symbols-outlined text-xl">{{ getFileIcon(att) }}</span>
-                  }
+        <!-- Student Feedback & Teaching Highlights -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Pedagogical Highlights Card -->
+          <div class="rounded-3xl bg-base-100 border border-base-300 p-5 space-y-4">
+            <h3 class="text-sm font-bold text-text-primary flex items-center gap-2">
+              <span class="material-symbols-outlined text-tenant-600">psychology</span>
+              <span>Teaching &amp; Faculty Excellence</span>
+            </h3>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 rounded-xl bg-base-200/50 border border-base-300 space-y-1">
+                <span class="font-bold text-text-primary">Direct Faculty Supervision</span>
+                <p class="text-text-secondary text-[11px]">Tagged to high-stakes compliance and frontline field operations courses.</p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-base-200/50 border border-base-300 space-y-1">
+                <span class="font-bold text-text-primary">Multi-Instance Deployment</span>
+                <p class="text-text-secondary text-[11px]">Delivering instructional sessions across Main Academy and specialized institutes.</p>
+              </div>
+
+              <div class="p-3 rounded-xl bg-base-200/50 border border-base-300 space-y-1">
+                <span class="font-bold text-text-primary">High Retention Impact</span>
+                <p class="text-text-secondary text-[11px]">Cohorts supervised by this instructor maintain a 92%+ module completion average.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Verified Learner Reviews -->
+          <div class="lg:col-span-2 rounded-3xl bg-base-100 border border-base-300 p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-500">rate_review</span>
+                <span>Verified Learner Feedback &amp; Ratings</span>
+              </h3>
+              <button
+                type="button"
+                (click)="activeTab.set('matrix')"
+                class="text-xs font-semibold text-tenant-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>View All in Matrix</span>
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              @for (item of allLearnerFeedback().slice(0, 3); track item.feedback.id) {
+                <div class="p-4 rounded-2xl bg-base-200/40 border border-base-300 space-y-2">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                      <img [src]="item.feedback.avatar" [alt]="item.feedback.studentName" class="w-8 h-8 rounded-full object-cover border border-base-300" />
+                      <div>
+                        <div class="font-bold text-xs text-text-primary">{{ item.feedback.studentName }}</div>
+                        <div class="text-[10px] text-text-secondary">{{ item.feedback.studentRole }} • {{ item.feedback.date }}</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 border border-amber-500/20 text-xs font-bold">
+                      <span class="material-symbols-outlined text-xs">star</span>
+                      <span>{{ item.feedback.rating }}.0</span>
+                    </div>
+                  </div>
+                  <p class="text-xs text-text-secondary leading-relaxed italic">"{{ item.feedback.comment }}"</p>
+                  <div class="pt-1.5 border-t border-base-300 flex items-center justify-between text-[10px] text-text-secondary">
+                    <span>Course: <strong class="text-text-primary">{{ item.courseName }}</strong></span>
+                    <span class="px-2 py-0.5 rounded bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 font-semibold">{{ item.feedback.tag }}</span>
+                  </div>
                 </div>
-                <div class="min-w-0 flex-1">
-                  <span class="text-xs font-bold text-text-primary truncate block group-hover:text-tenant-600 transition-colors" [title]="att.name">
-                    {{ att.name }}
-                  </span>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[10px] font-mono text-text-secondary">{{ att.sizeFormatted }}</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-tenant-100/70 dark:bg-tenant-950 text-tenant-700 dark:text-tenant-300">
-                      {{ att.category }}
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 2: Course Delivery & Version History -->
+    @if (activeTab() === 'delivery-history') {
+      <div class="space-y-4 animate-fadeIn">
+        <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="text-base font-bold text-text-primary flex items-center gap-2">
+              <span class="material-symbols-outlined text-tenant-600">history_edu</span>
+              <span>Course Delivery &amp; Version Teaching Ledger</span>
+            </h2>
+            <p class="text-xs text-text-secondary mt-0.5">
+              Historical record of course versions, cohorts, and instructional delivery layers assigned to and delivered by {{ instructor()!.name }}.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-xl bg-tenant-50 text-tenant-700 dark:bg-tenant-950/50 dark:text-tenant-300 border border-tenant-200/60 dark:border-tenant-800 text-xs font-bold font-mono">
+              {{ teachingDeliveryHistory().length }} Courses Delivered
+            </span>
+          </div>
+        </div>
+
+        @if (teachingDeliveryHistory().length === 0) {
+          <div class="p-12 rounded-3xl bg-base-100 border border-base-300 text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-base-200 text-text-secondary flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-2xl">history</span>
+            </div>
+            <h3 class="text-sm font-bold text-text-primary">No Delivery History Records</h3>
+            <p class="text-xs text-text-secondary max-w-md mx-auto">
+              As courses and new course versions are published with this instructor assigned to delivery layers, historic delivery records will be logged automatically.
+            </p>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            @for (item of teachingDeliveryHistory(); track item.course.courseId) {
+              <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-base-200 pb-3">
+                  <div class="flex items-center gap-2.5">
+                    <span class="px-2.5 py-1 rounded-lg bg-tenant-500 text-white font-bold text-xs font-mono">
+                      {{ item.course.code }}
+                    </span>
+                    <div>
+                      <h3 class="text-sm font-bold text-text-primary">{{ item.course.title }}</h3>
+                      <p class="text-xs text-text-secondary">{{ item.course.category }} • Current Live: {{ item.course.version.label }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-base-200 font-semibold text-text-secondary">
+                      {{ item.records.length }} Delivery Assignment(s)
                     </span>
                   </div>
                 </div>
-              </div>
 
-              <div class="flex items-center justify-between pt-2 border-t border-base-300 text-xs">
-                <span class="text-[10px] text-text-secondary">{{ att.uploadedAt }}</span>
-                <div class="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    (click)="openPreview(att)"
-                    class="p-1 rounded-md text-text-secondary hover:bg-base-300 transition-colors cursor-pointer"
-                    title="Preview file"
-                  >
-                    <span class="material-symbols-outlined text-base">visibility</span>
-                  </button>
-                  <button
-                    type="button"
-                    (click)="downloadAttachment(att)"
-                    class="p-1 rounded-md text-text-secondary hover:bg-base-300 transition-colors cursor-pointer"
-                    title="Download file"
-                  >
-                    <span class="material-symbols-outlined text-base">download</span>
-                  </button>
+                <div class="space-y-3">
+                  @for (record of item.records; track record.id) {
+                    <div class="p-4 rounded-2xl bg-base-200/50 border border-base-300 space-y-2">
+                      <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                          <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 font-mono font-bold text-xs">
+                            {{ record.versionLabel }}
+                          </span>
+                          <span class="text-xs font-bold text-text-primary">
+                            {{ record.layerName }}
+                          </span>
+                          <span class="text-[10px] px-2 py-0.5 rounded bg-base-200 font-bold uppercase text-text-secondary">
+                            {{ record.layerType }}
+                          </span>
+                          <span class="text-xs text-text-secondary">• Assigned: {{ record.assignedAt }}</span>
+                        </div>
+                        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-500/10 text-blue-600">
+                          Cohort: {{ record.cohortId }}
+                        </span>
+                      </div>
+
+                      @if (record.deliveryNotes) {
+                        <p class="text-xs text-text-secondary font-medium">
+                          {{ record.deliveryNotes }}
+                        </p>
+                      }
+
+                      @if (record.assignedUnits && record.assignedUnits.length > 0) {
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                          @for (unit of record.assignedUnits; track unit) {
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-base-100 text-text-secondary border border-base-300 font-medium">
+                              🎓 {{ unit }}
+                            </span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
               </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB 3: Teaching Matrix & Ratings -->
+    @if (activeTab() === 'matrix') {
+      <div class="space-y-4">
+        <!-- Filtering & Search Control Toolbar -->
+        <div class="p-4 rounded-2xl bg-base-100 border border-base-300 shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
+          <!-- Search Input -->
+          <div class="relative w-full md:w-80">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+            <input
+              type="text"
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value)"
+              placeholder="Search course title, layer, LMS..."
+              class="w-full pl-9 pr-3 py-1.5 rounded-xl border border-base-300 bg-base-200/50 text-xs text-text-primary focus:outline-none focus:border-tenant-500 transition-colors"
+            />
+          </div>
+
+          <!-- Filters -->
+          <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <!-- LMS Instance Filter -->
+            <select
+              [value]="lmsInstanceFilter()"
+              (change)="lmsInstanceFilter.set($any($event.target).value)"
+              class="px-3 py-1.5 rounded-xl border border-base-300 bg-base-200/50 text-xs text-text-primary focus:outline-none focus:border-tenant-500"
+            >
+              <option value="all">All LMS Instances</option>
+              <option value="LMS-1972-01">BRAC Microfinance Academy</option>
+              <option value="LMS-1972-02">Ultra-Poor Graduation Institute</option>
+              <option value="LMS-1972-03">Climate Resilience Institute</option>
+            </select>
+
+            <!-- Layer Type Filter -->
+            <select
+              [value]="layerTypeFilter()"
+              (change)="layerTypeFilter.set($any($event.target).value)"
+              class="px-3 py-1.5 rounded-xl border border-base-300 bg-base-200/50 text-xs text-text-primary focus:outline-none focus:border-tenant-500"
+            >
+              <option value="all">All Layer Types</option>
+              <option value="course">Course Lead</option>
+              <option value="module">Module</option>
+              <option value="lesson">Lesson</option>
+              <option value="quiz">Quiz</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select
+              [value]="courseStatusFilter()"
+              (change)="courseStatusFilter.set($any($event.target).value)"
+              class="px-3 py-1.5 rounded-xl border border-base-300 bg-base-200/50 text-xs text-text-primary focus:outline-none focus:border-tenant-500"
+            >
+              <option value="all">All Statuses</option>
+              <option value="Published">Published</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Matrix Table -->
+        <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-base-300 flex items-center justify-between bg-base-200/40">
+            <div>
+              <h3 class="text-sm font-bold text-text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-tenant-600">table_chart</span>
+                <span>Teaching Assignment Matrix &amp; Performance Scores</span>
+              </h3>
+              <p class="text-xs text-text-secondary mt-0.5">
+                Detailed metrics including learner completion rates, student ratings, and feedback reviews
+              </p>
+            </div>
+            <span class="px-3 py-1 rounded-xl bg-base-200 border border-base-300 text-xs font-bold text-text-primary">
+              {{ filteredHistory().length }} Result(s)
+            </span>
+          </div>
+
+          @if (filteredHistory().length === 0) {
+            <div class="p-12 text-center space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 mx-auto flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">search_off</span>
+              </div>
+              <h4 class="text-sm font-bold text-text-primary">No assignment records match the selected filters</h4>
+              <p class="text-xs text-text-secondary">Try adjusting your search query, LMS instance, or layer filter.</p>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="border-b border-base-300 bg-base-200/60 text-text-secondary uppercase tracking-wider text-[10px]">
+                    <th class="py-3 px-5 font-semibold">Course &amp; Title</th>
+                    <th class="py-3 px-4 font-semibold">Assigned Layer</th>
+                    <th class="py-3 px-4 font-semibold">Layer Type</th>
+                    <th class="py-3 px-4 font-semibold">LMS Instance</th>
+                    <th class="py-3 px-4 font-semibold">Completion Rate</th>
+                    <th class="py-3 px-4 font-semibold">Learner Rating</th>
+                    <th class="py-3 px-4 font-semibold text-center">Status</th>
+                    <th class="py-3 px-5 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-base-300 text-text-primary">
+                  @for (asg of filteredHistory(); track asg.id) {
+                    <tr class="hover:bg-base-200/40 transition-colors">
+                      <!-- Course Title -->
+                      <td class="py-3.5 px-5 font-semibold">
+                        <a [routerLink]="['/courses', asg.courseId]" class="hover:text-tenant-600 transition-colors">
+                          {{ asg.courseName }}
+                        </a>
+                      </td>
+
+                      <!-- Layer -->
+                      <td class="py-3.5 px-4 font-medium text-text-primary">
+                        {{ asg.layer }}
+                      </td>
+
+                      <!-- Layer Type -->
+                      <td class="py-3.5 px-4">
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-base-200 text-text-secondary border border-base-300 uppercase">
+                          {{ asg.layerType }}
+                        </span>
+                      </td>
+
+                      <!-- LMS Instance -->
+                      <td class="py-3.5 px-4 text-text-secondary font-mono text-[11px]">
+                        {{ asg.lmsName }}
+                      </td>
+
+                      <!-- Completion Rate Progress Bar -->
+                      <td class="py-3.5 px-4">
+                        <div class="space-y-1 min-w-28">
+                          <div class="flex items-center justify-between text-[10px]">
+                            <span class="font-bold text-text-primary">{{ asg.completionRate || 90 }}%</span>
+                            <span class="text-text-secondary">{{ asg.learnersCount || 1000 }} students</span>
+                          </div>
+                          <div class="w-full h-1.5 rounded-full bg-base-300 overflow-hidden">
+                            <div
+                              class="h-full rounded-full bg-emerald-500"
+                              [style.width.%]="asg.completionRate || 90"
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <!-- Rating -->
+                      <td class="py-3.5 px-4">
+                        <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 border border-amber-500/20 font-bold text-xs">
+                          <span class="material-symbols-outlined text-xs">star</span>
+                          <span>{{ asg.rating || 4.9 }}</span>
+                          <span class="text-[10px] text-amber-700/60 font-normal">({{ asg.reviewsCount || 40 }})</span>
+                        </div>
+                      </td>
+
+                      <!-- Status -->
+                      <td class="py-3.5 px-4 text-center">
+                        @if (asg.courseStatus === 'Published') {
+                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                            Published
+                          </span>
+                        } @else {
+                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                            {{ asg.courseStatus }}
+                          </span>
+                        }
+                      </td>
+
+                      <!-- Actions: Feedback Drawer & Course link -->
+                      <td class="py-3.5 px-5 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                          @if (asg.feedbackReviews && asg.feedbackReviews.length > 0) {
+                            <button
+                              type="button"
+                              (click)="openFeedbackDrawer(asg)"
+                              class="p-1.5 rounded-lg text-amber-600 hover:bg-amber-500/10 transition-colors inline-block cursor-pointer"
+                              title="Read Learner Feedback Reviews"
+                            >
+                              <span class="material-symbols-outlined text-base">rate_review</span>
+                            </button>
+                          }
+                          <a
+                            [routerLink]="['/courses', asg.courseId]"
+                            class="p-1.5 rounded-lg text-text-secondary hover:text-tenant-600 hover:bg-tenant-50 transition-colors inline-block"
+                            title="Open Course Details"
+                          >
+                            <span class="material-symbols-outlined text-base">open_in_new</span>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
           }
         </div>
       </div>
     }
 
-    <!-- Assignment History Section (§3.2) -->
-    <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm overflow-hidden space-y-0">
-      <div class="p-5 border-b border-base-300 flex items-center justify-between bg-base-200/40">
-        <div>
-          <h3 class="text-base font-bold text-text-primary flex items-center gap-2">
-            <span class="material-symbols-outlined text-tenant-600">history_edu</span>
-            <span>Course Layer Assignment History (§3.2)</span>
-          </h3>
-          <p class="text-xs text-text-secondary mt-0.5">
-            Real-time record of all courses, modules, lessons, and delivery units tagged to this instructor
-          </p>
-        </div>
-        <span class="px-3 py-1 rounded-xl bg-base-200 border border-base-300 text-xs font-bold text-text-primary">
-          {{ assignmentHistory().length }} Active Record(s)
-        </span>
-      </div>
-
-      @if (assignmentHistory().length === 0) {
-        <div class="p-12 text-center space-y-3">
-          <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 mx-auto flex items-center justify-center">
-            <span class="material-symbols-outlined text-2xl">assignment_late</span>
+    <!-- TAB 3: Credentials & Faculty Repository -->
+    @if (activeTab() === 'credentials') {
+      <div class="space-y-4">
+        <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-base-300">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 dark:text-tenant-400 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">folder_open</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-text-primary">Faculty Certificates, Media &amp; Academic Credentials</h3>
+                <p class="text-xs text-text-secondary">{{ instructor()!.attachments?.length || 0 }} file(s) available in repository</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              (click)="openEditModal()"
+              class="text-xs font-semibold text-tenant-600 dark:text-tenant-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-sm">add</span>
+              <span>Upload Credentials</span>
+            </button>
           </div>
-          <div>
-            <h4 class="text-sm font-bold text-text-primary">Not currently assigned to any course</h4>
-            <p class="text-xs text-text-secondary max-w-sm mx-auto mt-1">
-              This instructor is ready for tagging during Course creation, curriculum authoring, or via Bulk Assignment.
-            </p>
-          </div>
-          <a
-            routerLink="/courses"
-            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-tenant-600 text-white text-xs font-bold hover:bg-tenant-700 transition-colors"
-          >
-            <span>Go to Course Management</span>
-            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-          </a>
-        </div>
-      } @else {
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr class="border-b border-base-300 bg-base-200/60 text-text-secondary uppercase tracking-wider text-[10px]">
-                <th class="py-3 px-5 font-semibold">Course &amp; Title</th>
-                <th class="py-3 px-4 font-semibold">Assigned Layer</th>
-                <th class="py-3 px-4 font-semibold">Layer Type</th>
-                <th class="py-3 px-4 font-semibold">LMS Instance</th>
-                <th class="py-3 px-4 font-semibold text-center">Course Status</th>
-                <th class="py-3 px-4 font-semibold">Assigned Date</th>
-                <th class="py-3 px-5 font-semibold text-right">View Course</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-base-300 text-text-primary">
-              @for (asg of assignmentHistory(); track asg.id) {
-                <tr class="hover:bg-base-200/40 transition-colors">
-                  <!-- Course Title -->
-                  <td class="py-3.5 px-5 font-semibold">
-                    <a
-                      [routerLink]="['/courses', asg.courseId]"
-                      class="hover:text-tenant-600 transition-colors"
-                    >
-                      {{ asg.courseName }}
-                    </a>
-                  </td>
 
-                  <!-- Layer -->
-                  <td class="py-3.5 px-4 font-medium text-text-primary">
-                    {{ asg.layer }}
-                  </td>
-
-                  <!-- Layer Type -->
-                  <td class="py-3.5 px-4">
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-base-200 text-text-secondary border border-base-300 uppercase">
-                      {{ asg.layerType }}
-                    </span>
-                  </td>
-
-                  <!-- LMS Instance -->
-                  <td class="py-3.5 px-4 text-text-secondary font-mono text-[11px]">
-                    {{ asg.lmsName }}
-                  </td>
-
-                  <!-- Course Status -->
-                  <td class="py-3.5 px-4 text-center">
-                    @if (asg.courseStatus === 'Published') {
-                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                        Published
+          @if (!instructor()!.attachments || instructor()!.attachments!.length === 0) {
+            <div class="p-8 text-center text-xs text-text-secondary">
+              No qualification documents or certificates have been attached yet. Click "Upload Credentials" above to add CV, diplomas, or credentials.
+            </div>
+          } @else {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              @for (att of instructor()!.attachments!; track att.id) {
+                <div class="p-3.5 rounded-2xl bg-base-200/50 border border-base-300 hover:border-tenant-500/50 transition-all flex flex-col justify-between space-y-3 group">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-base-100 text-tenant-600 dark:text-tenant-400 flex items-center justify-center shrink-0 border border-base-300 shadow-2xs">
+                      @if (att.isImage && att.url) {
+                        <img [src]="att.url" [alt]="att.name" class="w-10 h-10 rounded-xl object-cover" />
+                      } @else {
+                        <span class="material-symbols-outlined text-xl">{{ getFileIcon(att) }}</span>
+                      }
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <span class="text-xs font-bold text-text-primary truncate block group-hover:text-tenant-600 transition-colors" [title]="att.name">
+                        {{ att.name }}
                       </span>
-                    } @else {
-                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
-                        {{ asg.courseStatus }}
-                      </span>
-                    }
-                  </td>
+                      <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] font-mono text-text-secondary">{{ att.sizeFormatted }}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-tenant-100/70 dark:bg-tenant-950 text-tenant-700 dark:text-tenant-300">
+                          {{ att.category }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-                  <!-- Assigned Date -->
-                  <td class="py-3.5 px-4 text-text-secondary font-mono text-[11px]">
-                    {{ asg.assignedDate }}
-                  </td>
-
-                  <!-- View Course Link -->
-                  <td class="py-3.5 px-5 text-right">
-                    <a
-                      [routerLink]="['/courses', asg.courseId]"
-                      class="p-1.5 rounded-lg text-text-secondary hover:text-tenant-600 hover:bg-tenant-50 transition-colors inline-block"
-                      title="Open Course Details"
-                    >
-                      <span class="material-symbols-outlined text-base">open_in_new</span>
-                    </a>
-                  </td>
-                </tr>
+                  <div class="flex items-center justify-between pt-2 border-t border-base-300 text-xs">
+                    <span class="text-[10px] text-text-secondary">{{ att.uploadedAt }}</span>
+                    <div class="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        (click)="openPreview(att)"
+                        class="p-1 rounded-md text-text-secondary hover:bg-base-300 transition-colors cursor-pointer"
+                        title="Preview file"
+                      >
+                        <span class="material-symbols-outlined text-base">visibility</span>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="downloadAttachment(att)"
+                        class="p-1 rounded-md text-text-secondary hover:bg-base-300 transition-colors cursor-pointer"
+                        title="Download file"
+                      >
+                        <span class="material-symbols-outlined text-base">download</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               }
-            </tbody>
-          </table>
+            </div>
+          }
         </div>
-      }
-    </div>
+      </div>
+    }
+
+    <!-- Expandable Feedback Drawer Modal -->
+    @if (activeFeedbackDrawerItem()) {
+      <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-end p-0 overflow-y-auto animate-modal-backdrop">
+        <div class="w-full max-w-lg h-full bg-base-100 border-l border-base-300 shadow-2xl flex flex-col animate-slide-left">
+          <!-- Drawer Header -->
+          <div class="p-5 border-b border-base-300 flex items-center justify-between bg-base-200/50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-xl">rate_review</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-text-primary">Learner Feedback Reviews</h3>
+                <p class="text-xs text-text-secondary truncate max-w-xs">{{ activeFeedbackDrawerItem()!.layer }}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              (click)="closeFeedbackDrawer()"
+              class="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-base-200"
+            >
+              <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
+
+          <!-- Drawer Content -->
+          <div class="p-5 overflow-y-auto flex-1 space-y-4 text-xs">
+            <div class="p-3.5 rounded-xl bg-base-200/60 border border-base-300 space-y-1">
+              <div class="font-bold text-text-primary">{{ activeFeedbackDrawerItem()!.courseName }}</div>
+              <div class="text-[11px] text-text-secondary">
+                LMS: {{ activeFeedbackDrawerItem()!.lmsName }} • Status: <strong>{{ activeFeedbackDrawerItem()!.courseStatus }}</strong>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              @for (rev of activeFeedbackDrawerItem()!.feedbackReviews || []; track rev.id) {
+                <div class="p-4 rounded-2xl bg-base-200/40 border border-base-300 space-y-2">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                      <img [src]="rev.avatar" [alt]="rev.studentName" class="w-8 h-8 rounded-full object-cover border border-base-300" />
+                      <div>
+                        <div class="font-bold text-text-primary text-xs">{{ rev.studentName }}</div>
+                        <div class="text-[10px] text-text-secondary">{{ rev.studentRole }} • {{ rev.date }}</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-0.5 px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 font-bold text-xs">
+                      <span class="material-symbols-outlined text-xs">star</span>
+                      <span>{{ rev.rating }}.0</span>
+                    </div>
+                  </div>
+                  <p class="text-xs text-text-secondary italic leading-relaxed">"{{ rev.comment }}"</p>
+                  @if (rev.tag) {
+                    <div class="pt-1">
+                      <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-tenant-100 dark:bg-tenant-950 text-tenant-700 dark:text-tenant-300">
+                        {{ rev.tag }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Drawer Footer -->
+          <div class="p-4 border-t border-base-300 bg-base-200/50 flex justify-end">
+            <button
+              type="button"
+              (click)="closeFeedbackDrawer()"
+              class="px-4 py-2 rounded-xl bg-tenant-600 hover:bg-tenant-700 text-white text-xs font-bold transition-all"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   }
 
   <!-- Blocked Deactivation Resolution Modal (§3.4) -->
@@ -460,6 +971,78 @@
     [recipient]="emailRecipient()"
     (close)="showEmailModal.set(false)"
   ></app-compose-email-modal>
+
+  <!-- ========================================================================= -->
+  <!-- TAG AS AUTHOR MODAL -->
+  <!-- ========================================================================= -->
+  @if (showTagAuthorModal()) {
+    <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/70 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
+      <div class="w-full max-w-lg rounded-3xl bg-base-100 border border-base-300 shadow-2xl overflow-hidden flex flex-col animate-modal-card">
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-base-300 bg-tenant-50/50 dark:bg-tenant-950/30 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-tenant-500/10 dark:bg-tenant-500/20 text-tenant-600 dark:text-tenant-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl">edit_note</span>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-text-primary">Tag Instructor as Author</h3>
+              <p class="text-xs text-text-secondary">Enable Content Authorship for {{ instructor()!.name }}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeTagAuthorModal()"
+            class="text-text-secondary hover:text-text-primary p-1.5 rounded-xl hover:bg-base-200 transition-colors"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-4">
+          <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 flex items-start gap-3">
+            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg mt-0.5">info</span>
+            <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+              This action creates a linked <strong>Author Profile</strong> for <strong>{{ instructor()!.name }}</strong> in the Content Authors pool. They can be selected and credited for video scripts, lesson documents, and quizzes across all courses.
+            </p>
+          </div>
+
+          <!-- Content Specialization -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-text-primary">Author Content Specialization</label>
+            <input
+              type="text"
+              [value]="tagAuthorSpecialization()"
+              (input)="tagAuthorSpecialization.set($any($event.target).value)"
+              placeholder="e.g. Video Scripting, Diagnostic Quizzes, SOP Documentation"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-base-100 border border-base-300 text-xs font-medium text-text-primary focus:outline-none focus:ring-2 focus:ring-tenant-500/30 focus:border-tenant-500 transition-all"
+            />
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-4 border-t border-base-300 bg-base-200/50 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            (click)="closeTagAuthorModal()"
+            class="px-4 py-2.5 rounded-xl border border-base-300 text-xs font-semibold text-text-secondary hover:bg-base-200 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="confirmTagAsAuthor()"
+            [disabled]="isTaggingAuthor()"
+            id="btn-confirm-tag-as-author"
+            class="px-5 py-2.5 rounded-xl bg-tenant-600 hover:bg-tenant-700 text-white text-xs font-bold shadow-sm transition-all inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <span class="material-symbols-outlined text-base">edit_note</span>
+            <span>Confirm &amp; Tag as Author</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Document / Media Preview Modal -->
   @if (previewModalAttachment()) {

@@ -172,7 +172,7 @@ export class ComposeEmailModalComponent {
     const tpl = this.templates.find(t => t.key === templateKey);
     if (!tpl) return;
 
-    const recName = this.recipient()?.name || 'Faculty Colleague';
+    const recName = this.recipient()?.name || 'Instructor Colleague';
     this.subject = tpl.subject;
     this.body = tpl.body.replace(/\{\{name\}\}/g, recName);
   }

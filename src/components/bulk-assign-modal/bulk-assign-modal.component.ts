@@ -332,7 +332,7 @@ export class BulkAssignModalComponent {
       courseName: 'BRAC Microfinance Operations & Client Protection Principles',
       lmsId: 'LMS-1972-01',
       lmsName: 'BRAC Microfinance Operations & Enterprise Academy',
-      layerTitle: 'Course Lead Faculty Assignment',
+      layerTitle: 'Course Lead Instructor Assignment',
       layerType: 'course',
       selected: true
     },
@@ -359,7 +359,7 @@ export class BulkAssignModalComponent {
       courseName: 'Ultra-Poor Graduation (UPG) Coaching & Asset Transfer Mastery',
       lmsId: 'LMS-1972-02',
       lmsName: 'Ultra-Poor Graduation & Social Development Institute',
-      layerTitle: 'Course Lead Faculty Assignment',
+      layerTitle: 'Course Lead Instructor Assignment',
       layerType: 'course',
       selected: false
     },

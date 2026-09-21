@@ -257,7 +257,16 @@ export class VenueCreateComponent implements OnInit {
       classroom: [initial?.classroom ?? true],
       uShape: [initial?.uShape ?? false],
       boardroom: [initial?.boardroom ?? false],
-      banquet: [initial?.banquet ?? false]
+      banquet: [initial?.banquet ?? false],
+      // Room-wise amenities
+      amenityAirConditioning: [initial?.amenityAirConditioning ?? true],
+      amenityDedicatedWifi: [initial?.amenityDedicatedWifi ?? true],
+      amenityWhiteboard: [initial?.amenityWhiteboard ?? true],
+      amenityPowerOutlets: [initial?.amenityPowerOutlets ?? true],
+      amenityVideoConferenceCam: [initial?.amenityVideoConferenceCam ?? false],
+      amenityWheelchairAccessible: [initial?.amenityWheelchairAccessible ?? true],
+      amenityWaterDispenser: [initial?.amenityWaterDispenser ?? false],
+      amenityNaturalLight: [initial?.amenityNaturalLight ?? true]
     });
 
     this.roomsArray.push(roomGroup);
@@ -309,7 +318,15 @@ export class VenueCreateComponent implements OnInit {
         classroom: r.seatingLayouts.includes('classroom'),
         uShape: r.seatingLayouts.includes('uShape'),
         boardroom: r.seatingLayouts.includes('boardroom'),
-        banquet: r.seatingLayouts.includes('banquet')
+        banquet: r.seatingLayouts.includes('banquet'),
+        amenityAirConditioning: r.amenities ? !!r.amenities.airConditioning : true,
+        amenityDedicatedWifi: r.amenities ? !!r.amenities.dedicatedWifi : true,
+        amenityWhiteboard: r.amenities ? !!r.amenities.whiteboard : true,
+        amenityPowerOutlets: r.amenities ? !!r.amenities.powerOutletsPerSeat : true,
+        amenityVideoConferenceCam: r.amenities ? !!r.amenities.videoConferenceCam : false,
+        amenityWheelchairAccessible: r.amenities ? !!r.amenities.wheelchairAccessible : true,
+        amenityWaterDispenser: r.amenities ? !!r.amenities.waterDispenser : false,
+        amenityNaturalLight: r.amenities ? !!r.amenities.naturalLight : false
       });
     });
   }
@@ -369,6 +386,17 @@ export class VenueCreateComponent implements OnInit {
       if (r.boardroom) layouts.push('boardroom');
       if (r.banquet) layouts.push('banquet');
 
+      const amenities = {
+        airConditioning: !!r.amenityAirConditioning,
+        dedicatedWifi: !!r.amenityDedicatedWifi,
+        whiteboard: !!r.amenityWhiteboard,
+        powerOutletsPerSeat: !!r.amenityPowerOutlets,
+        videoConferenceCam: !!r.amenityVideoConferenceCam,
+        wheelchairAccessible: !!r.amenityWheelchairAccessible,
+        waterDispenser: !!r.amenityWaterDispenser,
+        naturalLight: !!r.amenityNaturalLight
+      };
+
       return {
         roomId: r.roomId || `room-${Date.now()}-${Math.floor(Math.random()*100)}`,
         venueId: this.venueId() || '',
@@ -383,6 +411,7 @@ export class VenueCreateComponent implements OnInit {
           displayScreen: !!r.hasDisplayScreen,
           otherTags: []
         },
+        amenities,
         seatingLayouts: layouts.length > 0 ? layouts : ['classroom'],
         status: 'active',
         usedInClassesCount: 0,

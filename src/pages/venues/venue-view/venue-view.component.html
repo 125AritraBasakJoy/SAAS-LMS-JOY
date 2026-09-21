@@ -162,6 +162,60 @@
                     <span class="capitalize">Layouts: {{ room.seatingLayouts.join(', ') }}</span>
                   </div>
 
+                  <!-- Room-Wise Amenities Badges -->
+                  @if (room.amenities) {
+                    <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                      @if (room.amenities.airConditioning) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 border border-sky-200/60" title="Air Conditioned">
+                          <span class="material-symbols-outlined text-[12px]">ac_unit</span>
+                          <span>AC</span>
+                        </span>
+                      }
+                      @if (room.amenities.dedicatedWifi) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border border-indigo-200/60" title="Dedicated High-Speed Wi-Fi">
+                          <span class="material-symbols-outlined text-[12px]">wifi</span>
+                          <span>Wi-Fi</span>
+                        </span>
+                      }
+                      @if (room.amenities.whiteboard) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/60" title="Interactive Whiteboard">
+                          <span class="material-symbols-outlined text-[12px]">draw</span>
+                          <span>Whiteboard</span>
+                        </span>
+                      }
+                      @if (room.amenities.powerOutletsPerSeat) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/60" title="Power Outlets Per Desk">
+                          <span class="material-symbols-outlined text-[12px]">power</span>
+                          <span>Power Sockets</span>
+                        </span>
+                      }
+                      @if (room.amenities.videoConferenceCam) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200/60" title="Video Conference Camera">
+                          <span class="material-symbols-outlined text-[12px]">videocam</span>
+                          <span>VC Cam</span>
+                        </span>
+                      }
+                      @if (room.amenities.wheelchairAccessible) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300 border border-teal-200/60" title="Wheelchair Accessible">
+                          <span class="material-symbols-outlined text-[12px]">accessible</span>
+                          <span>Accessible</span>
+                        </span>
+                      }
+                      @if (room.amenities.waterDispenser) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-cyan-50 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300 border border-cyan-200/60" title="Water Dispenser">
+                          <span class="material-symbols-outlined text-[12px]">water_drop</span>
+                          <span>Water</span>
+                        </span>
+                      }
+                      @if (room.amenities.naturalLight) {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200/60" title="Natural Light / Windows">
+                          <span class="material-symbols-outlined text-[12px]">wb_sunny</span>
+                          <span>Natural Light</span>
+                        </span>
+                      }
+                    </div>
+                  }
+
                   @if (room.notes) {
                     <p class="text-xs text-text-secondary italic">{{ room.notes }}</p>
                   }
@@ -367,6 +421,72 @@
         <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
           <input type="checkbox" formControlName="hasDisplayScreen" class="accent-tenant-500 rounded cursor-pointer" />
           <span class="text-xs font-medium text-text-primary">Display Screen</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Room-Specific Amenities Configuration -->
+    <div class="border-t border-base-300 pt-3">
+      <div class="flex items-center justify-between mb-2">
+        <label class="block text-[11px] font-bold text-text-secondary uppercase tracking-wider">Room-Specific Amenities</label>
+        <span class="text-[10px] text-text-secondary">Configured per room</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityAirConditioning" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-sky-500">ac_unit</span>
+            <span>AC</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityDedicatedWifi" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-indigo-500">wifi</span>
+            <span>Wi-Fi</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityWhiteboard" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-emerald-500">draw</span>
+            <span>Whiteboard</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityPowerOutlets" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-amber-500">power</span>
+            <span>Power Plugs</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityVideoConferenceCam" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-purple-500">videocam</span>
+            <span>VC Cam</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityWheelchairAccessible" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-teal-500">accessible</span>
+            <span>Accessible</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityWaterDispenser" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-cyan-500">water_drop</span>
+            <span>Water</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-base-200/50 border border-base-300 cursor-pointer hover:border-tenant-300">
+          <input type="checkbox" formControlName="amenityNaturalLight" class="accent-tenant-500 rounded cursor-pointer" />
+          <span class="text-xs font-medium text-text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs text-amber-500">wb_sunny</span>
+            <span>Daylight</span>
+          </span>
         </label>
       </div>
     </div>

@@ -252,9 +252,8 @@ export class OfflineTrainingGridComponent implements OnInit {
   });
 
   statusOptions: SelectOption[] = [
-    { value: 'all', label: 'Status: All', icon: 'filter_list' },
-    { value: 'published', label: 'Published', icon: 'verified', badge: 'Published', badgeClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' },
-    { value: 'draft', label: 'Draft', icon: 'edit_note', badge: 'Draft', badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300' },
+    { value: 'all', label: 'All Statuses', icon: 'filter_list' },
+    { value: 'active', label: 'Active', icon: 'verified', badge: 'Active', badgeClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' },
     { value: 'inactive', label: 'Inactive', icon: 'cancel', badge: 'Inactive', badgeClass: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300' }
   ];
 
@@ -307,7 +306,13 @@ export class OfflineTrainingGridComponent implements OnInit {
     }
 
     if (status !== 'all') {
-      list = list.filter(t => t.status === status);
+      if (status === 'active') {
+        list = list.filter(t => t.status === 'published' || (t.status as string) === 'active');
+      } else if (status === 'inactive' || status === 'deactive') {
+        list = list.filter(t => t.status === 'inactive' || t.status === 'draft' || (t.status as string) === 'deactive');
+      } else {
+        list = list.filter(t => t.status === status);
+      }
     }
 
     if (venue !== 'all') {

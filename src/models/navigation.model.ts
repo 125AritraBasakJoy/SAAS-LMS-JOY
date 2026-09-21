@@ -219,51 +219,6 @@ export const APP_NAV_ITEMS: NavItem[] = [
     ]
   },
   {
-    label: 'Offline Trainings',
-    route: '/offline-trainings',
-    icon: 'groups_3',
-    roles: ['system_admin', 'super_admin', 'tenant_admin', 'lms_admin', 'instructor', 'learner'],
-    badge: 'In-Person',
-    description: 'In-person classroom workshops, physical venues, reusable content & multi-mode assessments',
-    matchPatterns: ['/offline-trainings', '/offline-trainings/**'],
-    children: [
-      {
-        label: 'Training Catalog',
-        route: '/offline-trainings',
-        icon: 'grid_view',
-        description: 'Browse, filter & search offline trainings',
-        matchPatterns: ['/offline-trainings', '/offline-trainings/view/**']
-      },
-      {
-        label: 'Training Dashboard',
-        route: '/offline-trainings/dashboard',
-        icon: 'space_dashboard',
-        badge: 'Telemetry',
-        description: 'Classroom statistics, venue distribution & capacity metrics',
-        roles: ['system_admin', 'super_admin', 'tenant_admin', 'lms_admin', 'instructor'],
-        matchPatterns: ['/offline-trainings/dashboard']
-      },
-      {
-        label: 'Create Training',
-        route: '/offline-trainings/create',
-        icon: 'add_circle',
-        badge: 'Builder',
-        description: '5-step in-person offline training creation wizard',
-        roles: ['system_admin', 'super_admin', 'tenant_admin', 'lms_admin', 'instructor'],
-        matchPatterns: ['/offline-trainings/create', '/offline-trainings/edit/**']
-      },
-      {
-        label: 'Trainee Results',
-        route: '/offline-trainings/results',
-        icon: 'fact_check',
-        badge: 'Gradebook',
-        description: 'Attendance log, manual mark entry & cohort pass status',
-        roles: ['system_admin', 'super_admin', 'tenant_admin', 'lms_admin', 'instructor'],
-        matchPatterns: ['/offline-trainings/results']
-      }
-    ]
-  },
-  {
     label: 'Venues & Facilities',
     route: '/venues',
     icon: 'location_city',
@@ -422,8 +377,8 @@ export const APP_NAV_ITEMS: NavItem[] = [
         label: 'Instructors Pool',
         route: '/instructors',
         icon: 'co_present',
-        badge: 'Faculty',
-        description: 'Faculty pool & course layer assignments',
+        badge: 'Instructors',
+        description: 'Instructor pool & course layer assignments',
         matchPatterns: ['/instructors', '/instructors/view/**', '/instructors/details/**']
       },
       {

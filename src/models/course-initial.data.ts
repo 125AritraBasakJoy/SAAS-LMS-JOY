@@ -208,6 +208,76 @@ export const INITIAL_COURSES_ENTITIES: CourseEntity[] = [
         ]
       }
     ],
+    authorHistory: [
+      {
+        id: 'auth-hist-101-1',
+        versionLabel: 'v1.0',
+        versionNumber: 1,
+        authorId: 'auth-mahbubur',
+        authorName: 'Mahbubur Rahman',
+        authorEmail: 'mahbubur.r@brac.net',
+        authorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
+        authorRole: 'Curriculum Architect',
+        timestamp: '15/01/2026 10:00',
+        changeSummary: 'Authored core Village Organization foundation videos and meeting discipline masterclasses.',
+        affectedUnitsCount: 2,
+        authoredUnits: [
+          { contentId: 'cnt-1', title: 'VO Grassroots Structure & Member Onboarding Video', family: 'learning', subtype: 'video' }
+        ]
+      },
+      {
+        id: 'auth-hist-101-2',
+        versionLabel: 'v1.0',
+        versionNumber: 1,
+        authorId: 'auth-sadia',
+        authorName: 'Sadia Rahman',
+        authorEmail: 'sadia.rahman@brac.net',
+        authorAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80',
+        authorRole: 'Assessment Specialist',
+        timestamp: '15/01/2026 11:30',
+        changeSummary: 'Designed subjective household credit audit simulation and objective ethics quizzes.',
+        affectedUnitsCount: 2,
+        authoredUnits: [
+          { contentId: 'cnt-3', title: 'Formative Check: Client Dignity & Code of Conduct Quiz', family: 'assessment', subtype: 'quiz' },
+          { contentId: 'cnt-4', title: 'Field Case Study: Simulated Household Credit Audit', family: 'assessment', subtype: 'assignment' }
+        ]
+      },
+      {
+        id: 'auth-hist-101-3',
+        versionLabel: 'v1.0',
+        versionNumber: 1,
+        authorId: 'auth-farhana',
+        authorName: 'Farhana Ahmed',
+        authorEmail: 'farhana.ahmed@brac.net',
+        authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
+        authorRole: 'Co-Author',
+        timestamp: '15/01/2026 14:00',
+        changeSummary: 'Authored client protection regulatory compliance SOP manual and ethical guidelines.',
+        affectedUnitsCount: 1,
+        authoredUnits: [
+          { contentId: 'cnt-2', title: 'BRAC Client Protection Manual (SOP Ref Guide)', family: 'learning', subtype: 'reading' }
+        ]
+      }
+    ],
+    instructorHistory: [
+      {
+        id: 'inst-hist-101-1',
+        layerNodeId: 'ch-1',
+        layerTitle: 'Chapter 1: Foundational Framework & Regulatory Covenants',
+        layerDepth: 1,
+        instructorId: 'usr-brac-tanvir',
+        instructorName: 'Tanvir Hossain',
+        instructorEmail: 'tanvir.hossain@brac.net',
+        instructorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+        instructorTitle: 'Lead Microfinance Master Trainer',
+        cohortOrTerm: 'Cohort 2026-Q1 & Nationwide Induction',
+        assignedDate: '15/01/2026',
+        status: 'Active',
+        learnerCount: 1420,
+        averageRating: 4.9,
+        notes: 'Primary Master Instructor managing manual assessment grading across all sub-nodes.'
+      }
+    ],
     status: 'published',
     usedInPlansCount: 3,
     usedInPhasesCount: 4,
@@ -345,6 +415,58 @@ export const INITIAL_COURSES_ENTITIES: CourseEntity[] = [
         lockedInPhases: [
           { phaseId: 'phase-upg-02', phaseName: 'Phase 2: Household Immersion', planName: 'UPG National Accelerator', lockedAt: '22/02/2026' }
         ]
+      }
+    ],
+    authorHistory: [
+      {
+        id: 'auth-hist-102-1',
+        versionLabel: 'v1.0',
+        versionNumber: 1,
+        authorId: 'auth-nusrat',
+        authorName: 'Nusrat Jahan',
+        authorEmail: 'nusrat.jahan@brac.net',
+        authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+        authorRole: 'Primary Course Author',
+        timestamp: '05/01/2026 09:00',
+        changeSummary: 'Authored baseline participatory rural appraisal (PRA) tools and household coaching syllabus.',
+        affectedUnitsCount: 2,
+        authoredUnits: [
+          { contentId: 'cnt-upg-1', title: 'Participatory Rural Appraisal (PRA) Video Guide', family: 'learning', subtype: 'video' }
+        ]
+      },
+      {
+        id: 'auth-hist-102-2',
+        versionLabel: 'v2.0',
+        versionNumber: 2,
+        authorId: 'auth-sadia',
+        authorName: 'Sadia Rahman',
+        authorEmail: 'sadia.rahman@brac.net',
+        authorAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80',
+        authorRole: 'Assessment Specialist',
+        timestamp: '20/02/2026 14:00',
+        changeSummary: 'Upgraded household livelihood asset transfer rubrics to version 2.0 with rubric evaluation matrices.',
+        affectedUnitsCount: 1,
+        authoredUnits: [
+          { contentId: 'cnt-upg-2', title: 'Household Livelihood Plan Evaluation Rubric', family: 'assessment', subtype: 'assignment' }
+        ]
+      }
+    ],
+    instructorHistory: [
+      {
+        id: 'inst-hist-102-1',
+        layerNodeId: 'mod-upg-1',
+        layerTitle: 'Module 1: Household Wealth Ranking & Baseline Profiling',
+        layerDepth: 1,
+        instructorId: 'usr-brac-nusrat',
+        instructorName: 'Nusrat Jahan',
+        instructorEmail: 'nusrat.jahan@brac.net',
+        instructorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+        instructorTitle: 'Senior Graduation Mentor',
+        cohortOrTerm: 'UPG National Accelerator Cohort 2',
+        assignedDate: '05/01/2026',
+        status: 'Active',
+        learnerCount: 890,
+        averageRating: 4.8
       }
     ],
     status: 'published',

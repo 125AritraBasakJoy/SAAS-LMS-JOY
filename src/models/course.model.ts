@@ -107,6 +107,41 @@ export interface CourseReviewsConfig {
   allowComments?: boolean;
 }
 
+export interface CourseAuthorVersionRecord {
+  id: string;
+  versionLabel: string; // e.g. "v1.0", "v1.1", "v2.0"
+  versionNumber: number;
+  authorId: string;
+  authorName: string;
+  authorEmail: string;
+  authorAvatar?: string;
+  authorRole: 'Primary Course Author' | 'Curriculum Architect' | 'Co-Author' | 'Instructional Designer' | 'Assessment Specialist';
+  timestamp: string; // e.g. "15/01/2026 10:00"
+  changeSummary: string; // e.g. "Initial curriculum drafting and lesson videos published."
+  affectedUnitsCount: number;
+  authoredUnits?: { contentId: string; title: string; family: 'learning' | 'assessment'; subtype?: string }[];
+}
+
+export interface CourseInstructorDeliveryRecord {
+  id: string;
+  layerNodeId?: string;
+  layerTitle: string; // e.g. "Chapter 1: Foundational Principles & Scope"
+  layerDepth?: number; // 1, 2, or 3
+  instructorId: string;
+  instructorName: string;
+  instructorEmail: string;
+  instructorAvatar?: string;
+  instructorTitle?: string;
+  cohortOrTerm: string; // e.g. "Cohort 2026-Q1", "Spring 2026 Session", "Active Term"
+  assignedDate: string;
+  releasedDate?: string;
+  assignedBy?: string;
+  status: 'Active' | 'Completed' | 'Reassigned' | 'Historical';
+  learnerCount: number;
+  averageRating?: number;
+  notes?: string;
+}
+
 export interface CourseVersionInfo {
   versionNumber: number;
   label: string; // e.g. "v1.0", "v2.0"
@@ -178,15 +213,43 @@ export interface CourseEntity {
   
   reviewsConfig: CourseReviewsConfig;
   
-  // Competency & Credential Tagging (Step 4)
+  // Competency, Credential & Physical Delivery Tagging (Step 4)
   skills?: string[];
   badgeTemplateId?: string;
   badgeTemplateName?: string;
   certificateTemplateId?: string;
   certificateTemplateName?: string;
+  deliveryMode?: 'online' | 'in_person' | 'blended' | 'hybrid';
+  venueId?: string;
+  venueName?: string;
+  venueCategory?: 'brac_internal' | 'external';
+  venueCity?: string;
+  roomId?: string;
+  roomName?: string;
+  
+  // Embedded Offline Training & Classroom Session Specs (Single Form within Course/Class)
+  offlineSession?: {
+    enabled: boolean;
+    sessionTitle?: string;
+    sessionCode?: string;
+    startDate?: string;
+    endDate?: string;
+    startTime?: string;
+    endTime?: string;
+    totalHours?: number;
+    instructorId?: string;
+    instructorName?: string;
+    maxSeats?: number;
+    minAttendancePercent?: number;
+    evaluationMode?: 'auto' | 'trainer_rubric' | 'observation' | 'graded_exam';
+    materialsProvided?: string[];
+    specialInstructions?: string;
+  };
   
   version: CourseVersionInfo;
   versionHistory: CourseVersionSnapshot[];
+  authorHistory?: CourseAuthorVersionRecord[];
+  instructorHistory?: CourseInstructorDeliveryRecord[];
   
   status: CourseStatus; // draft | published | inactive
   

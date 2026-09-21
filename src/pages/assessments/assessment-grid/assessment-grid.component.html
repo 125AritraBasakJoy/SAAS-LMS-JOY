@@ -236,7 +236,7 @@
     itemLabel="assessments">
 
     <!-- Filter Panel Drawer Projection -->
-    <div filter-panel class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 text-xs pt-1">
+    <div filter-panel class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3 text-xs pt-1">
       <!-- Status Filter -->
       <div class="space-y-1.5">
         <label class="font-bold text-text-primary block">Status</label>
@@ -245,6 +245,17 @@
           [ngModel]="selectedStatus()"
           (ngModelChange)="selectedStatus.set($event); currentPage.set(1)"
           placeholder="All Statuses">
+        </app-custom-select>
+      </div>
+
+      <!-- Alignment / Origin Filter -->
+      <div class="space-y-1.5">
+        <label class="font-bold text-text-primary block">Alignment Scope</label>
+        <app-custom-select
+          [options]="alignmentOptions"
+          [ngModel]="selectedAlignment()"
+          (ngModelChange)="selectedAlignment.set($event); currentPage.set(1)"
+          placeholder="All Alignments">
         </app-custom-select>
       </div>
 
@@ -345,6 +356,13 @@
         </span>
       }
 
+      @if (selectedAlignment() !== 'all') {
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tenant-50 dark:bg-tenant-950/60 text-tenant-700 dark:text-tenant-300 border border-tenant-200 dark:border-tenant-800 text-[11px] font-semibold">
+          <span>Alignment: {{ selectedAlignment() | titlecase }}</span>
+          <button (click)="selectedAlignment.set('all')" class="hover:text-rose-500 cursor-pointer"><span class="material-symbols-outlined text-xs">close</span></button>
+        </span>
+      }
+
       @if (filterHasManualGrading() !== 'all') {
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tenant-50 dark:bg-tenant-950/60 text-tenant-700 dark:text-tenant-300 border border-tenant-200 dark:border-tenant-800 text-[11px] font-semibold">
           <span>Manual: {{ filterHasManualGrading() === 'yes' ? 'Required' : 'Auto-only' }}</span>
@@ -401,6 +419,16 @@
 
                 <span class="text-[11px] font-bold font-mono px-2 py-0.5 bg-slate-100 dark:bg-base-200 text-slate-600 dark:text-slate-400 rounded-md border border-slate-200/60 dark:border-base-300">
                   {{ curVer?.versionLabel || 'v1' }}
+                </span>
+
+                <!-- Alignment / Origin Tag Badge -->
+                @let alignInfo = getAlignmentInfo(asm);
+                <span 
+                  [class]="alignInfo.badgeClass"
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border shadow-2xs"
+                  [title]="alignInfo.subtext || alignInfo.label">
+                  <span class="material-symbols-outlined text-[13px]">{{ alignInfo.icon }}</span>
+                  <span>{{ alignInfo.label }}</span>
                 </span>
               </div>
             </div>

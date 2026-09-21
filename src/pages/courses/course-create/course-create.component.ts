@@ -20,18 +20,22 @@ import {
 import { Skill } from '../../../models/skill-mapping.model';
 import { BadgeTemplate } from '../../../models/badge-template.model';
 import { CertificateTemplate, CanvasElement, PLACEHOLDER_TOKENS } from '../../../models/certificate-template.model';
+import { Venue, VenueRoom, VenueCategory, calculateVenueTotalCapacity, getRoomAmenitiesList } from '../../../models/venue.model';
 import { CustomSelectComponent, SelectOption } from '../../../components/custom-select/custom-select.component';
 import { StepperComponent, StepperStep } from '../../../components/stepper/stepper.component';
+import { ModalOverlayComponent } from '../../../components/modal-overlay/modal-overlay.component';
 
 @Component({
   selector: 'app-course-create',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule, CustomSelectComponent, StepperComponent],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule, CustomSelectComponent, StepperComponent, ModalOverlayComponent],
   templateUrl: './course-create.component.html'
 })
 export class CourseCreateComponent implements OnInit {
   lmsService = inject(LmsDataService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+
+  getRoomAmenitiesList = getRoomAmenitiesList;
   private fb = inject(FormBuilder);
   private confirmModal = inject(ConfirmationModalService);
 
@@ -351,6 +355,122 @@ export class CourseCreateComponent implements OnInit {
     return this.lmsService.certificateTemplates().find(c => c.id === id) || null;
   });
 
+  // Step 4: Physical Venue & Delivery Configuration
+  deliveryMode = signal<'online' | 'in_person' | 'blended' | 'hybrid'>('blended');
+  venueCategoryFilter = signal<'all' | 'brac_internal' | 'external'>('all');
+  selectedVenueId = signal<string>('ven-dhk-01');
+  selectedRoomId = signal<string>('room-dhk-101');
+  isVenueDetailModalOpen = signal<boolean>(false);
+  venueDetailTarget = signal<Venue | null>(null);
+
+  deliveryModeOptions: SelectOption[] = [
+    { value: 'blended', label: 'Blended Delivery (Online & Physical Venue)', sublabel: 'Combines digital e-learning with in-person classroom sessions', icon: 'hub' },
+    { value: 'in_person', label: 'In-Person Delivery (Classroom / Lab)', sublabel: 'Held physically at training center / campus facilities', icon: 'domain' },
+    { value: 'hybrid', label: 'Hybrid Simultaneous (Sync Classroom & Remote)', sublabel: 'Live broadcast classroom with online participation', icon: 'cast_for_education' },
+    { value: 'online', label: '100% Online Delivery (Virtual Only)', sublabel: 'Self-paced and live webinar delivery without physical room', icon: 'laptop_chromebook' }
+  ];
+
+  selectedVenue = computed<Venue | null>(() => {
+    const id = this.selectedVenueId();
+    if (!id) return null;
+    return this.lmsService.venues().find(v => v.venueId === id) || null;
+  });
+
+  selectedRoom = computed<VenueRoom | null>(() => {
+    const venue = this.selectedVenue();
+    const roomId = this.selectedRoomId();
+    if (!venue || !roomId) return null;
+    return venue.rooms.find(r => r.roomId === roomId) || null;
+  });
+
+  filteredVenuesForStep4 = computed<Venue[]>(() => {
+    const cat = this.venueCategoryFilter();
+    const list = this.lmsService.venues().filter(v => v.status === 'active');
+    if (cat === 'all') return list;
+    return list.filter(v => (v.venueCategory || 'brac_internal') === cat);
+  });
+
+  venueOptions = computed<SelectOption[]>(() => {
+    const list: SelectOption[] = [
+      { value: '', label: 'No Physical Venue Attached', sublabel: 'Proceed without booking a physical training facility', icon: 'location_off' }
+    ];
+    this.filteredVenuesForStep4().forEach(v => {
+      const isExternal = v.venueCategory === 'external';
+      list.push({
+        value: v.venueId,
+        label: `${v.name} (${v.code})`,
+        sublabel: `${isExternal ? '🏨 External Partner' : '🏛️ BRAC Internal'} • ${v.address.city} • ${v.rooms.length} Rooms • ${calculateVenueTotalCapacity(v)} Seats`,
+        badge: isExternal ? 'External' : 'BRAC',
+        badgeClass: isExternal 
+          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60'
+          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60',
+        icon: isExternal ? 'hotel' : 'domain'
+      });
+    });
+    return list;
+  });
+
+  roomOptions = computed<SelectOption[]>(() => {
+    const venue = this.selectedVenue();
+    if (!venue || !venue.rooms || venue.rooms.length === 0) {
+      return [{ value: '', label: 'No specific room designated (Whole facility)', icon: 'domain' }];
+    }
+    const list: SelectOption[] = [
+      { value: '', label: 'Unspecified Room / Entire Facility', sublabel: 'Room assignment decided closer to delivery date', icon: 'meeting_room' }
+    ];
+    venue.rooms.forEach(r => {
+      const amenitiesText = getRoomAmenitiesList(r.amenities).slice(0, 3).join(', ');
+      list.push({
+        value: r.roomId,
+        label: `${r.name} (${r.capacity} seats)`,
+        sublabel: `${r.floorLevel || 'Ground Floor'} • ${amenitiesText}`,
+        badge: `${r.capacity} Seats`,
+        icon: 'meeting_room'
+      });
+    });
+    return list;
+  });
+
+  setVenueCategoryFilter(cat: 'all' | 'brac_internal' | 'external'): void {
+    this.venueCategoryFilter.set(cat);
+  }
+
+  onVenueChange(venueId: string): void {
+    this.selectedVenueId.set(venueId);
+    if (!venueId) {
+      this.selectedRoomId.set('');
+      return;
+    }
+    const v = this.lmsService.venues().find(x => x.venueId === venueId);
+    if (v && v.rooms && v.rooms.length > 0) {
+      this.selectedRoomId.set(v.rooms[0].roomId);
+    } else {
+      this.selectedRoomId.set('');
+    }
+  }
+
+  onRoomChange(roomId: string): void {
+    this.selectedRoomId.set(roomId);
+  }
+
+  openVenueDetailModal(venue?: Venue | null): void {
+    const target = venue || this.selectedVenue();
+    if (target) {
+      this.venueDetailTarget.set(target);
+      this.isVenueDetailModalOpen.set(true);
+    }
+  }
+
+  closeVenueDetailModal(): void {
+    this.isVenueDetailModalOpen.set(false);
+    this.venueDetailTarget.set(null);
+  }
+
+  clearVenue(): void {
+    this.selectedVenueId.set('');
+    this.selectedRoomId.set('');
+  }
+
   // Skill management helpers
   onSkillSelectionChange(value: any) {
     if (Array.isArray(value)) {
@@ -426,7 +546,7 @@ export class CourseCreateComponent implements OnInit {
       if (token === '{{completion_date}}' || token === '{{date}}' || token === '{{issue_date}}') return dateStr;
       if (token === '{{certificate_id}}' || token === '{{serial_number}}') return 'BRAC-CERT-2026-98214';
       if (token === '{{grade}}') return '96.5% (Distinction)';
-      if (token === '{{trainer_name}}') return 'Lead Faculty Instructor';
+      if (token === '{{trainer_name}}') return 'Lead Instructor';
       if (token === '{{signatory_name}}') return 'Dr. Karim Rahman';
       if (token === '{{signatory_designation}}') return 'Director of Academic Affairs';
       if (token === '{{organization_name}}') return 'BRAC Learning Institute';
@@ -565,17 +685,21 @@ export class CourseCreateComponent implements OnInit {
     this.layer2Label.set('Topic');
     this.layer3Label.set('Lesson');
 
-    // Default Step 4 Skills & Credentials
+    // Default Step 4 Skills, Credentials & Physical Venue
     this.selectedSkillIds.set(['skl-001', 'skl-002']);
     this.selectedBadgeId.set('BDG-1001');
     this.selectedCertificateId.set('CERT-TMP-1972-01');
+    this.deliveryMode.set('blended');
+    this.venueCategoryFilter.set('all');
+    this.selectedVenueId.set('ven-dhk-01');
+    this.selectedRoomId.set('room-dhk-101');
 
     const defaultInst = this.lmsService.instructorsRepo()[0] || {
       id: user.id,
       name: user.name,
       email: user.email,
       avatar: user.avatar,
-      title: 'Senior Faculty Lead',
+      title: 'Senior Lead Instructor',
       department: 'Instructional Design',
       specialization: ['Compliance']
     };
@@ -691,7 +815,7 @@ export class CourseCreateComponent implements OnInit {
     this.structureNodes.set(JSON.parse(JSON.stringify(course.structure)));
     this.reviewsConfig.set({ ...course.reviewsConfig });
 
-    // Step 4: Skills, Badge and Certificate credentials
+    // Step 4: Skills, Badge, Certificate & Physical Venue Attachment
     if (course.skills && course.skills.length > 0) {
       this.selectedSkillIds.set([...course.skills]);
     } else {
@@ -702,6 +826,18 @@ export class CourseCreateComponent implements OnInit {
     }
     if (course.certificateTemplateId !== undefined) {
       this.selectedCertificateId.set(course.certificateTemplateId);
+    }
+    if (course.deliveryMode) {
+      this.deliveryMode.set(course.deliveryMode);
+    }
+    if (course.venueId !== undefined) {
+      this.selectedVenueId.set(course.venueId || '');
+    }
+    if (course.roomId !== undefined) {
+      this.selectedRoomId.set(course.roomId || '');
+    }
+    if (course.venueCategory) {
+      this.venueCategoryFilter.set(course.venueCategory);
     }
 
     // Determine instructor tagged layer
@@ -1830,8 +1966,8 @@ export class CourseCreateComponent implements OnInit {
 
   quickRoleOptions: SelectOption[] = [
     { value: 'author', label: 'Content Author', sublabel: 'Curriculum & lesson instructional author', icon: 'edit_note' },
-    { value: 'instructor', label: 'Faculty Instructor', sublabel: 'Faculty member delivering course layers', icon: 'school' },
-    { value: 'both', label: 'Dual-Role (Author + Instructor)', sublabel: 'Course author with faculty teaching privileges', icon: 'badge' }
+    { value: 'instructor', label: 'Instructor', sublabel: 'Instructor delivering course layers', icon: 'school' },
+    { value: 'both', label: 'Dual-Role (Author + Instructor)', sublabel: 'Course author with instructor teaching privileges', icon: 'badge' }
   ];
 
   quickAuthorForm = {
@@ -1901,8 +2037,8 @@ export class CourseCreateComponent implements OnInit {
         contactNumber: contact,
         specialization: spec,
         bio: bio,
-        department: 'Academic & Faculty Division',
-        title: 'Faculty Instructor',
+        department: 'Academic & Training Division',
+        title: 'Course Instructor',
         status: 'Active',
         isQuickAdd: true
       });
@@ -1925,8 +2061,8 @@ export class CourseCreateComponent implements OnInit {
         contactNumber: contact,
         specialization: spec,
         bio: bio,
-        department: 'Academic & Faculty Division',
-        title: 'Faculty Instructor & Author',
+        department: 'Academic & Training Division',
+        title: 'Instructor & Author',
         status: 'Active',
         isQuickAdd: true
       });
@@ -2036,6 +2172,13 @@ export class CourseCreateComponent implements OnInit {
       badgeTemplateName: this.selectedBadge()?.name || '',
       certificateTemplateId: this.selectedCertificateId(),
       certificateTemplateName: this.selectedCertificate()?.name || '',
+      deliveryMode: this.deliveryMode(),
+      venueId: this.selectedVenueId() || undefined,
+      venueName: this.selectedVenue()?.name,
+      venueCategory: this.selectedVenue()?.venueCategory || 'brac_internal',
+      venueCity: this.selectedVenue()?.address.city,
+      roomId: this.selectedRoomId() || undefined,
+      roomName: this.selectedRoom()?.name,
       version: {
         versionNumber: 1,
         label: 'v1.0-draft',

@@ -52,6 +52,7 @@
       [steps]="steps"
       [currentStep]="currentStep()"
       [completedSteps]="completedSteps()"
+      [showNumbers]="false"
       orientation="horizontal"
       (stepChange)="goToStep($event)">
     </app-stepper>
@@ -73,7 +74,7 @@
         </span>
       </div>
       <div class="text-[11px] text-text-secondary">
-        Stage <strong>{{ currentStep() }}</strong> of {{ steps.length }}: <span class="font-semibold text-text-primary">{{ steps[currentStep() - 1].title }}</span>
+        Current Section: <span class="font-semibold text-text-primary">{{ steps[currentStep() - 1].title }}</span>
       </div>
     </div>
   </div>
@@ -97,7 +98,7 @@
             </span>
           </div>
           <p class="text-xs text-text-secondary leading-relaxed max-w-3xl">
-            Configure offline training sessions across physical classrooms. Follow the horizontal stepper above to set workshop scope, reserve certified rooms, assign faculty, choose assessment criteria, and enforce attendance thresholds.
+            Configure offline training sessions across physical classrooms. Follow the horizontal stepper above to set workshop scope, reserve certified rooms, assign instructors, choose assessment criteria, and enforce attendance thresholds.
           </p>
         </div>
       </div>

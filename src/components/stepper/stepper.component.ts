@@ -62,6 +62,14 @@ export type StepItem = StepperStep;
                 }">
                 @if (getStepState(step.id) === 'done') {
                   <span class="material-symbols-outlined text-lg text-white font-bold">check</span>
+                } @else if (!showNumbers() && step.icon) {
+                  <span class="material-symbols-outlined text-lg font-bold" [class]="getStepState(step.id) === 'current' ? 'text-white font-bold' : 'text-slate-400 dark:text-slate-500 font-bold'">
+                    {{ step.icon }}
+                  </span>
+                } @else if (!showNumbers()) {
+                  <span class="material-symbols-outlined text-base font-bold" [class]="getStepState(step.id) === 'current' ? 'text-white font-bold' : 'text-slate-400 dark:text-slate-500 font-bold'">
+                    circle
+                  </span>
                 } @else {
                   <span [class]="getStepState(step.id) === 'current' ? 'text-white font-bold' : 'text-slate-400 dark:text-slate-500 font-bold'">
                     {{ step.id }}
@@ -174,6 +182,14 @@ export type StepItem = StepperStep;
                   }">
                   @if (getStepState(step.id) === 'done') {
                     <span class="material-symbols-outlined text-base sm:text-lg text-white font-bold">check</span>
+                  } @else if (!showNumbers() && step.icon) {
+                    <span class="material-symbols-outlined text-base sm:text-lg font-bold" [class]="getStepState(step.id) === 'current' ? 'text-white font-bold' : 'text-slate-400 dark:text-slate-500 font-bold'">
+                      {{ step.icon }}
+                    </span>
+                  } @else if (!showNumbers()) {
+                    <span class="material-symbols-outlined text-sm font-bold" [class]="getStepState(step.id) === 'current' ? 'text-white font-bold' : 'text-slate-400 dark:text-slate-500 font-bold'">
+                      circle
+                    </span>
                   } @else {
                     <span [class]="getStepState(step.id) === 'current' ? 'text-white font-bold' : 'text-slate-400 dark:text-slate-500 font-bold'">
                       {{ step.id }}
@@ -225,6 +241,7 @@ export class StepperComponent implements AfterViewInit, OnDestroy {
   steps = input<StepperStep[]>([]);
   currentStep = input<number>(1);
   completedSteps = input<Set<number> | number[]>(new Set<number>());
+  showNumbers = input<boolean>(true);
   isStepClickable = input<((stepId: number) => boolean) | null>(null);
   allowDirectNavigation = input<boolean>(true);
   containerClass = input<string>('');

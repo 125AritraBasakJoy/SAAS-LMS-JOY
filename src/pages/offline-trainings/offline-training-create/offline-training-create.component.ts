@@ -35,7 +35,7 @@ export class OfflineTrainingCreateComponent implements OnInit {
   steps: StepperStep[] = [
     { id: 1, shortTitle: 'Basics', title: 'Basic Details & Scope', icon: 'info' },
     { id: 2, shortTitle: 'Venue', title: 'Venue & Room Allocation', icon: 'location_city' },
-    { id: 3, shortTitle: 'Trainers', title: 'Faculty & Trainers', icon: 'school' },
+    { id: 3, shortTitle: 'Instructors', title: 'Instructors & Trainers', icon: 'school' },
     { id: 4, shortTitle: 'Evaluation', title: 'Assessment Architecture', icon: 'fact_check' },
     { id: 5, shortTitle: 'Compliance', title: 'Attendance & Certs', icon: 'verified' }
   ];

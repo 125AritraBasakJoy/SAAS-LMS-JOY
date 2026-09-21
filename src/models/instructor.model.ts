@@ -1,4 +1,4 @@
-import { PersonnelAttachment } from './author.model';
+import { PersonnelAttachment, LearnerFeedbackItem } from './author.model';
 
 export interface InstructorProfile {
   id: string;
@@ -38,6 +38,11 @@ export interface InstructorAssignmentRecord {
   lmsName: string;
   courseStatus: 'Published' | 'Draft' | 'Inactive' | 'Archived';
   assignedDate: string;
+  rating?: number;
+  reviewsCount?: number;
+  completionRate?: number;
+  learnersCount?: number;
+  feedbackReviews?: LearnerFeedbackItem[];
 }
 
 export interface InstructorDeactivationResolution {
@@ -240,7 +245,23 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-01',
     lmsName: 'BRAC Microfinance Operations & Enterprise Academy',
     courseStatus: 'Published',
-    assignedDate: '10/01/2026'
+    assignedDate: '10/01/2026',
+    rating: 4.9,
+    reviewsCount: 112,
+    completionRate: 94,
+    learnersCount: 1420,
+    feedbackReviews: [
+      {
+        id: 'inst-rev-1',
+        studentName: 'Shahnaz Begum',
+        studentRole: 'Credit Officer',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+        rating: 5,
+        date: '14/02/2026',
+        comment: 'Master Tanvir explained complex interest amortization tables and borrower dignity with patience and depth.',
+        tag: 'Exceptional Faculty'
+      }
+    ]
   },
   {
     id: 'inst-asg-2',
@@ -255,7 +276,23 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-01',
     lmsName: 'BRAC Microfinance Operations & Enterprise Academy',
     courseStatus: 'Published',
-    assignedDate: '12/01/2026'
+    assignedDate: '12/01/2026',
+    rating: 4.8,
+    reviewsCount: 88,
+    completionRate: 92,
+    learnersCount: 1250,
+    feedbackReviews: [
+      {
+        id: 'inst-rev-2',
+        studentName: 'Kamal Uddin',
+        studentRole: 'Branch Accountant',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+        rating: 5,
+        date: '20/02/2026',
+        comment: 'Very practical examples of governance dispute resolution during weekly borrower meetings.',
+        tag: 'Field Expertise'
+      }
+    ]
   },
   {
     id: 'inst-asg-3',
@@ -270,7 +307,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-01',
     lmsName: 'BRAC Microfinance Operations & Enterprise Academy',
     courseStatus: 'Published',
-    assignedDate: '14/01/2026'
+    assignedDate: '14/01/2026',
+    rating: 5.0,
+    reviewsCount: 75,
+    completionRate: 96,
+    learnersCount: 1100
   },
   {
     id: 'inst-asg-4',
@@ -285,7 +326,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-03',
     lmsName: 'Climate Resilience & Humanitarian Action Institute',
     courseStatus: 'Published',
-    assignedDate: '25/01/2026'
+    assignedDate: '25/01/2026',
+    rating: 4.8,
+    reviewsCount: 45,
+    completionRate: 89,
+    learnersCount: 620
   },
   {
     id: 'inst-asg-5',
@@ -300,7 +345,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-01',
     lmsName: 'BRAC Microfinance Operations & Enterprise Academy',
     courseStatus: 'Published',
-    assignedDate: '15/01/2026'
+    assignedDate: '15/01/2026',
+    rating: 4.9,
+    reviewsCount: 94,
+    completionRate: 95,
+    learnersCount: 1380
   },
   {
     id: 'inst-asg-6',
@@ -314,7 +363,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-01',
     lmsName: 'BRAC Microfinance Operations & Enterprise Academy',
     courseStatus: 'Draft',
-    assignedDate: '02/02/2026'
+    assignedDate: '02/02/2026',
+    rating: 4.7,
+    reviewsCount: 22,
+    completionRate: 88,
+    learnersCount: 340
   },
   {
     id: 'inst-asg-7',
@@ -329,7 +382,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-01',
     lmsName: 'BRAC Microfinance Operations & Enterprise Academy',
     courseStatus: 'Draft',
-    assignedDate: '05/02/2026'
+    assignedDate: '05/02/2026',
+    rating: 4.8,
+    reviewsCount: 18,
+    completionRate: 86,
+    learnersCount: 290
   },
   {
     id: 'inst-asg-8',
@@ -343,7 +400,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-02',
     lmsName: 'Ultra-Poor Graduation & Social Development Institute',
     courseStatus: 'Published',
-    assignedDate: '20/01/2026'
+    assignedDate: '20/01/2026',
+    rating: 5.0,
+    reviewsCount: 86,
+    completionRate: 97,
+    learnersCount: 1150
   },
   {
     id: 'inst-asg-9',
@@ -358,7 +419,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-02',
     lmsName: 'Ultra-Poor Graduation & Social Development Institute',
     courseStatus: 'Published',
-    assignedDate: '22/01/2026'
+    assignedDate: '22/01/2026',
+    rating: 4.9,
+    reviewsCount: 65,
+    completionRate: 94,
+    learnersCount: 980
   },
   {
     id: 'inst-asg-10',
@@ -373,7 +438,11 @@ export const INITIAL_INSTRUCTOR_ASSIGNMENTS: InstructorAssignmentRecord[] = [
     lmsId: 'LMS-1972-02',
     lmsName: 'Ultra-Poor Graduation & Social Development Institute',
     courseStatus: 'Published',
-    assignedDate: '24/01/2026'
+    assignedDate: '24/01/2026',
+    rating: 4.9,
+    reviewsCount: 52,
+    completionRate: 93,
+    learnersCount: 820
   },
   {
     id: 'inst-asg-11',

@@ -341,7 +341,7 @@ export class PhaseCreateComponent implements OnInit {
         category: c.category,
         duration: `${c.durationMinutes} mins`,
         lessonsCount: c.modules ? c.modules.reduce((sum, m) => sum + (m.lessons ? m.lessons.length : 0), 0) : 10,
-        courseOwnerName: c.instructorName || 'Assigned Faculty Lead'
+        courseOwnerName: c.instructorName || 'Assigned Lead Instructor'
       })));
     }
   }
@@ -529,7 +529,7 @@ export class PhaseCreateComponent implements OnInit {
           category: course.category,
           duration: `${course.durationMinutes || 120} mins`,
           lessonsCount: lessonsCount,
-          courseOwnerName: course.instructorName || 'Assigned Faculty Lead'
+          courseOwnerName: course.instructorName || 'Assigned Lead Instructor'
         }
       ]);
     }
@@ -634,7 +634,7 @@ export class PhaseCreateComponent implements OnInit {
     this.newSessionDate.set(this.startDate() || formatDateDDMMYYYY(new Date()));
     this.newSessionTime.set('10:00 AM');
     this.newSessionDuration.set(90);
-    this.newSessionInstructor.set(this.phaseOwner().name || 'Course Faculty');
+    this.newSessionInstructor.set(this.phaseOwner().name || 'Course Instructor');
     this.newSessionVenue.set('Main Campus - Hall A');
     this.newSessionMeetingLink.set('https://meet.google.com/onelms-session');
     this.showSessionModal.set(true);
@@ -673,7 +673,7 @@ export class PhaseCreateComponent implements OnInit {
             sessionDate: this.newSessionDate().trim() || this.startDate() || formatDateDDMMYYYY(new Date()),
             startTime: this.newSessionTime().trim(),
             durationMinutes: this.newSessionDuration() || 90,
-            instructorName: this.newSessionInstructor().trim() || 'Course Faculty',
+            instructorName: this.newSessionInstructor().trim() || 'Course Instructor',
             venueName: this.deliveryMode() === 'Instructor-Led / In-Person' || this.deliveryMode() === 'Blended' 
               ? (this.newSessionVenue().trim() || 'Main Campus Hall') 
               : undefined,
@@ -693,7 +693,7 @@ export class PhaseCreateComponent implements OnInit {
         sessionDate: this.newSessionDate().trim() || this.startDate() || formatDateDDMMYYYY(new Date()),
         startTime: this.newSessionTime().trim(),
         durationMinutes: this.newSessionDuration() || 90,
-        instructorName: this.newSessionInstructor().trim() || this.phaseOwner().name || 'Course Faculty',
+        instructorName: this.newSessionInstructor().trim() || this.phaseOwner().name || 'Course Instructor',
         venueName: this.deliveryMode() === 'Instructor-Led / In-Person' || this.deliveryMode() === 'Blended' 
           ? (this.newSessionVenue().trim() || 'Main Campus Hall') 
           : undefined,

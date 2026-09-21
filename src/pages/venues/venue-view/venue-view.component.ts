@@ -94,15 +94,26 @@ export class VenueViewComponent implements OnInit {
       capacity: [30, [Validators.required, Validators.min(1), Validators.max(1000)]],
       floorLevel: ['Ground Floor'],
       notes: [''],
+      // Hardware / AV Equipment
       hasProjector: [true],
       hasSoundSystem: [true],
       hasMicrophone: [true],
       hasDisplayScreen: [true],
+      // Seating Configurations
       layoutTheatre: [true],
       layoutClassroom: [true],
       layoutUshape: [false],
       layoutBoardroom: [false],
-      layoutBanquet: [false]
+      layoutBanquet: [false],
+      // Room-Wise Amenities (Amenities config per room)
+      amenityAirConditioning: [true],
+      amenityDedicatedWifi: [true],
+      amenityWhiteboard: [true],
+      amenityPowerOutlets: [true],
+      amenityVideoConferenceCam: [false],
+      amenityWheelchairAccessible: [true],
+      amenityWaterDispenser: [false],
+      amenityNaturalLight: [true]
     });
   }
 
@@ -133,7 +144,15 @@ export class VenueViewComponent implements OnInit {
       layoutClassroom: true,
       layoutUshape: false,
       layoutBoardroom: false,
-      layoutBanquet: false
+      layoutBanquet: false,
+      amenityAirConditioning: true,
+      amenityDedicatedWifi: true,
+      amenityWhiteboard: true,
+      amenityPowerOutlets: true,
+      amenityVideoConferenceCam: false,
+      amenityWheelchairAccessible: true,
+      amenityWaterDispenser: false,
+      amenityNaturalLight: true
     });
     this.isRoomModalOpen.set(true);
   }
@@ -153,7 +172,15 @@ export class VenueViewComponent implements OnInit {
       layoutClassroom: room.seatingLayouts.includes('classroom'),
       layoutUshape: room.seatingLayouts.includes('uShape'),
       layoutBoardroom: room.seatingLayouts.includes('boardroom'),
-      layoutBanquet: room.seatingLayouts.includes('banquet')
+      layoutBanquet: room.seatingLayouts.includes('banquet'),
+      amenityAirConditioning: room.amenities ? !!room.amenities.airConditioning : true,
+      amenityDedicatedWifi: room.amenities ? !!room.amenities.dedicatedWifi : true,
+      amenityWhiteboard: room.amenities ? !!room.amenities.whiteboard : true,
+      amenityPowerOutlets: room.amenities ? !!room.amenities.powerOutletsPerSeat : true,
+      amenityVideoConferenceCam: room.amenities ? !!room.amenities.videoConferenceCam : false,
+      amenityWheelchairAccessible: room.amenities ? !!room.amenities.wheelchairAccessible : true,
+      amenityWaterDispenser: room.amenities ? !!room.amenities.waterDispenser : false,
+      amenityNaturalLight: room.amenities ? !!room.amenities.naturalLight : false
     });
     this.isRoomModalOpen.set(true);
   }
@@ -182,6 +209,17 @@ export class VenueViewComponent implements OnInit {
       otherTags: []
     };
 
+    const amenities = {
+      airConditioning: !!val.amenityAirConditioning,
+      dedicatedWifi: !!val.amenityDedicatedWifi,
+      whiteboard: !!val.amenityWhiteboard,
+      powerOutletsPerSeat: !!val.amenityPowerOutlets,
+      videoConferenceCam: !!val.amenityVideoConferenceCam,
+      wheelchairAccessible: !!val.amenityWheelchairAccessible,
+      waterDispenser: !!val.amenityWaterDispenser,
+      naturalLight: !!val.amenityNaturalLight
+    };
+
     if (this.editingRoom()) {
       this.lmsData.updateRoom(this.venue()!.venueId, this.editingRoom()!.roomId, {
         name: val.name,
@@ -189,6 +227,7 @@ export class VenueViewComponent implements OnInit {
         floorLevel: val.floorLevel,
         notes: val.notes,
         equipment,
+        amenities,
         seatingLayouts: layouts.length > 0 ? layouts : ['classroom']
       });
     } else {
@@ -198,6 +237,7 @@ export class VenueViewComponent implements OnInit {
         floorLevel: val.floorLevel,
         notes: val.notes,
         equipment,
+        amenities,
         seatingLayouts: layouts.length > 0 ? layouts : ['classroom']
       });
     }

@@ -69,66 +69,87 @@ import { CourseEntity } from '../../../models/course.model';
             </div>
           </div>
 
-          <!-- Version History Timeline -->
-          <div class="flex-1 overflow-y-auto p-6 space-y-4">
-            <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold text-text-primary uppercase tracking-wider">Publication History & Snapshots</h3>
-              <span class="text-xs text-text-secondary font-mono">{{ (crs.versionHistory?.length || 0) + 1 }} total iterations</span>
-            </div>
+          <!-- Tab Navigation inside Modal -->
+          <div class="px-6 pt-4 pb-0 bg-base-100 flex items-center gap-2 border-b border-base-300 overflow-x-auto">
+            <button
+              type="button"
+              (click)="activeModalTab.set('snapshots')"
+              [class.border-tenant-500]="activeModalTab() === 'snapshots'"
+              [class.text-tenant-600]="activeModalTab() === 'snapshots'"
+              [class.font-bold]="activeModalTab() === 'snapshots'"
+              [class.border-transparent]="activeModalTab() !== 'snapshots'"
+              [class.text-text-secondary]="activeModalTab() !== 'snapshots'"
+              class="flex items-center gap-1.5 px-3 py-2 border-b-2 text-xs transition-colors whitespace-nowrap cursor-pointer hover:text-tenant-600"
+            >
+              <span class="material-symbols-outlined text-sm">history</span>
+              <span>Version Snapshots</span>
+            </button>
 
-            <div class="space-y-3">
-              <!-- Current item -->
-              <div class="p-3.5 rounded-2xl border border-tenant-500/30 bg-tenant-500/5 flex items-start justify-between gap-3">
-                <div class="flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-xl bg-tenant-500 text-white font-bold text-xs flex items-center justify-center font-mono">
-                    {{ crs.version.versionNumber }}
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-bold text-text-primary">{{ crs.version.label }}</span>
-                      <span class="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                        {{ crs.status === 'published' ? 'Active Live' : 'Current Draft' }}
-                      </span>
-                    </div>
-                    <p class="text-xs text-text-secondary mt-1">
-                      {{ crs.version.changeSummary || 'Active course configuration.' }}
-                    </p>
-                    @if (crs.version.lockedPhaseNames && crs.version.lockedPhaseNames.length > 0) {
-                      <div class="mt-2 flex flex-wrap gap-1">
-                        @for (phase of crs.version.lockedPhaseNames; track phase) {
-                          <span class="text-[10px] px-2 py-0.5 rounded bg-base-200 text-text-secondary border border-base-300 font-mono">
-                            📌 {{ phase }}
-                          </span>
-                        }
-                      </div>
-                    }
-                  </div>
-                </div>
+            <button
+              type="button"
+              (click)="activeModalTab.set('authorHistory')"
+              [class.border-tenant-500]="activeModalTab() === 'authorHistory'"
+              [class.text-tenant-600]="activeModalTab() === 'authorHistory'"
+              [class.font-bold]="activeModalTab() === 'authorHistory'"
+              [class.border-transparent]="activeModalTab() !== 'authorHistory'"
+              [class.text-text-secondary]="activeModalTab() !== 'authorHistory'"
+              class="flex items-center gap-1.5 px-3 py-2 border-b-2 text-xs transition-colors whitespace-nowrap cursor-pointer hover:text-tenant-600"
+            >
+              <span class="material-symbols-outlined text-sm">edit_note</span>
+              <span>Author History (Who Made What)</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-base-200 border border-base-300 font-mono">
+                {{ crs.authorHistory?.length || 0 }}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              (click)="activeModalTab.set('instructorHistory')"
+              [class.border-tenant-500]="activeModalTab() === 'instructorHistory'"
+              [class.text-tenant-600]="activeModalTab() === 'instructorHistory'"
+              [class.font-bold]="activeModalTab() === 'instructorHistory'"
+              [class.border-transparent]="activeModalTab() !== 'instructorHistory'"
+              [class.text-text-secondary]="activeModalTab() !== 'instructorHistory'"
+              class="flex items-center gap-1.5 px-3 py-2 border-b-2 text-xs transition-colors whitespace-nowrap cursor-pointer hover:text-tenant-600"
+            >
+              <span class="material-symbols-outlined text-sm">school</span>
+              <span>Instructor Delivery History</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-base-200 border border-base-300 font-mono">
+                {{ crs.instructorHistory?.length || 0 }}
+              </span>
+            </button>
+          </div>
+
+          <!-- Tab Content Area -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-4">
+            @if (activeModalTab() === 'snapshots') {
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold text-text-primary uppercase tracking-wider">Publication History & Snapshots</h3>
+                <span class="text-xs text-text-secondary font-mono">{{ (crs.versionHistory?.length || 0) + 1 }} total iterations</span>
               </div>
 
-              <!-- Historical snapshots -->
-              @for (snap of crs.versionHistory || []; track snap.versionNumber) {
-                <div class="p-3.5 rounded-2xl border border-base-300 bg-base-200/30 flex items-start justify-between gap-3">
+              <div class="space-y-3">
+                <!-- Current item -->
+                <div class="p-3.5 rounded-2xl border border-tenant-500/30 bg-tenant-500/5 flex items-start justify-between gap-3">
                   <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-base-300 text-text-secondary font-bold text-xs flex items-center justify-center font-mono">
-                      {{ snap.versionNumber }}
+                    <div class="w-8 h-8 rounded-xl bg-tenant-500 text-white font-bold text-xs flex items-center justify-center font-mono">
+                      {{ crs.version.versionNumber }}
                     </div>
                     <div>
                       <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-text-primary">{{ snap.label }}</span>
-                        <span class="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-slate-500/10 text-slate-600">
-                          Archived Snapshot
+                        <span class="text-xs font-bold text-text-primary">{{ crs.version.label }}</span>
+                        <span class="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                          {{ crs.status === 'published' ? 'Active Live' : 'Current Draft' }}
                         </span>
-                        <span class="text-[11px] text-text-secondary">{{ snap.publishedAt }}</span>
                       </div>
                       <p class="text-xs text-text-secondary mt-1">
-                        {{ snap.changeSummary }}
+                        {{ crs.version.changeSummary || 'Active course configuration.' }}
                       </p>
-                      @if (snap.lockedInPhases && snap.lockedInPhases.length > 0) {
+                      @if (crs.version.lockedPhaseNames && crs.version.lockedPhaseNames.length > 0) {
                         <div class="mt-2 flex flex-wrap gap-1">
-                          @for (phase of snap.lockedInPhases; track ($index)) {
+                          @for (phase of crs.version.lockedPhaseNames; track phase) {
                             <span class="text-[10px] px-2 py-0.5 rounded bg-base-200 text-text-secondary border border-base-300 font-mono">
-                              📌 {{ phase.phaseName || phase }}
+                              📌 {{ phase }}
                             </span>
                           }
                         </div>
@@ -136,8 +157,136 @@ import { CourseEntity } from '../../../models/course.model';
                     </div>
                   </div>
                 </div>
-              }
-            </div>
+
+                <!-- Historical snapshots -->
+                @for (snap of crs.versionHistory || []; track snap.versionNumber) {
+                  <div class="p-3.5 rounded-2xl border border-base-300 bg-base-200/30 flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                      <div class="w-8 h-8 rounded-xl bg-base-300 text-text-secondary font-bold text-xs flex items-center justify-center font-mono">
+                        {{ snap.versionNumber }}
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-xs font-bold text-text-primary">{{ snap.label }}</span>
+                          <span class="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-slate-500/10 text-slate-600">
+                            Archived Snapshot
+                          </span>
+                          <span class="text-[11px] text-text-secondary">{{ snap.publishedAt }}</span>
+                        </div>
+                        <p class="text-xs text-text-secondary mt-1">
+                          {{ snap.changeSummary }}
+                        </p>
+                        @if (snap.lockedInPhases && snap.lockedInPhases.length > 0) {
+                          <div class="mt-2 flex flex-wrap gap-1">
+                            @for (phase of snap.lockedInPhases; track ($index)) {
+                              <span class="text-[10px] px-2 py-0.5 rounded bg-base-200 text-text-secondary border border-base-300 font-mono">
+                                📌 {{ phase.phaseName || phase }}
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else if (activeModalTab() === 'authorHistory') {
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-xs font-bold text-text-primary uppercase tracking-wider">Author Version Contribution Ledger</h3>
+                  <span class="text-xs text-text-secondary font-mono">{{ crs.authorHistory?.length || 0 }} logged records</span>
+                </div>
+
+                @if (!crs.authorHistory || crs.authorHistory.length === 0) {
+                  <div class="p-8 rounded-2xl bg-base-200/50 border border-base-300 text-center space-y-2">
+                    <span class="material-symbols-outlined text-3xl text-text-secondary">history_edu</span>
+                    <p class="text-xs text-text-secondary">No version-specific author update logs recorded yet.</p>
+                  </div>
+                } @else {
+                  <div class="space-y-3">
+                    @for (record of crs.authorHistory; track record.id) {
+                      <div class="p-4 rounded-2xl bg-base-200/40 border border-base-300 space-y-2">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                          <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 font-mono font-bold text-xs">
+                              {{ record.versionLabel }}
+                            </span>
+                            <span class="text-xs font-bold text-text-primary">
+                              {{ record.authorName }}
+                            </span>
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-base-200 text-text-secondary border border-base-300">
+                              {{ record.authorRole }}
+                            </span>
+                          </div>
+                          <span class="text-[11px] text-text-secondary font-mono">{{ record.timestamp }}</span>
+                        </div>
+
+                        <p class="text-xs text-text-secondary leading-relaxed font-medium">
+                          {{ record.changeSummary }}
+                        </p>
+
+                        @if (record.authoredUnits && record.authoredUnits.length > 0) {
+                          <div class="flex flex-wrap gap-1.5 pt-1">
+                            @for (unit of record.authoredUnits; track unit) {
+                              <span class="text-[10px] px-2 py-0.5 rounded bg-base-100 text-text-secondary border border-base-300">
+                                📝 {{ unit }}
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else if (activeModalTab() === 'instructorHistory') {
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-xs font-bold text-text-primary uppercase tracking-wider">Instructor Delivery History Ledger</h3>
+                  <span class="text-xs text-text-secondary font-mono">{{ crs.instructorHistory?.length || 0 }} logged delivery records</span>
+                </div>
+
+                @if (!crs.instructorHistory || crs.instructorHistory.length === 0) {
+                  <div class="p-8 rounded-2xl bg-base-200/50 border border-base-300 text-center space-y-2">
+                    <span class="material-symbols-outlined text-3xl text-text-secondary">school</span>
+                    <p class="text-xs text-text-secondary">No version-specific instructor delivery logs recorded yet.</p>
+                  </div>
+                } @else {
+                  <div class="space-y-3">
+                    @for (record of crs.instructorHistory; track record.id) {
+                      <div class="p-4 rounded-2xl bg-base-200/40 border border-base-300 space-y-2">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                          <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 font-mono font-bold text-xs">
+                              {{ record.layerTitle }}
+                            </span>
+                            <span class="text-xs font-bold text-text-primary">
+                              {{ record.instructorName }}
+                            </span>
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-base-200 text-text-secondary border border-base-300 uppercase">
+                              Depth {{ record.layerDepth }}
+                            </span>
+                          </div>
+                          <span class="text-[11px] text-text-secondary font-mono">Assigned: {{ record.assignedDate }}</span>
+                        </div>
+
+                        <div class="text-xs text-text-secondary flex items-center gap-2">
+                          <span>Title: <strong class="text-text-primary">{{ record.instructorTitle }}</strong></span>
+                          <span>•</span>
+                          <span>Cohort: <strong class="text-text-primary">{{ record.cohortOrTerm || 'General Cohort' }}</strong></span>
+                        </div>
+
+                        @if (record.notes) {
+                          <p class="text-xs text-text-secondary italic">
+                            "{{ record.notes }}"
+                          </p>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
           </div>
 
           <!-- Modal Footer with New Version Trigger -->
@@ -166,4 +315,6 @@ export class CourseVersionModalComponent {
   course = input<CourseEntity | null>(null);
   close = output<void>();
   triggerNewVersion = output<void>();
+
+  activeModalTab = signal<'snapshots' | 'authorHistory' | 'instructorHistory'>('snapshots');
 }

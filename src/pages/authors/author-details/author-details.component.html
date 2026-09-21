@@ -1,28 +1,28 @@
-<div class="space-y-6 pb-12">
+<div class="space-y-6 pb-16">
   @if (author()) {
     @let a = author()!;
 
     <!-- Top Breadcrumbs & Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <div class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+        <div class="flex items-center gap-2 text-xs font-medium text-text-secondary mb-1">
           <a routerLink="/settings" class="hover:text-tenant-600 dark:hover:text-tenant-400 transition-colors">Settings</a>
           <span class="material-symbols-outlined text-xs">chevron_right</span>
           <span>Personnel Management</span>
           <span class="material-symbols-outlined text-xs">chevron_right</span>
           <a routerLink="/authors" class="hover:text-tenant-600 dark:hover:text-tenant-400 transition-colors">Authors</a>
           <span class="material-symbols-outlined text-xs">chevron_right</span>
-          <span class="text-slate-800 dark:text-slate-200 font-semibold">{{ a.name }}</span>
+          <span class="text-text-primary font-semibold">{{ a.name }}</span>
         </div>
         <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{{ a.name }}</h1>
+          <h1 class="text-2xl font-bold text-text-primary tracking-tight">{{ a.name }}</h1>
           @if (a.status === 'Active') {
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Active Author
             </span>
           } @else {
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-200 text-text-secondary border border-base-300">
               <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
               Inactive
             </span>
@@ -30,25 +30,62 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <!-- Dual-Role Profile Switcher Toggle -->
+        @if (a.isInstructor || linkedInstructor()) {
+          <div class="inline-flex items-center p-1 rounded-2xl bg-base-200 border border-base-300 shadow-xs mr-1">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-base-100 text-tenant-700 dark:text-tenant-300 text-xs font-bold shadow-xs border border-tenant-200/50">
+              <span class="material-symbols-outlined text-sm text-indigo-600">edit_note</span>
+              <span>Author View</span>
+            </span>
+            <button
+              type="button"
+              (click)="switchToInstructorView()"
+              id="toggle-switch-to-instructor-profile"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100/60 text-xs font-semibold transition-all cursor-pointer"
+              title="Switch to Instructor profile view for this individual"
+            >
+              <span class="material-symbols-outlined text-sm text-amber-500">school</span>
+              <span>Instructor View</span>
+              <span class="material-symbols-outlined text-xs text-slate-400">arrow_forward</span>
+            </button>
+          </div>
+        }
+
         <a
           routerLink="/authors"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          id="btn-back-authors-grid"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-base-300 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-base-200 transition-colors cursor-pointer"
         >
-          <span class="material-symbols-outlined text-lg">arrow_back</span>
-          <span>Back to Grid</span>
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>Back to Authors</span>
         </a>
+
+        @if (!a.isInstructor && !linkedInstructor()) {
+          <button
+            type="button"
+            (click)="openTagInstructorModal()"
+            id="btn-tag-author-as-instructor"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+            title="Tag this author as an Instructor so they can be assigned to course delivery layers"
+          >
+            <span class="material-symbols-outlined text-base">school</span>
+            <span>Tag as Instructor</span>
+          </button>
+        }
 
         <a
           [routerLink]="['/authors/edit', a.id]"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-semibold transition-colors"
+          id="btn-edit-author-profile"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-base-200 hover:bg-base-300 text-text-primary text-xs font-bold transition-colors cursor-pointer"
         >
-          <span class="material-symbols-outlined text-lg">edit</span>
+          <span class="material-symbols-outlined text-base">edit</span>
           <span>Edit Profile</span>
         </a>
 
         <button
           (click)="handleToggleStatus()"
+          id="btn-toggle-author-status"
           [class.bg-emerald-600]="a.status === 'Inactive'"
           [class.hover:bg-emerald-700]="a.status === 'Inactive'"
           [class.text-white]="a.status === 'Inactive'"
@@ -60,9 +97,9 @@
           [class.dark:bg-rose-950/40]="a.status === 'Active'"
           [class.dark:text-rose-300]="a.status === 'Active'"
           [class.dark:border-rose-900/50]="a.status === 'Active'"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold shadow-xs transition-colors"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
         >
-          <span class="material-symbols-outlined text-lg">
+          <span class="material-symbols-outlined text-base">
             {{ a.status === 'Active' ? 'power_settings_new' : 'check_circle' }}
           </span>
           <span>{{ a.status === 'Active' ? 'Deactivate Author' : 'Activate Author' }}</span>
@@ -70,19 +107,19 @@
       </div>
     </div>
 
-    <!-- Author Profile Card (§4) -->
-    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm p-6 sm:p-8">
+    <!-- Author Profile Hero Card -->
+    <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm p-6 sm:p-8">
       <div class="flex flex-col md:flex-row md:items-start gap-6">
         <!-- Avatar -->
         <div class="relative shrink-0">
           <img
             [src]="a.avatar"
             [alt]="a.name"
-            class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-slate-100 dark:ring-slate-800 shadow-sm"
+            class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-base-200 shadow-sm"
             referrerpolicy="no-referrer"
           />
           @if (a.status === 'Active') {
-            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-3 border-white dark:border-slate-900 rounded-full"></span>
+            <span class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
           }
         </div>
 
@@ -90,22 +127,22 @@
         <div class="flex-1 space-y-4">
           <div>
             <div class="flex flex-wrap items-center gap-2 mb-1.5">
-              <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{{ a.name }}</h2>
+              <h2 class="text-xl sm:text-2xl font-bold text-text-primary">{{ a.name }}</h2>
               @if (a.isInstructor) {
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
                   <span class="material-symbols-outlined text-sm">school</span>
                   Dual-Role (Author + Instructor)
                 </span>
               }
-              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-base-200 text-text-secondary border border-base-300">
                 <span class="material-symbols-outlined text-sm">domain</span>
                 BRAC (Organization-Wide Scope)
               </span>
             </div>
 
             <!-- Content Specialization Tag -->
-            <div class="mt-2 flex items-center gap-2">
-              <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Content Specialization:</span>
+            <div class="mt-2 flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-semibold text-text-secondary">Specialization:</span>
               <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-semibold bg-tenant-50 text-tenant-700 dark:bg-tenant-950/60 dark:text-tenant-300 border border-tenant-200/60 dark:border-tenant-800/60">
                 {{ a.specialization }}
               </span>
@@ -113,100 +150,851 @@
           </div>
 
           <!-- Contact & Identity Row -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-base-300 text-xs">
             <div class="space-y-0.5">
-              <span class="text-slate-400 font-medium">Email Address</span>
-              <p class="font-semibold text-slate-800 dark:text-slate-200">{{ a.email }}</p>
+              <span class="text-text-secondary font-medium">Email Address</span>
+              <p class="font-semibold text-text-primary">{{ a.email }}</p>
             </div>
             <div class="space-y-0.5">
-              <span class="text-slate-400 font-medium">Contact Number</span>
-              <p class="font-semibold text-slate-800 dark:text-slate-200">{{ a.contactNumber || 'Not provided' }}</p>
+              <span class="text-text-secondary font-medium">Contact Number</span>
+              <p class="font-semibold text-text-primary">{{ a.contactNumber || 'Not provided' }}</p>
             </div>
             <div class="space-y-0.5">
-              <span class="text-slate-400 font-medium">Date Profile Added</span>
-              <p class="font-semibold text-slate-800 dark:text-slate-200">{{ a.createdAt }}</p>
+              <span class="text-text-secondary font-medium">Date Profile Added</span>
+              <p class="font-semibold text-text-primary font-mono">{{ a.createdAt }}</p>
             </div>
           </div>
 
           <!-- Bio / Credentials -->
           @if (a.bio) {
-            <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
-              <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Pedagogical Credentials & Media Background:</span>
-              <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed max-w-3xl">
+            <div class="pt-3 border-t border-base-300">
+              <span class="text-xs font-semibold text-text-secondary block mb-1">Pedagogical Credentials &amp; Media Background:</span>
+              <p class="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-3xl">
                 {{ a.bio }}
               </p>
             </div>
           }
         </div>
+
+        <!-- Quick Summary Badge Tile -->
+        <div class="p-4 rounded-2xl bg-base-200/60 border border-base-300 shrink-0 text-center min-w-36 space-y-1">
+          <div class="text-2xl font-black text-tenant-600 dark:text-tenant-400">
+            {{ totalAuthoredItems() }}
+          </div>
+          <div class="text-[11px] font-semibold text-text-secondary uppercase tracking-wider">
+            Authored Units
+          </div>
+          <div class="text-[10px] text-text-secondary">{{ activeCoursesCount() }} active course(s)</div>
+        </div>
       </div>
     </div>
 
-    <!-- Attached Documents & Media Files Section -->
-    @if (a.attachments && a.attachments.length > 0) {
-      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm p-6 space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 dark:text-tenant-400 flex items-center justify-center">
-              <span class="material-symbols-outlined text-lg">folder_open</span>
+    <!-- ========================================================================= -->
+    <!-- AUTHORSHIP VIEW SWITCHER TABS -->
+    <!-- ========================================================================= -->
+    <div class="flex items-center justify-between border-b border-base-300 pb-3 gap-4 flex-wrap">
+      <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-base-200/70 border border-base-300 max-w-full overflow-x-auto">
+        <!-- Tab 1: Content Dashboard -->
+        <button
+          type="button"
+          (click)="activeTab.set('dashboard')"
+          id="author-view-tab-dashboard"
+          [class]="activeTab() === 'dashboard' 
+            ? 'flex items-center gap-2 px-4 py-2 rounded-xl bg-tenant-500 text-white font-bold text-xs shadow-sm cursor-pointer transition-all'
+            : 'flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100 font-medium text-xs transition-all cursor-pointer'"
+        >
+          <span class="material-symbols-outlined text-base">dashboard</span>
+          <span>Content Dashboard</span>
+        </button>
+
+        <!-- Tab 2: Content Repository Assets -->
+        <button
+          type="button"
+          (click)="activeTab.set('content-repo')"
+          id="author-view-tab-content-repo"
+          [class]="activeTab() === 'content-repo' 
+            ? 'flex items-center gap-2 px-4 py-2 rounded-xl bg-tenant-500 text-white font-bold text-xs shadow-sm cursor-pointer transition-all'
+            : 'flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100 font-medium text-xs transition-all cursor-pointer'"
+        >
+          <span class="material-symbols-outlined text-base">inventory_2</span>
+          <span>Content Repository</span>
+          <span class="px-1.5 py-0.2 rounded-md bg-base-100/30 text-[10px] font-bold">
+            {{ contentRepoItems().length }}
+          </span>
+        </button>
+
+        <!-- Tab 3: Course Version History -->
+        <button
+          type="button"
+          (click)="activeTab.set('course-versions')"
+          id="author-view-tab-course-versions"
+          [class]="activeTab() === 'course-versions' 
+            ? 'flex items-center gap-2 px-4 py-2 rounded-xl bg-tenant-500 text-white font-bold text-xs shadow-sm cursor-pointer transition-all'
+            : 'flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100 font-medium text-xs transition-all cursor-pointer'"
+        >
+          <span class="material-symbols-outlined text-base">history_edu</span>
+          <span>Course Version History</span>
+          <span class="px-1.5 py-0.2 rounded-md bg-base-100/30 text-[10px] font-bold">
+            {{ courseVersionHistory().length }}
+          </span>
+        </button>
+
+        <!-- Tab 4: Authorship Matrix & Ratings -->
+        <button
+          type="button"
+          (click)="activeTab.set('matrix')"
+          id="author-view-tab-matrix"
+          [class]="activeTab() === 'matrix' 
+            ? 'flex items-center gap-2 px-4 py-2 rounded-xl bg-tenant-500 text-white font-bold text-xs shadow-sm cursor-pointer transition-all'
+            : 'flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100 font-medium text-xs transition-all cursor-pointer'"
+        >
+          <span class="material-symbols-outlined text-base">table_chart</span>
+          <span>Authorship Matrix &amp; Ratings</span>
+          <span class="px-1.5 py-0.2 rounded-md bg-base-100/30 text-[10px] font-bold">
+            {{ history().length }}
+          </span>
+        </button>
+
+        <!-- Tab 3: Cross-Course Provenance -->
+        <button
+          type="button"
+          (click)="activeTab.set('provenance')"
+          id="author-view-tab-provenance"
+          [class]="activeTab() === 'provenance' 
+            ? 'flex items-center gap-2 px-4 py-2 rounded-xl bg-tenant-500 text-white font-bold text-xs shadow-sm cursor-pointer transition-all'
+            : 'flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100 font-medium text-xs transition-all cursor-pointer'"
+        >
+          <span class="material-symbols-outlined text-base">hub</span>
+          <span>Cross-Course Provenance</span>
+        </button>
+
+        <!-- Tab 4: Credentials Vault -->
+        @if (a.attachments && a.attachments.length > 0) {
+          <button
+            type="button"
+            (click)="activeTab.set('credentials')"
+            id="author-view-tab-credentials"
+            [class]="activeTab() === 'credentials' 
+              ? 'flex items-center gap-2 px-4 py-2 rounded-xl bg-tenant-500 text-white font-bold text-xs shadow-sm cursor-pointer transition-all'
+              : 'flex items-center gap-2 px-4 py-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-base-100 font-medium text-xs transition-all cursor-pointer'"
+          >
+            <span class="material-symbols-outlined text-base">folder_open</span>
+            <span>Credentials Vault</span>
+            <span class="px-1.5 py-0.2 rounded-md bg-base-100/30 text-[10px] font-bold">
+              {{ a.attachments.length }}
+            </span>
+          </button>
+        }
+      </div>
+
+      <div class="text-xs text-text-secondary font-medium hidden md:flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-base text-tenant-600">verified</span>
+        <span>Verified Content Author Repository</span>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: CONTENT DASHBOARD (5 Executive KPI Cards) -->
+    <!-- ========================================================================= -->
+    @if (activeTab() === 'dashboard') {
+      <div class="space-y-6 animate-fadeIn">
+        <!-- 5 Executive KPI Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <!-- KPI 1: Overall Content Rating -->
+          <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-2 hover:border-tenant-500/40 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-secondary">Overall Content Rating</span>
+              <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">star</span>
+              </div>
             </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-900 dark:text-white">Attached Documents, Media &amp; Credentials</h2>
-              <p class="text-xs text-slate-500 dark:text-slate-400">{{ a.attachments.length }} file(s) available in the repository</p>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-black text-text-primary">{{ averageRating() }}</span>
+              <span class="text-xs text-text-secondary font-medium">/ 5.0</span>
+            </div>
+            <div class="flex items-center gap-1 text-amber-500 text-xs">
+              <span class="material-symbols-outlined text-sm">star</span>
+              <span class="material-symbols-outlined text-sm">star</span>
+              <span class="material-symbols-outlined text-sm">star</span>
+              <span class="material-symbols-outlined text-sm">star</span>
+              <span class="material-symbols-outlined text-sm">star_half</span>
+              <span class="text-[10px] text-emerald-600 font-semibold ml-1">Top 2%</span>
             </div>
           </div>
-          <a
-            [routerLink]="['/authors/edit', a.id]"
-            class="text-xs font-semibold text-tenant-600 dark:text-tenant-400 hover:underline inline-flex items-center gap-1"
-          >
-            <span class="material-symbols-outlined text-sm">add</span>
-            <span>Upload More</span>
-          </a>
+
+          <!-- KPI 2: Learner Completion Rate -->
+          <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-2 hover:border-tenant-500/40 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-secondary">Learner Completion Rate</span>
+              <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">trending_up</span>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-black text-text-primary">{{ averageCompletionRate() }}%</span>
+              <span class="text-xs text-emerald-600 font-semibold">+6.2% vs avg</span>
+            </div>
+            <!-- Progress meter -->
+            <div class="w-full bg-base-200 rounded-full h-2 overflow-hidden">
+              <div class="bg-emerald-500 h-2 rounded-full" [style.width.%]="averageCompletionRate()"></div>
+            </div>
+          </div>
+
+          <!-- KPI 3: Learners Reached -->
+          <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-2 hover:border-tenant-500/40 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-secondary">Learners Reached</span>
+              <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">groups</span>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-black text-text-primary">{{ totalLearnersReached() | number }}</span>
+              <span class="text-xs text-text-secondary font-medium">graduates</span>
+            </div>
+            <div class="text-[11px] text-text-secondary">
+              Across organization cohorts
+            </div>
+          </div>
+
+          <!-- KPI 4: Authored Units Breakdown -->
+          <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-2 hover:border-tenant-500/40 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-secondary">Authored Units</span>
+              <div class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">auto_stories</span>
+              </div>
+            </div>
+            <div class="text-3xl font-black text-text-primary">{{ totalAuthoredItems() }}</div>
+            <div class="flex items-center gap-1.5 flex-wrap text-[10px]">
+              <span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold">{{ videoCount() }} Videos</span>
+              <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold">{{ docCount() }} Docs</span>
+              <span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 font-semibold">{{ quizCount() }} Quizzes</span>
+            </div>
+          </div>
+
+          <!-- KPI 5: Active Courses & LMS Nodes -->
+          <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-2 hover:border-tenant-500/40 transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-secondary">Active Courses</span>
+              <div class="w-8 h-8 rounded-xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">domain</span>
+              </div>
+            </div>
+            <div class="text-3xl font-black text-tenant-600">{{ activeCoursesCount() }}</div>
+            <div class="text-[11px] text-text-secondary">
+              Syndicated across <strong>{{ uniqueLmsNodesCount() }}</strong> LMS nodes
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          @for (att of a.attachments; track att.id) {
-            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-tenant-400 dark:hover:border-tenant-600 transition-all flex flex-col justify-between space-y-3 group">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-700 text-tenant-600 dark:text-tenant-400 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-600 shadow-2xs">
-                  @if (att.isImage && att.url) {
-                    <img [src]="att.url" [alt]="att.name" class="w-10 h-10 rounded-xl object-cover" />
-                  } @else {
-                    <span class="material-symbols-outlined text-xl">{{ getFileIcon(att) }}</span>
-                  }
+        <!-- Secondary Insights: Sentiment & Recent Verified Learner Reviews -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left 2 cols: Recent Verified Reviews -->
+          <div class="lg:col-span-2 rounded-3xl bg-base-100 border border-base-300 shadow-sm p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-base-300">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-lg">rate_review</span>
                 </div>
-                <div class="min-w-0 flex-1">
-                  <span class="text-xs font-bold text-slate-900 dark:text-white truncate block group-hover:text-tenant-600 dark:group-hover:text-tenant-400 transition-colors" [title]="att.name">
-                    {{ att.name }}
-                  </span>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">{{ att.sizeFormatted }}</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-tenant-100/70 dark:bg-tenant-950 text-tenant-700 dark:text-tenant-300">
-                      {{ att.category }}
-                    </span>
+                <div>
+                  <h3 class="text-sm font-bold text-text-primary">Verified Learner Feedback &amp; Sentiments</h3>
+                  <p class="text-xs text-text-secondary">Direct reviews submitted on learning items authored by {{ a.name }}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="activeTab.set('matrix')"
+                class="text-xs font-semibold text-tenant-600 dark:text-tenant-400 hover:underline cursor-pointer"
+              >
+                View in Matrix &rarr;
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              @for (rev of allFeedbackReviews(); track rev.id) {
+                <div class="p-4 rounded-2xl bg-base-200/50 border border-base-300 space-y-2.5">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                      <img [src]="rev.avatar" [alt]="rev.studentName" class="w-9 h-9 rounded-xl object-cover ring-2 ring-base-300" />
+                      <div>
+                        <div class="text-xs font-bold text-text-primary flex items-center gap-2">
+                          <span>{{ rev.studentName }}</span>
+                          <span class="text-[10px] text-text-secondary font-normal font-mono">• {{ rev.studentRole }}</span>
+                        </div>
+                        <div class="text-[11px] text-text-secondary truncate max-w-xs">
+                          Unit: <strong class="text-text-primary">{{ rev.itemTitle }}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-1">
+                      <div class="flex items-center text-amber-500 text-xs">
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="font-bold ml-0.5 text-text-primary">{{ rev.rating }}</span>
+                      </div>
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-tenant-100/70 text-tenant-700 dark:bg-tenant-950 dark:text-tenant-300">
+                        {{ rev.tag }}
+                      </span>
+                    </div>
                   </div>
+
+                  <p class="text-xs text-text-secondary leading-relaxed bg-base-100 p-3 rounded-xl border border-base-300/60">
+                    &ldquo;{{ rev.comment }}&rdquo;
+                  </p>
+                  <div class="text-[10px] text-text-secondary font-mono flex items-center justify-between">
+                    <span>Course: {{ rev.courseName }}</span>
+                    <span>Reviewed: {{ rev.date }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Right 1 col: Specialization & Quality Indicators -->
+          <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm p-6 space-y-5">
+            <div>
+              <h3 class="text-sm font-bold text-text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-tenant-600 text-lg">verified_user</span>
+                <span>Pedagogy &amp; QA Compliance</span>
+              </h3>
+              <p class="text-xs text-text-secondary mt-0.5">Author quality standards benchmark</p>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+              <div class="p-3.5 rounded-2xl bg-base-200/60 border border-base-300 space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-semibold text-text-primary">
+                  <span>Microlearning Video Clarity</span>
+                  <span class="text-emerald-600 font-bold">98%</span>
+                </div>
+                <div class="w-full bg-base-300 rounded-full h-1.5">
+                  <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 98%"></div>
                 </div>
               </div>
 
-              <div class="flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-xs">
-                <span class="text-[10px] text-slate-400">{{ att.uploadedAt }}</span>
-                <div class="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    (click)="openPreview(att)"
-                    class="p-1 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                    title="Preview file"
-                  >
-                    <span class="material-symbols-outlined text-base">visibility</span>
-                  </button>
-                  <button
-                    type="button"
-                    (click)="downloadAttachment(att)"
-                    class="p-1 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                    title="Download file"
-                  >
-                    <span class="material-symbols-outlined text-base">download</span>
-                  </button>
+              <div class="p-3.5 rounded-2xl bg-base-200/60 border border-base-300 space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-semibold text-text-primary">
+                  <span>SOP &amp; Document Rigor</span>
+                  <span class="text-blue-600 font-bold">94%</span>
                 </div>
+                <div class="w-full bg-base-300 rounded-full h-1.5">
+                  <div class="bg-blue-500 h-1.5 rounded-full" style="width: 94%"></div>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-2xl bg-base-200/60 border border-base-300 space-y-1.5">
+                <div class="flex items-center justify-between text-xs font-semibold text-text-primary">
+                  <span>Assessment Alignment (Rubrics)</span>
+                  <span class="text-purple-600 font-bold">91%</span>
+                </div>
+                <div class="w-full bg-base-300 rounded-full h-1.5">
+                  <div class="bg-purple-500 h-1.5 rounded-full" style="width: 91%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-base-300">
+              <div class="p-3.5 rounded-2xl bg-tenant-50 dark:bg-tenant-950/60 border border-tenant-200/60 dark:border-tenant-800/60 text-xs space-y-1.5">
+                <div class="font-bold text-tenant-800 dark:text-tenant-200 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-base">workspace_premium</span>
+                  <span>Certified Master Author</span>
+                </div>
+                <p class="text-[11px] text-text-secondary leading-relaxed">
+                  Qualified to author accredited SCORM/xAPI packages, high-stakes examination question banks, and operational SOP guidelines.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================================================= -->
+    <!-- TAB: CONTENT REPOSITORY (Aligned with Content Creation & Repository) -->
+    <!-- ========================================================================= -->
+    @if (activeTab() === 'content-repo') {
+      <div class="space-y-4 animate-fadeIn">
+        <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="text-base font-bold text-text-primary flex items-center gap-2">
+              <span class="material-symbols-outlined text-tenant-600">inventory_2</span>
+              <span>Content Creation &amp; Repository Assets</span>
+            </h2>
+            <p class="text-xs text-text-secondary mt-0.5">
+              Reusable learning objects, video modules, assessments, and reference documents authored by {{ a.name }} aligned to organizational curricula.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-xl bg-tenant-50 text-tenant-700 dark:bg-tenant-950/50 dark:text-tenant-300 border border-tenant-200/60 dark:border-tenant-800 text-xs font-bold font-mono">
+              {{ contentRepoItems().length }} Repository Assets
+            </span>
+          </div>
+        </div>
+
+        @if (contentRepoItems().length === 0) {
+          <div class="p-12 rounded-3xl bg-base-100 border border-base-300 text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-base-200 text-text-secondary flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-2xl">folder_off</span>
+            </div>
+            <h3 class="text-sm font-bold text-text-primary">No Central Content Assets Found</h3>
+            <p class="text-xs text-text-secondary max-w-md mx-auto">
+              This author has not yet published standalone items to the central Content Repository. All content currently resides within mapped course units.
+            </p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @for (item of contentRepoItems(); track item.id) {
+              <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-4 hover:border-tenant-500/40 transition-all flex flex-col justify-between">
+                <div class="space-y-3">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                      <div class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
+                        [class.bg-blue-500/10]="item.subtype === 'video'"
+                        [class.text-blue-600]="item.subtype === 'video'"
+                        [class.bg-emerald-500/10]="item.subtype === 'document'"
+                        [class.text-emerald-600]="item.subtype === 'document'"
+                        [class.bg-purple-500/10]="item.subtype === 'quiz' || item.subtype === 'exam'"
+                        [class.text-purple-600]="item.subtype === 'quiz' || item.subtype === 'exam'"
+                        [class.bg-amber-500/10]="item.subtype === 'scorm_package' || item.subtype === 'interactive_lab'"
+                        [class.text-amber-600]="item.subtype === 'scorm_package' || item.subtype === 'interactive_lab'">
+                        <span class="material-symbols-outlined text-xl">
+                          {{ item.subtype === 'video' ? 'smart_display' : (item.subtype === 'document' ? 'description' : (item.subtype === 'quiz' || item.subtype === 'exam' ? 'quiz' : 'extension')) }}
+                        </span>
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-base-200 text-text-secondary border border-base-300 font-mono">
+                            {{ item.subtype }}
+                          </span>
+                          <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-tenant-500/10 text-tenant-600 border border-tenant-500/20 font-mono">
+                            {{ item.version }}
+                          </span>
+                          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600">
+                            {{ item.status }}
+                          </span>
+                        </div>
+                        <h3 class="text-sm font-bold text-text-primary mt-1">{{ item.title }}</h3>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p class="text-xs text-text-secondary line-clamp-2 leading-relaxed">
+                    {{ item.description || 'Standard curriculum module authored with full compliance metadata.' }}
+                  </p>
+
+                  <!-- Tags -->
+                  <div class="flex flex-wrap gap-1">
+                    @for (tag of item.tags; track tag) {
+                      <span class="text-[10px] px-2 py-0.5 rounded-md bg-base-200 text-text-secondary border border-base-300">
+                        #{{ tag }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Footer: Usage & Meta -->
+                <div class="pt-3 border-t border-base-200/80 flex items-center justify-between text-xs text-text-secondary">
+                  <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm">schedule</span>
+                      <span>{{ item.durationMinutes }}m</span>
+                    </span>
+                    <span class="flex items-center gap-1 font-mono text-[11px]">
+                      <span class="material-symbols-outlined text-sm">calendar_today</span>
+                      <span>{{ item.updatedAt }}</span>
+                    </span>
+                  </div>
+
+                  <div class="flex items-center gap-1.5 font-semibold text-tenant-600">
+                    <span class="material-symbols-outlined text-sm">account_tree</span>
+                    <span>Used in {{ item.coursesUsed?.length || item.coursesUsedCount || 0 }} course(s)</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ========================================================================= -->
+    <!-- TAB: COURSE VERSION HISTORY (Audit: Which version made by whom) -->
+    <!-- ========================================================================= -->
+    @if (activeTab() === 'course-versions') {
+      <div class="space-y-4 animate-fadeIn">
+        <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="text-base font-bold text-text-primary flex items-center gap-2">
+              <span class="material-symbols-outlined text-tenant-600">history_edu</span>
+              <span>Course Version &amp; Author Audit History</span>
+            </h2>
+            <p class="text-xs text-text-secondary mt-0.5">
+              Comprehensive immutable audit ledger recording which course versions, units, and structural iterations were created or revised by {{ a.name }}.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-xl bg-tenant-50 text-tenant-700 dark:bg-tenant-950/50 dark:text-tenant-300 border border-tenant-200/60 dark:border-tenant-800 text-xs font-bold font-mono">
+              {{ courseVersionHistory().length }} Courses with Version Records
+            </span>
+          </div>
+        </div>
+
+        @if (courseVersionHistory().length === 0) {
+          <div class="p-12 rounded-3xl bg-base-100 border border-base-300 text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-base-200 text-text-secondary flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-2xl">history</span>
+            </div>
+            <h3 class="text-sm font-bold text-text-primary">No Direct Course Version Changes Logged</h3>
+            <p class="text-xs text-text-secondary max-w-md mx-auto">
+              All contributions are currently active in current baseline versions. When course versions are published or updated, version audit snapshots are automatically appended here.
+            </p>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            @for (item of courseVersionHistory(); track item.course.courseId) {
+              <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-base-200 pb-3">
+                  <div class="flex items-center gap-2.5">
+                    <span class="px-2.5 py-1 rounded-lg bg-tenant-500 text-white font-bold text-xs font-mono">
+                      {{ item.course.code }}
+                    </span>
+                    <div>
+                      <h3 class="text-sm font-bold text-text-primary">{{ item.course.title }}</h3>
+                      <p class="text-xs text-text-secondary">{{ item.course.category }} • Current Live: {{ item.course.version.label }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-base-200 font-semibold text-text-secondary">
+                      {{ item.records.length }} Version Revision(s)
+                    </span>
+                  </div>
+                </div>
+
+                <div class="space-y-3">
+                  @for (record of item.records; track record.id) {
+                    <div class="p-4 rounded-2xl bg-base-200/50 border border-base-300 space-y-2">
+                      <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="flex items-center gap-2">
+                          <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 font-mono font-bold text-xs">
+                            {{ record.versionLabel }}
+                          </span>
+                          <span class="text-xs font-bold text-text-primary">
+                            {{ record.authorRole }}
+                          </span>
+                          <span class="text-xs text-text-secondary">• {{ record.timestamp }}</span>
+                        </div>
+                        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600">
+                          {{ record.affectedUnitsCount }} Unit(s) Modified
+                        </span>
+                      </div>
+
+                      <p class="text-xs text-text-secondary font-medium">
+                        {{ record.changeSummary }}
+                      </p>
+
+                      @if (record.authoredUnits && record.authoredUnits.length > 0) {
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                          @for (unit of record.authoredUnits; track unit) {
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-base-100 text-text-secondary border border-base-300 font-medium">
+                              ✓ {{ unit }}
+                            </span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: AUTHORSHIP MATRIX & RATINGS (Details Table with Search, LMS Filter, Progress Bars) -->
+    <!-- ========================================================================= -->
+    @if (activeTab() === 'matrix') {
+      <div class="space-y-4 animate-fadeIn">
+        <!-- Control Header & Dynamic Filters -->
+        <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-4">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h2 class="text-base font-bold text-text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-tenant-600">table_chart</span>
+                <span>Authorship Matrix &amp; Granular Ratings</span>
+              </h2>
+              <p class="text-xs text-text-secondary mt-0.5">
+                Inspect specific lessons, videos, SOPs, and quizzes with course completion rates and individual feedback.
+              </p>
+            </div>
+
+            <!-- Real-Time Keyword Search Bar -->
+            <div class="relative w-full lg:w-80">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-base">search</span>
+              <input
+                type="text"
+                [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)"
+                id="input-authorship-matrix-search"
+                placeholder="Search unit, course, or lesson..."
+                class="w-full pl-9 pr-3.5 py-2 rounded-xl bg-base-200/70 border border-base-300 text-text-primary placeholder:text-text-secondary text-xs focus:outline-none focus:border-tenant-500 transition-all"
+              />
+              @if (searchQuery()) {
+                <button
+                  type="button"
+                  (click)="searchQuery.set('')"
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary p-0.5"
+                >
+                  <span class="material-symbols-outlined text-xs">close</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Dynamic Filter Selectors Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-base-300">
+            <!-- LMS Instance Filter -->
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-text-secondary font-medium shrink-0">LMS Node:</span>
+              <app-custom-select
+                [options]="lmsInstanceOptions()"
+                [value]="lmsInstanceFilter()"
+                (valueChange)="lmsInstanceFilter.set($any($event))"
+                size="sm"
+                dropdownPosition="bottom"
+                class="w-full"
+              />
+            </div>
+
+            <!-- Content Type Filter -->
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-text-secondary font-medium shrink-0">Type:</span>
+              <app-custom-select
+                [options]="contentTypeOptions"
+                [value]="contentTypeFilter()"
+                (valueChange)="contentTypeFilter.set($any($event))"
+                size="sm"
+                dropdownPosition="bottom"
+                class="w-full"
+              />
+            </div>
+
+            <!-- Course Status Filter -->
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-text-secondary font-medium shrink-0">Status:</span>
+              <app-custom-select
+                [options]="courseStatusOptions"
+                [value]="courseStatusFilter()"
+                (valueChange)="courseStatusFilter.set($any($event))"
+                size="sm"
+                dropdownPosition="bottom"
+                class="w-full"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Authorship Matrix Table -->
+        <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+          @if (filteredHistory().length === 0) {
+            <div class="p-12 text-center space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-base-200 text-text-secondary mx-auto flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">search_off</span>
+              </div>
+              <h4 class="text-sm font-bold text-text-primary">No matching authored units found</h4>
+              <p class="text-xs text-text-secondary max-w-sm mx-auto">
+                Try resetting your filters or search keywords to view all authored content records.
+              </p>
+              <button
+                type="button"
+                (click)="searchQuery.set(''); lmsInstanceFilter.set('All'); contentTypeFilter.set('All'); courseStatusFilter.set('All')"
+                class="px-4 py-2 rounded-xl bg-base-200 hover:bg-base-300 text-xs font-bold text-text-primary transition-all cursor-pointer"
+              >
+                Reset All Filters
+              </button>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="border-b border-base-300 bg-base-200/60 text-text-secondary uppercase tracking-wider text-[10px]">
+                    <th class="py-3 px-5 font-semibold">Authored Unit &amp; Title</th>
+                    <th class="py-3 px-4 font-semibold">Format / Type</th>
+                    <th class="py-3 px-4 font-semibold">Course &amp; LMS Node</th>
+                    <th class="py-3 px-4 font-semibold">Completion Rate</th>
+                    <th class="py-3 px-4 font-semibold text-center">Quality Rating</th>
+                    <th class="py-3 px-4 font-semibold text-center">Learners</th>
+                    <th class="py-3 px-4 font-semibold">Credited Date</th>
+                    <th class="py-3 px-5 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-base-300 text-text-primary">
+                  @for (rec of filteredHistory(); track rec.id) {
+                    <tr class="hover:bg-base-200/40 transition-colors group">
+                      <!-- Unit Title & Node Location -->
+                      <td class="py-3.5 px-5 font-semibold">
+                        <div class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-tenant-600 text-base">
+                            {{ getContentTypeIcon(rec.contentType) }}
+                          </span>
+                          <div>
+                            <div class="font-bold text-text-primary group-hover:text-tenant-600 transition-colors">
+                              {{ rec.contentItemTitle }}
+                            </div>
+                            @if (rec.nodeTitle) {
+                              <div class="text-[10px] text-text-secondary font-normal font-mono mt-0.5">
+                                {{ rec.nodeTitle }} • {{ rec.version }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </td>
+
+                      <!-- Format / Type -->
+                      <td class="py-3.5 px-4">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border {{ getContentTypeBadgeClass(rec.contentType) }}">
+                          {{ rec.contentType }}
+                        </span>
+                      </td>
+
+                      <!-- Course & LMS Node -->
+                      <td class="py-3.5 px-4">
+                        <div class="font-semibold text-text-primary line-clamp-1 max-w-xs">
+                          {{ rec.courseName }}
+                        </div>
+                        <div class="text-[10px] text-text-secondary font-mono mt-0.5">
+                          {{ rec.lmsName }}
+                        </div>
+                      </td>
+
+                      <!-- Course Completion Progress Bar -->
+                      <td class="py-3.5 px-4 min-w-[140px]">
+                        <div class="space-y-1">
+                          <div class="flex items-center justify-between text-[11px]">
+                            <span class="font-bold text-text-primary">{{ rec.completionRate || 92 }}%</span>
+                            <span class="text-[10px] text-text-secondary">completed</span>
+                          </div>
+                          <div class="w-full bg-base-200 rounded-full h-1.5 overflow-hidden">
+                            <div
+                              [class]="(rec.completionRate || 92) >= 90 ? 'bg-emerald-500' : 'bg-blue-500'"
+                              class="h-1.5 rounded-full"
+                              [style.width.%]="rec.completionRate || 92"
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <!-- Rating Score -->
+                      <td class="py-3.5 px-4 text-center">
+                        <div class="inline-flex items-center gap-1 px-2 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200/60 text-amber-700 dark:text-amber-300 font-bold">
+                          <span class="material-symbols-outlined text-xs">star</span>
+                          <span>{{ rec.rating || 4.9 }}</span>
+                          <span class="text-[10px] text-text-secondary font-normal font-mono">({{ rec.reviewsCount || 40 }})</span>
+                        </div>
+                      </td>
+
+                      <!-- Learners Count -->
+                      <td class="py-3.5 px-4 text-center font-mono font-semibold text-text-secondary">
+                        {{ rec.learnersCount || 1200 | number }}
+                      </td>
+
+                      <!-- Credited Date -->
+                      <td class="py-3.5 px-4 text-text-secondary font-mono text-[11px]">
+                        {{ rec.creditedDate }}
+                      </td>
+
+                      <!-- Action Buttons -->
+                      <td class="py-3.5 px-5 text-right">
+                        <div class="flex items-center justify-end gap-1">
+                          <!-- Expandable Feedback Drawer Button -->
+                          <button
+                            type="button"
+                            (click)="openFeedbackDrawer(rec)"
+                            class="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors cursor-pointer"
+                            title="Read Verified Learner Feedback"
+                          >
+                            <span class="material-symbols-outlined text-base">rate_review</span>
+                          </button>
+
+                          <!-- View Course Link -->
+                          <a
+                            [routerLink]="['/courses', rec.courseId]"
+                            class="p-1.5 rounded-lg text-text-secondary hover:text-tenant-600 hover:bg-base-200 transition-colors"
+                            title="Open Course Details"
+                          >
+                            <span class="material-symbols-outlined text-base">open_in_new</span>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: CROSS-COURSE PROVENANCE & REPOSITORY REUSE -->
+    <!-- ========================================================================= -->
+    @if (activeTab() === 'provenance') {
+      <div class="space-y-6 animate-fadeIn">
+        <div class="p-6 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 dark:text-tenant-400 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">hub</span>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-text-primary">Cross-Course Provenance &amp; Attribution Architecture</h2>
+              <p class="text-xs text-text-secondary">
+                Track how video assets, documents, and question banks authored by {{ a.name }} are reused across multiple programs and LMS branches without loss of author attribution.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Provenance Graph / Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          @for (prov of provenanceItems(); track prov.item.id) {
+            <div class="p-5 rounded-3xl bg-base-100 border border-base-300 shadow-sm space-y-4 hover:border-tenant-500/40 transition-all">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-lg">{{ getContentTypeIcon(prov.item.contentType) }}</span>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-text-primary">{{ prov.item.contentItemTitle }}</h4>
+                    <span class="text-[10px] text-text-secondary font-mono">Original Version: {{ prov.item.version }} • {{ prov.item.creditedDate }}</span>
+                  </div>
+                </div>
+
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200">
+                  {{ prov.provenanceCount }} Course Links
+                </span>
+              </div>
+
+              <!-- Reused In Nodes -->
+              <div class="space-y-2 pt-3 border-t border-base-300">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Reused &amp; Syndicated Across:</span>
+                <div class="space-y-1.5">
+                  @for (node of prov.nodes; track node) {
+                    <div class="p-2.5 rounded-xl bg-base-200/60 border border-base-300 flex items-center justify-between text-xs">
+                      <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-emerald-500 text-sm">check_circle</span>
+                        <span class="font-medium text-text-primary">{{ node }}</span>
+                      </div>
+                      <span class="text-[10px] font-mono text-text-secondary">Attributed</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="pt-2 flex items-center justify-between text-[11px] text-text-secondary font-mono">
+                <span>Rating: ⭐ {{ prov.item.rating || 4.9 }}</span>
+                <span>Graduates: {{ prov.item.learnersCount || 1000 | number }}</span>
               </div>
             </div>
           }
@@ -215,403 +1003,423 @@
     }
 
     <!-- ========================================================================= -->
-    <!-- AUTHORSHIP HISTORY SECTION (§4 - Core Value) -->
+    <!-- TAB 4: CREDENTIALS VAULT -->
     <!-- ========================================================================= -->
-    <div class="space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span class="material-symbols-outlined text-tenant-600 dark:text-tenant-400">library_books</span>
-            Authorship History & Content Credits
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Complete record of specific video lessons, documents, readings, and assessments authored by {{ a.name }} across all courses.
-          </p>
-        </div>
-
-        <!-- Filter controls -->
-        <div class="flex flex-wrap items-center gap-3">
-          <!-- Content Type Filter -->
-          <div class="flex items-center gap-1.5 text-xs text-slate-500 min-w-[180px]">
-            <span class="font-medium shrink-0">Type:</span>
-            <app-custom-select
-              [options]="contentTypeOptions"
-              [value]="contentTypeFilter()"
-              (valueChange)="contentTypeFilter.set($any($event))"
-              size="sm"
-              dropdownPosition="bottom"
-              placeholder="All Content Types"
-              class="w-full" />
-          </div>
-
-          <!-- Course Status Filter -->
-          <div class="flex items-center gap-1.5 text-xs text-slate-500 min-w-[180px]">
-            <span class="font-medium shrink-0">Status:</span>
-            <app-custom-select
-              [options]="courseStatusOptions"
-              [value]="courseStatusFilter()"
-              (valueChange)="courseStatusFilter.set($any($event))"
-              size="sm"
-              dropdownPosition="bottom"
-              placeholder="All Course Statuses"
-              class="w-full" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary Metrics Bar -->
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
-          <span class="text-[11px] font-medium text-slate-400 block">Total Authored Items</span>
-          <span class="text-lg font-bold text-slate-900 dark:text-white">{{ totalItems() }}</span>
-        </div>
-        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
-          <span class="text-[11px] font-medium text-slate-400 block">Video Lessons</span>
-          <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ videoCount() }}</span>
-        </div>
-        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
-          <span class="text-[11px] font-medium text-slate-400 block">Documents & SOPs</span>
-          <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ docCount() }}</span>
-        </div>
-        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
-          <span class="text-[11px] font-medium text-slate-400 block">Quizzes & Labs</span>
-          <span class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ quizCount() }}</span>
-        </div>
-        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs col-span-2 sm:col-span-1">
-          <span class="text-[11px] font-medium text-slate-400 block">Active Courses</span>
-          <span class="text-lg font-bold text-tenant-600 dark:text-tenant-400">{{ activeCoursesCount() }}</span>
-        </div>
-      </div>
-
-      <!-- Reused Content Architecture Note Banner -->
-      <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 flex items-start gap-3 text-xs text-slate-600 dark:text-slate-300">
-        <span class="material-symbols-outlined text-tenant-600 dark:text-tenant-400 text-lg shrink-0 mt-0.5">info</span>
-        <div class="space-y-0.5">
-          <strong class="font-semibold text-slate-900 dark:text-white">Content-Level Credit Provenance:</strong>
-          <p>
-            Unlike instructors who are tagged at the chapter/module tier, Authors are credited directly on individual learning items. When a video or document is reused across multiple courses, this author's credit is automatically maintained across all delivery instances.
-          </p>
-        </div>
-      </div>
-
-      <!-- History Table / Grid -->
-      <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/75 dark:bg-slate-800/40 text-xs font-semibold text-slate-600 dark:text-slate-300 tracking-wider">
-                <th class="py-3.5 px-4 sm:px-6">CONTENT ITEM</th>
-                <th class="py-3.5 px-4">TYPE</th>
-                <th class="py-3.5 px-4">COURSE & LMS INSTANCE</th>
-                <th class="py-3.5 px-4">STRUCTURE NODE</th>
-                <th class="py-3.5 px-4">VERSION</th>
-                <th class="py-3.5 px-4 sm:px-6 text-right">CREDITED DATE</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80 text-sm">
-              @for (rec of filteredHistory(); track rec.id) {
-                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                  <!-- Content Item Name -->
-                  <td class="py-3.5 px-4 sm:px-6">
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-base">
-                          {{ getContentTypeIcon(rec.contentType) }}
-                        </span>
-                      </div>
-                      <span class="font-semibold text-slate-900 dark:text-white">
-                        {{ rec.contentItemTitle }}
-                      </span>
-                    </div>
-                  </td>
-
-                  <!-- Type Badge -->
-                  <td class="py-3.5 px-4">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold border capitalize" [class]="getContentTypeBadgeClass(rec.contentType)">
-                      {{ rec.contentType }}
-                    </span>
-                  </td>
-
-                  <!-- Course & LMS -->
-                  <td class="py-3.5 px-4">
-                    <div class="space-y-0.5">
-                      <div class="flex items-center gap-2">
-                        <span class="font-medium text-slate-800 dark:text-slate-200">{{ rec.courseName }}</span>
-                        <span
-                          class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold"
-                          [class.bg-emerald-100]="rec.courseStatus === 'Published'"
-                          [class.text-emerald-800]="rec.courseStatus === 'Published'"
-                          [class.bg-slate-100]="rec.courseStatus !== 'Published'"
-                          [class.text-slate-600]="rec.courseStatus !== 'Published'"
-                        >
-                          {{ rec.courseStatus }}
-                        </span>
-                      </div>
-                      <div class="text-xs text-slate-500 dark:text-slate-400">
-                        {{ rec.lmsName }}
-                      </div>
-                    </div>
-                  </td>
-
-                  <!-- Structure Node -->
-                  <td class="py-3.5 px-4 text-xs text-slate-600 dark:text-slate-300">
-                    {{ rec.nodeTitle || 'Direct Lesson' }}
-                  </td>
-
-                  <!-- Version -->
-                  <td class="py-3.5 px-4">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                      {{ rec.version }}
-                    </span>
-                  </td>
-
-                  <!-- Credited Date -->
-                  <td class="py-3.5 px-4 sm:px-6 text-right text-xs text-slate-500 dark:text-slate-400">
-                    {{ rec.creditedDate }}
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="6" class="py-12 px-4 text-center">
-                    <div class="max-w-sm mx-auto space-y-2">
-                      <span class="material-symbols-outlined text-3xl text-slate-400">menu_book</span>
-                      <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">Not currently credited on any content</h3>
-                      <p class="text-xs text-slate-500 dark:text-slate-400">
-                        When courses tag {{ a.name }} to video lectures, documents, quizzes, or interactive labs, their authored items will appear here automatically.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- BLOCKED DEACTIVATION RESOLUTION MODAL (§3.4) -->
-    <!-- ========================================================================= -->
-    @if (showBlockedModal()) {
-      <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
-        <div class="w-full max-w-2xl rounded-3xl bg-base-100 border border-base-300 shadow-2xl overflow-hidden animate-modal-card">
-          <div class="p-5 border-b border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-xl">block</span>
+    @if (activeTab() === 'credentials' && a.attachments && a.attachments.length > 0) {
+      <div class="space-y-4 animate-fadeIn">
+        <div class="rounded-3xl bg-base-100 border border-base-300 shadow-sm p-6 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-base-300">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">folder_open</span>
               </div>
               <div>
-                <h3 class="text-base font-bold text-text-primary">Cannot Deactivate Author</h3>
-                <p class="text-xs text-rose-700 dark:text-rose-300 font-medium">
-                  Active Content Credits Dependency Detected
-                </p>
+                <h3 class="text-sm font-bold text-text-primary">Attached Documents, Media &amp; Author Credentials</h3>
+                <p class="text-xs text-text-secondary">{{ a.attachments.length }} file(s) available in the repository</p>
               </div>
             </div>
-            <button
-              (click)="closeBlockedModal()"
-              class="text-text-secondary hover:text-text-primary p-1.5 rounded-lg hover:bg-base-200 transition-colors cursor-pointer"
+            <a
+              [routerLink]="['/authors/edit', a.id]"
+              class="text-xs font-semibold text-tenant-600 dark:text-tenant-400 hover:underline inline-flex items-center gap-1"
             >
-              <span class="material-symbols-outlined text-lg">close</span>
-            </button>
+              <span class="material-symbols-outlined text-sm">add</span>
+              <span>Upload More</span>
+            </a>
           </div>
 
-          <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-            <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
-              <span class="font-bold">{{ a.name }}</span> is credited on
-              <span class="font-bold">{{ blockedActiveRecords().length }} content item(s)</span> in actively-delivering published course(s). Reassign or remove each credit below before deactivating this profile.
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            @for (att of a.attachments; track att.id) {
+              <div class="p-3.5 rounded-2xl bg-base-200/50 border border-base-300 hover:border-tenant-500/50 transition-all flex flex-col justify-between space-y-3 group">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-base-100 text-tenant-600 dark:text-tenant-400 flex items-center justify-center shrink-0 border border-base-300 shadow-2xs">
+                    @if (att.isImage && att.url) {
+                      <img [src]="att.url" [alt]="att.name" class="w-10 h-10 rounded-xl object-cover" />
+                    } @else {
+                      <span class="material-symbols-outlined text-xl">{{ getFileIcon(att) }}</span>
+                    }
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <span class="text-xs font-bold text-text-primary truncate block group-hover:text-tenant-600 transition-colors" [title]="att.name">
+                      {{ att.name }}
+                    </span>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-[10px] font-mono text-text-secondary">{{ att.sizeFormatted }}</span>
+                      <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-tenant-100/70 dark:bg-tenant-950 text-tenant-700 dark:text-tenant-300">
+                        {{ att.category }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            @if (blockedActiveRecords().length > 0) {
-              <div class="space-y-3">
-                @for (rec of blockedActiveRecords(); track rec.contentItemId + rec.courseId) {
-                  <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-3">
-                    <div class="flex items-start justify-between gap-3">
-                      <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                          <span class="material-symbols-outlined text-sm text-tenant-600 dark:text-tenant-400">
-                            {{ getContentTypeIcon(rec.contentType) }}
-                          </span>
-                          <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ rec.contentItemTitle }}</span>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                          <span>Course: <strong class="text-slate-700 dark:text-slate-300">{{ rec.courseName }}</strong></span>
-                          <span>•</span>
-                          <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                            {{ rec.courseStatus }}
-                          </span>
-                          <span>•</span>
-                          <span>{{ rec.lmsName }}</span>
-                          <span>•</span>
-                          <span class="font-mono">{{ rec.version }}</span>
-                        </div>
+                <div class="flex items-center justify-between pt-2 border-t border-base-300 text-xs">
+                  <span class="text-[10px] text-text-secondary">{{ att.uploadedAt }}</span>
+                  <div class="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      (click)="openPreview(att)"
+                      class="p-1 rounded-md text-text-secondary hover:bg-base-300 transition-colors cursor-pointer"
+                      title="Preview file"
+                    >
+                      <span class="material-symbols-outlined text-base">visibility</span>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="downloadAttachment(att)"
+                      class="p-1 rounded-md text-text-secondary hover:bg-base-300 transition-colors cursor-pointer"
+                      title="Download file"
+                    >
+                      <span class="material-symbols-outlined text-base">download</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ========================================================================= -->
+  <!-- EXPANDABLE FEEDBACK DRAWER (rate_review drawer / modal) -->
+  <!-- ========================================================================= -->
+  @if (activeFeedbackDrawerItem()) {
+    @let item = activeFeedbackDrawerItem()!;
+    <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
+      <div class="w-full max-w-2xl rounded-3xl bg-base-100 border border-base-300 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-modal-card">
+        <!-- Modal Header -->
+        <div class="p-5 border-b border-base-300 bg-base-200/50 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">rate_review</span>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-text-primary">Verified Learner Feedback &amp; Ratings</h3>
+              <p class="text-xs text-text-secondary truncate max-w-md">
+                {{ item.contentItemTitle }} ({{ item.courseName }})
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeFeedbackDrawer()"
+            class="text-text-secondary hover:text-text-primary p-1.5 rounded-lg cursor-pointer"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Metrics bar -->
+        <div class="p-5 bg-base-200/30 border-b border-base-300 grid grid-cols-3 gap-3 text-center text-xs">
+          <div class="p-2.5 rounded-xl bg-base-100 border border-base-300">
+            <span class="text-[10px] text-text-secondary block">Overall Rating</span>
+            <div class="text-base font-black text-amber-600 flex items-center justify-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-sm">star</span>
+              <span>{{ item.rating || 4.9 }} / 5.0</span>
+            </div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-base-100 border border-base-300">
+            <span class="text-[10px] text-text-secondary block">Completion Rate</span>
+            <div class="text-base font-black text-emerald-600 mt-0.5">
+              {{ item.completionRate || 94 }}%
+            </div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-base-100 border border-base-300">
+            <span class="text-[10px] text-text-secondary block">Learners Reached</span>
+            <div class="text-base font-black text-text-primary mt-0.5">
+              {{ item.learnersCount || 1400 | number }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback Reviews List -->
+        <div class="p-6 space-y-4 overflow-y-auto flex-1">
+          @if (!item.feedbackReviews || item.feedbackReviews.length === 0) {
+            <div class="p-8 text-center text-text-secondary text-xs">
+              <span class="material-symbols-outlined text-3xl mb-2 text-text-secondary block">reviews</span>
+              No verified student comments recorded yet for this specific unit.
+            </div>
+          } @else {
+            <div class="space-y-3">
+              @for (rev of item.feedbackReviews; track rev.id) {
+                <div class="p-4 rounded-2xl bg-base-200/50 border border-base-300 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <img [src]="rev.avatar" [alt]="rev.studentName" class="w-8 h-8 rounded-full object-cover" />
+                      <div>
+                        <div class="text-xs font-bold text-text-primary">{{ rev.studentName }}</div>
+                        <div class="text-[10px] text-text-secondary font-mono">{{ rev.studentRole }}</div>
                       </div>
                     </div>
-
-                    <div class="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                      <div class="flex items-center gap-2 flex-1">
-                        <label class="text-xs text-slate-600 dark:text-slate-400 shrink-0 font-medium">Reassign to:</label>
-                        <div class="flex-1 min-w-[200px]">
-                          <app-custom-select
-                            [options]="replacementAuthorOptions()"
-                            [value]="reassignmentSelections()[rec.contentItemId + '_' + rec.courseId] || ''"
-                            (valueChange)="setReplacementSelection(rec.contentItemId + '_' + rec.courseId, $any($event))"
-                            size="sm"
-                            placeholder="Select active author..."
-                            [searchable]="true"
-                            dropdownPosition="bottom" />
-                        </div>
-                        <button
-                          (click)="resolveItemReassign(rec)"
-                          class="px-3 py-1.5 rounded-lg bg-tenant-600 hover:bg-tenant-700 text-white text-xs font-semibold shadow-xs transition-colors shrink-0"
-                        >
-                          Reassign
-                        </button>
-                      </div>
-
-                      <div class="flex items-center gap-1.5 justify-end">
-                        <span class="text-xs text-slate-400">or</span>
-                        <button
-                          (click)="resolveItemRemove(rec)"
-                          class="px-2.5 py-1.5 rounded-lg border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold transition-colors"
-                        >
-                          Remove Credit
-                        </button>
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-tenant-100 text-tenant-700 dark:bg-tenant-950 dark:text-tenant-300">
+                        {{ rev.tag }}
+                      </span>
+                      <div class="flex items-center text-amber-500 text-xs font-bold">
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span>{{ rev.rating }}</span>
                       </div>
                     </div>
                   </div>
-                }
-              </div>
-            } @else {
-              <div class="p-6 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center space-y-2">
-                <span class="material-symbols-outlined text-3xl text-emerald-600 dark:text-emerald-400">check_circle</span>
-                <p class="text-sm font-bold text-emerald-900 dark:text-emerald-200">All Active Course Credits Resolved</p>
-                <p class="text-xs text-emerald-700 dark:text-emerald-300">
-                  There are no remaining active content dependencies. You can now safely deactivate {{ a.name }}.
-                </p>
-              </div>
-            }
-          </div>
+                  <p class="text-xs text-text-secondary leading-relaxed bg-base-100 p-3 rounded-xl border border-base-300">
+                    &ldquo;{{ rev.comment }}&rdquo;
+                  </p>
+                  <div class="text-[10px] text-text-secondary text-right font-mono">
+                    {{ rev.date }}
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
 
-          <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
-            <div class="text-xs text-slate-500">
-              Remaining items to resolve: <strong class="text-slate-900 dark:text-white">{{ blockedActiveRecords().length }}</strong>
-            </div>
-            <div class="flex items-center gap-2">
-              <button
-                (click)="closeBlockedModal()"
-                class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                (click)="finalizeDeactivationAfterResolutions()"
-                [disabled]="blockedActiveRecords().length > 0"
-                [class.opacity-50]="blockedActiveRecords().length > 0"
-                [class.cursor-not-allowed]="blockedActiveRecords().length > 0"
-                class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold shadow-sm transition-all"
-              >
-                Confirm Deactivation
-              </button>
-            </div>
-          </div>
+        <!-- Modal Footer -->
+        <div class="p-4 border-t border-base-300 bg-base-200/50 flex justify-end">
+          <button
+            type="button"
+            (click)="closeFeedbackDrawer()"
+            class="px-5 py-2 rounded-xl bg-tenant-600 hover:bg-tenant-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+          >
+            Close Feedback Drawer
+          </button>
         </div>
       </div>
-    }
+    </div>
+  }
 
-    <!-- Document / Media Preview Modal -->
-    @if (previewModalAttachment()) {
-      @let att = previewModalAttachment()!;
-      <div 
-        class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/75 backdrop-blur-md z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop"
-        (click)="closePreview()">
-        <div 
-          class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh] animate-modal-card"
-          (click)="$event.stopPropagation()">
-          <!-- Modal Header -->
-          <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/50">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 dark:text-tenant-400 flex items-center justify-center shrink-0 border border-tenant-200/50 dark:border-tenant-800/50">
-                <span class="material-symbols-outlined text-xl">{{ getFileIcon(att) }}</span>
-              </div>
-              <div class="min-w-0">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate" [title]="att.name">{{ att.name }}</h3>
-                <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  <span class="font-mono">{{ att.sizeFormatted }}</span>
-                  <span>•</span>
-                  <span class="font-semibold text-tenant-600 dark:text-tenant-400">{{ att.category }}</span>
-                </div>
-              </div>
+  <!-- ========================================================================= -->
+  <!-- BLOCKED DEACTIVATION MODAL -->
+  <!-- ========================================================================= -->
+  @if (showBlockedModal() && author()) {
+    <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/60 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
+      <div class="w-full max-w-2xl rounded-3xl bg-base-100 border border-base-300 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-modal-card">
+        <div class="p-5 border-b border-red-500/20 bg-red-500/10 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-600 flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">gavel</span>
             </div>
-            <button
-              type="button"
-              (click)="closePreview()"
-              class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <span class="material-symbols-outlined text-xl">close</span>
-            </button>
+            <div>
+              <h3 class="text-base font-bold text-text-primary">Author Deactivation Blocked</h3>
+              <p class="text-xs text-text-secondary">
+                {{ author()!.name }} has {{ blockedActiveRecords().length }} active authored unit(s)
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeBlockedModal()"
+            class="text-text-secondary hover:text-text-primary p-1.5 rounded-lg"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+          <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 leading-relaxed">
+            <strong>Rule Engine Requirement:</strong> Please reassign or remove active author attribution before deactivating this author profile.
           </div>
 
-          <!-- Modal Body Preview -->
-          <div class="p-6 overflow-y-auto flex-1 flex flex-col items-center justify-center bg-slate-100/50 dark:bg-slate-950/40 min-h-[300px]">
-            @if (att.isImage && att.url) {
-              <div class="max-h-[60vh] flex items-center justify-center overflow-hidden rounded-2xl shadow-md border border-slate-200 dark:border-slate-800">
-                <img [src]="att.url" [alt]="att.name" class="max-h-[55vh] max-w-full object-contain" />
-              </div>
-            } @else {
-              <div class="text-center space-y-4 max-w-md p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="w-16 h-16 rounded-2xl bg-tenant-50 dark:bg-tenant-950/60 text-tenant-600 dark:text-tenant-400 flex items-center justify-center mx-auto border border-tenant-200/60 dark:border-tenant-800/60">
-                  <span class="material-symbols-outlined text-3xl">{{ getFileIcon(att) }}</span>
+          <div class="space-y-3">
+            @for (rec of blockedActiveRecords(); track rec.id) {
+              <div class="p-4 rounded-xl bg-base-200/70 border border-base-300 space-y-2">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="font-bold text-text-primary">{{ rec.contentItemTitle }}</div>
+                    <div class="text-[11px] text-text-secondary mt-0.5">
+                      Course: <strong>{{ rec.courseName }}</strong> • LMS: {{ rec.lmsName }}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 class="text-base font-bold text-slate-900 dark:text-white">{{ att.name }}</h4>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
-                    File Type: {{ att.type }} • Size: {{ att.sizeFormatted }}
-                  </p>
-                  <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                    Document or media asset attached to this profile.
-                  </p>
+
+                <div class="pt-2 border-t border-base-300 flex items-center justify-between gap-3">
+                  <div class="flex-1 max-w-sm">
+                    <app-custom-select
+                      [options]="replacementAuthorOptions()"
+                      [value]="reassignmentSelections()[rec.contentItemId + '_' + rec.courseId] || ''"
+                      (valueChange)="setReplacementSelection(rec.contentItemId + '_' + rec.courseId, $any($event))"
+                      size="sm"
+                      placeholder="-- Select Replacement Author --"
+                      dropdownPosition="bottom"
+                    />
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      (click)="resolveItemReassign(rec)"
+                      class="px-3 py-1.5 rounded-xl bg-tenant-600 text-white text-xs font-semibold hover:bg-tenant-700"
+                    >
+                      Reassign
+                    </button>
+                    <button
+                      type="button"
+                      (click)="resolveItemRemove(rec)"
+                      class="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               </div>
             }
           </div>
+        </div>
 
-          <!-- Modal Footer -->
-          <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-white dark:bg-slate-900">
-            <span class="text-xs text-slate-400">Uploaded: {{ att.uploadedAt }}</span>
-            <div class="flex items-center gap-2">
+        <div class="p-4 border-t border-base-300 bg-base-200/50 flex items-center justify-between">
+          <button
+            type="button"
+            (click)="closeBlockedModal()"
+            class="px-4 py-2 rounded-xl border border-base-300 text-xs font-semibold text-text-secondary hover:bg-base-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="finalizeDeactivationAfterResolutions()"
+            class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all"
+          >
+            Finalize Deactivation
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- TAG AS INSTRUCTOR MODAL -->
+  <!-- ========================================================================= -->
+  @if (showTagInstructorModal()) {
+    <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/70 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
+      <div class="w-full max-w-lg rounded-3xl bg-base-100 border border-base-300 shadow-2xl overflow-hidden flex flex-col animate-modal-card">
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-base-300 bg-amber-50/50 dark:bg-amber-950/30 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl">school</span>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-text-primary">Tag Author as Instructor</h3>
+              <p class="text-xs text-text-secondary">Enable Faculty Instruction role for {{ a.name }}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeTagInstructorModal()"
+            class="text-text-secondary hover:text-text-primary p-1.5 rounded-xl hover:bg-base-200 transition-colors"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-4">
+          <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 flex items-start gap-3">
+            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg mt-0.5">info</span>
+            <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+              This action creates an linked <strong>Instructor Profile</strong> for <strong>{{ a.name }}</strong> in the Faculty Pool. They will be available for assignment across courses, delivery layers, webinars, and classroom cohorts.
+            </p>
+          </div>
+
+          <!-- Academic Title -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-text-primary">Faculty / Instructional Title</label>
+            <input
+              type="text"
+              [value]="tagInstructorTitle()"
+              (input)="tagInstructorTitle.set($any($event.target).value)"
+              placeholder="e.g. Senior Faculty Instructor, Lead Field Trainer"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-base-100 border border-base-300 text-xs font-medium text-text-primary focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+            />
+          </div>
+
+          <!-- Department -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-text-primary">Academic Department</label>
+            <input
+              type="text"
+              [value]="tagInstructorDepartment()"
+              (input)="tagInstructorDepartment.set($any($event.target).value)"
+              placeholder="e.g. BRAC Microfinance Academy, Pedagogy Division"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-base-100 border border-base-300 text-xs font-medium text-text-primary focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+            />
+          </div>
+
+          <!-- Teaching Specialization -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-text-primary">Teaching Specializations (comma separated)</label>
+            <input
+              type="text"
+              [value]="tagInstructorSpecialization()"
+              (input)="tagInstructorSpecialization.set($any($event.target).value)"
+              placeholder="e.g. Financial Inclusion, SME Loan Appraisal, Credit Risk"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-base-100 border border-base-300 text-xs font-medium text-text-primary focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+            />
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-4 border-t border-base-300 bg-base-200/50 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            (click)="closeTagInstructorModal()"
+            class="px-4 py-2.5 rounded-xl border border-base-300 text-xs font-semibold text-text-secondary hover:bg-base-200 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="confirmTagAsInstructor()"
+            [disabled]="isTaggingInstructor()"
+            id="btn-confirm-tag-as-instructor"
+            class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm transition-all inline-flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <span class="material-symbols-outlined text-base">school</span>
+            <span>Confirm &amp; Tag as Instructor</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- ATTACHMENT PREVIEW MODAL -->
+  <!-- ========================================================================= -->
+  @if (previewModalAttachment()) {
+    @let att = previewModalAttachment()!;
+    <div class="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-black/70 backdrop-blur-sm z-[999999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-modal-backdrop">
+      <div class="w-full max-w-3xl rounded-3xl bg-base-100 border border-base-300 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-modal-card">
+        <div class="p-4 border-b border-base-300 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-tenant-600">{{ getFileIcon(att) }}</span>
+            <span class="text-sm font-bold text-text-primary truncate max-w-sm">{{ att.name }}</span>
+          </div>
+          <button
+            type="button"
+            (click)="closePreview()"
+            class="text-text-secondary hover:text-text-primary p-1 rounded-lg"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1 flex items-center justify-center bg-base-200/40">
+          @if (att.isImage && att.url) {
+            <img [src]="att.url" [alt]="att.name" class="max-h-[60vh] max-w-full rounded-2xl object-contain shadow-md" />
+          } @else {
+            <div class="text-center space-y-3 p-8">
+              <span class="material-symbols-outlined text-6xl text-tenant-600">{{ getFileIcon(att) }}</span>
+              <h4 class="text-base font-bold text-text-primary">{{ att.name }}</h4>
+              <p class="text-xs text-text-secondary font-mono">{{ att.sizeFormatted }} • {{ att.category }}</p>
               <button
                 type="button"
                 (click)="downloadAttachment(att)"
-                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-tenant-600 hover:bg-tenant-700 text-white text-xs font-bold transition-colors shadow-xs cursor-pointer"
+                class="px-5 py-2.5 rounded-xl bg-tenant-600 text-white text-xs font-bold hover:bg-tenant-700 transition-all inline-flex items-center gap-2"
               >
-                <span class="material-symbols-outlined text-sm">download</span>
-                <span>Download File</span>
-              </button>
-              <button
-                type="button"
-                (click)="closePreview()"
-                class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Close
+                <span class="material-symbols-outlined text-base">download</span>
+                <span>Download Document</span>
               </button>
             </div>
-          </div>
+          }
         </div>
       </div>
-    }
-
-  } @else {
-    <div class="p-12 text-center space-y-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-      <span class="material-symbols-outlined text-4xl text-slate-400">person_off</span>
-      <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200">Author Profile Not Found</h2>
-      <p class="text-sm text-slate-500">The requested author profile does not exist or has been removed.</p>
-      <a
-        routerLink="/authors"
-        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-tenant-600 text-white text-sm font-semibold shadow-sm"
-      >
-        <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Return to Authors Grid
-      </a>
     </div>
   }
 </div>

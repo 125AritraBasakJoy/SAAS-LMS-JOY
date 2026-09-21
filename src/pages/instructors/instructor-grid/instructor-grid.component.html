@@ -618,8 +618,11 @@
 
         <!-- Resolution Items Table -->
         <div class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
-          <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 leading-relaxed">
-            <strong>Mandatory Governance Policy:</strong> An instructor cannot be deactivated while actively tagged to published course delivery layers. For each course layer below, select a replacement Active instructor or choose to remove the tag.
+          <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 leading-relaxed flex items-start gap-2.5">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-lg shrink-0 mt-0.5">policy</span>
+            <div>
+              <strong>Mandatory Reassignment Policy:</strong> LMS administrators cannot remove instructors from active course layers without reassigning them. Select a qualified replacement instructor for each active course layer below before deactivating this profile.
+            </div>
           </div>
 
           <div class="space-y-3">
@@ -638,14 +641,14 @@
                 </div>
 
                 <div class="pt-2 border-t border-base-300 flex items-center justify-between gap-3">
-                  <span class="text-xs font-semibold text-text-primary">Resolution Action:</span>
+                  <span class="text-xs font-semibold text-text-primary">Assign Replacement:</span>
                   <div class="flex-1 max-w-sm">
                     <app-custom-select
                       [options]="resolutionOptions()"
                       [value]="reassignmentSelections()[rec.id] || ''"
                       (valueChange)="setResolutionAction(rec.id, $any($event))"
                       size="sm"
-                      placeholder="-- Choose Resolution Action --"
+                      placeholder="-- Select Replacement Instructor --"
                       [searchable]="true"
                       dropdownPosition="bottom" />
                   </div>
@@ -667,9 +670,10 @@
           <button
             type="button"
             (click)="resolveAndDeactivate()"
-            class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition-all"
+            class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5"
           >
-            Apply Resolutions &amp; Deactivate
+            <span class="material-symbols-outlined text-sm">swap_horiz</span>
+            Reassign All &amp; Deactivate
           </button>
         </div>
       </div>
