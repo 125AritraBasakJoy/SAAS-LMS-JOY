@@ -43,13 +43,11 @@ export class VenueGridComponent implements OnInit {
   // Search & Filters
   searchQuery = signal<string>('');
   selectedStatuses = signal<string[]>([]); // active | inactive
-  selectedCategory = signal<'all' | 'brac_internal' | 'external'>('all');
   selectedCity = signal<string>('all');
   selectedFacility = signal<string>('all'); // all | internet | parking | accessibility
   sortBy = signal<string>('newest'); // newest | oldest | name_asc | name_desc | capacity_desc | rooms_desc
 
   draftStatuses = signal<string[]>([]);
-  draftCategory = signal<'all' | 'brac_internal' | 'external'>('all');
   draftCity = signal<string>('all');
   draftFacility = signal<string>('all');
 
@@ -121,21 +119,16 @@ export class VenueGridComponent implements OnInit {
   filteredVenues = computed(() => {
     let list = this.lmsData.venues();
     const q = this.searchQuery().toLowerCase().trim();
-    const cat = this.selectedCategory();
     const city = this.selectedCity();
     const facility = this.selectedFacility();
     const sort = this.sortBy();
-
-    if (cat !== 'all') {
-      list = list.filter(v => (v.venueCategory || 'brac_internal') === cat);
-    }
 
     if (q) {
       list = list.filter(v => 
         v.name.toLowerCase().includes(q) ||
         v.code.toLowerCase().includes(q) ||
         v.address.city.toLowerCase().includes(q) ||
-        v.address.formatted?.toLowerCase().includes(q) ||
+        v.address.formatted.toLowerCase().includes(q) ||
         v.rooms.some(r => r.name.toLowerCase().includes(q))
       );
     }
@@ -165,14 +158,11 @@ export class VenueGridComponent implements OnInit {
     });
   });
 
-  // Telemetry summaries & categories
+  // Telemetry summaries
   totalVenuesCount = computed(() => this.lmsData.venues().length);
   activeVenuesCount = computed(() => this.lmsData.venues().filter(v => v.status === 'active').length);
-  internalVenuesCount = computed(() => this.lmsData.venues().filter(v => (v.venueCategory || 'brac_internal') === 'brac_internal').length);
-  externalVenuesCount = computed(() => this.lmsData.venues().filter(v => v.venueCategory === 'external').length);
   totalRoomsCount = computed(() => this.lmsData.venues().reduce((acc, v) => acc + v.rooms.length, 0));
   totalLearnerCapacity = computed(() => this.lmsData.venues().reduce((acc, v) => acc + calculateVenueTotalCapacity(v), 0));
-  isLmsAdmin = computed(() => this.lmsData.activeRole() === 'lms_admin');
 
   ngOnInit(): void {
     this.initRoomForm();
@@ -382,27 +372,20 @@ export class VenueGridComponent implements OnInit {
     this.draftStatuses.set([...this.selectedStatuses()]);
   }
 
-  setCategoryFilter(category: 'all' | 'brac_internal' | 'external'): void {
-    this.selectedCategory.set(category);
-    this.draftCategory.set(category);
-  }
-
   activeFilterCount = computed(() => {
     let count = 0;
     count += this.selectedStatuses().length;
-    if (this.selectedCategory() !== 'all') count++;
     if (this.selectedCity() !== 'all') count++;
     if (this.selectedFacility() !== 'all') count++;
     return count;
   });
 
-  hasActiveFilters = computed(() => this.searchQuery().trim() !== '' || this.selectedCategory() !== 'all' || this.activeFilterCount() > 0);
+  hasActiveFilters = computed(() => this.searchQuery().trim() !== '' || this.activeFilterCount() > 0);
 
   onFilterToggle(isOpen: boolean): void {
     this.isFilterPanelOpen.set(isOpen);
     if (isOpen) {
       this.draftStatuses.set([...this.selectedStatuses()]);
-      this.draftCategory.set(this.selectedCategory());
       this.draftCity.set(this.selectedCity());
       this.draftFacility.set(this.selectedFacility());
     }
@@ -410,7 +393,6 @@ export class VenueGridComponent implements OnInit {
 
   applyFilters(): void {
     this.selectedStatuses.set([...this.draftStatuses()]);
-    this.selectedCategory.set(this.draftCategory());
     this.selectedCity.set(this.draftCity());
     this.selectedFacility.set(this.draftFacility());
     this.isFilterPanelOpen.set(false);
@@ -420,8 +402,6 @@ export class VenueGridComponent implements OnInit {
     this.searchQuery.set('');
     this.selectedStatuses.set([]);
     this.draftStatuses.set([]);
-    this.selectedCategory.set('all');
-    this.draftCategory.set('all');
     this.selectedCity.set('all');
     this.selectedFacility.set('all');
     this.draftCity.set('all');

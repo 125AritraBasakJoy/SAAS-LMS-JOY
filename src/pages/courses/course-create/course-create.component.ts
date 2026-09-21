@@ -20,22 +20,18 @@ import {
 import { Skill } from '../../../models/skill-mapping.model';
 import { BadgeTemplate } from '../../../models/badge-template.model';
 import { CertificateTemplate, CanvasElement, PLACEHOLDER_TOKENS } from '../../../models/certificate-template.model';
-import { Venue, VenueRoom, VenueCategory, calculateVenueTotalCapacity, getRoomAmenitiesList } from '../../../models/venue.model';
 import { CustomSelectComponent, SelectOption } from '../../../components/custom-select/custom-select.component';
 import { StepperComponent, StepperStep } from '../../../components/stepper/stepper.component';
-import { ModalOverlayComponent } from '../../../components/modal-overlay/modal-overlay.component';
 
 @Component({
   selector: 'app-course-create',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule, CustomSelectComponent, StepperComponent, ModalOverlayComponent],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule, CustomSelectComponent, StepperComponent],
   templateUrl: './course-create.component.html'
 })
 export class CourseCreateComponent implements OnInit {
   lmsService = inject(LmsDataService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
-  getRoomAmenitiesList = getRoomAmenitiesList;
   private fb = inject(FormBuilder);
   private confirmModal = inject(ConfirmationModalService);
 
@@ -218,47 +214,6 @@ export class CourseCreateComponent implements OnInit {
     return this.layerLabelPresets.filter(p => p.count === this.selectedLayerCount());
   });
 
-  activePreset = computed<LayerLabelPreset>(() => {
-    const currentCount = this.selectedLayerCount();
-    const l1 = this.layer1Label() || 'Chapter';
-    const l2 = this.layer2Label() || 'Topic';
-    const l3 = this.layer3Label() || 'Lesson';
-
-    const found = this.layerLabelPresets.find(p => 
-      p.count === currentCount &&
-      p.labels[0] === l1 &&
-      (p.count < 2 || p.labels[1] === l2) &&
-      (p.count < 3 || p.labels[2] === l3)
-    );
-    if (found) return found;
-
-    const labels = [l1];
-    if (currentCount >= 2) labels.push(l2);
-    if (currentCount >= 3) labels.push(l3);
-
-    return {
-      name: `Custom ${currentCount}-Tier (${labels.join(' / ')})`,
-      count: currentCount,
-      labels,
-      icon: currentCount === 3 ? 'account_tree' : (currentCount === 2 ? 'view_agenda' : 'inventory_2'),
-      description: `Custom configured ${currentCount}-tier hierarchy for specialized course delivery`,
-      badge: `Custom ${currentCount}-Tier`,
-      previewImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80',
-      previewTheme: {
-        accentColor: 'tenant',
-        bgGradient: 'from-slate-900 via-slate-900/95 to-slate-950',
-        sampleRoot: `${l1} 1: Foundational Framework`,
-        sampleMid: currentCount >= 2 ? `${l2} 1.1: Core Concepts` : undefined,
-        sampleLeaf: currentCount === 3 ? `${l3} 1.1.1: Applied Practice` : undefined,
-        sampleContent: [
-          { title: 'Overview & Orientation Video', type: 'video', duration: '15 min' },
-          { title: 'Interactive Practice Lab', type: 'lab', duration: '20 min', isSubscription: true },
-          { title: 'Knowledge Verification Quiz', type: 'quiz', duration: '15 min' }
-        ]
-      }
-    };
-  });
-
   isPresetActive(preset: LayerLabelPreset): boolean {
     if (this.selectedLayerCount() !== preset.count) return false;
     if (this.layer1Label() !== (preset.labels[0] || '')) return false;
@@ -355,122 +310,6 @@ export class CourseCreateComponent implements OnInit {
     return this.lmsService.certificateTemplates().find(c => c.id === id) || null;
   });
 
-  // Step 4: Physical Venue & Delivery Configuration
-  deliveryMode = signal<'online' | 'in_person' | 'blended' | 'hybrid'>('blended');
-  venueCategoryFilter = signal<'all' | 'brac_internal' | 'external'>('all');
-  selectedVenueId = signal<string>('ven-dhk-01');
-  selectedRoomId = signal<string>('room-dhk-101');
-  isVenueDetailModalOpen = signal<boolean>(false);
-  venueDetailTarget = signal<Venue | null>(null);
-
-  deliveryModeOptions: SelectOption[] = [
-    { value: 'blended', label: 'Blended Delivery (Online & Physical Venue)', sublabel: 'Combines digital e-learning with in-person classroom sessions', icon: 'hub' },
-    { value: 'in_person', label: 'In-Person Delivery (Classroom / Lab)', sublabel: 'Held physically at training center / campus facilities', icon: 'domain' },
-    { value: 'hybrid', label: 'Hybrid Simultaneous (Sync Classroom & Remote)', sublabel: 'Live broadcast classroom with online participation', icon: 'cast_for_education' },
-    { value: 'online', label: '100% Online Delivery (Virtual Only)', sublabel: 'Self-paced and live webinar delivery without physical room', icon: 'laptop_chromebook' }
-  ];
-
-  selectedVenue = computed<Venue | null>(() => {
-    const id = this.selectedVenueId();
-    if (!id) return null;
-    return this.lmsService.venues().find(v => v.venueId === id) || null;
-  });
-
-  selectedRoom = computed<VenueRoom | null>(() => {
-    const venue = this.selectedVenue();
-    const roomId = this.selectedRoomId();
-    if (!venue || !roomId) return null;
-    return venue.rooms.find(r => r.roomId === roomId) || null;
-  });
-
-  filteredVenuesForStep4 = computed<Venue[]>(() => {
-    const cat = this.venueCategoryFilter();
-    const list = this.lmsService.venues().filter(v => v.status === 'active');
-    if (cat === 'all') return list;
-    return list.filter(v => (v.venueCategory || 'brac_internal') === cat);
-  });
-
-  venueOptions = computed<SelectOption[]>(() => {
-    const list: SelectOption[] = [
-      { value: '', label: 'No Physical Venue Attached', sublabel: 'Proceed without booking a physical training facility', icon: 'location_off' }
-    ];
-    this.filteredVenuesForStep4().forEach(v => {
-      const isExternal = v.venueCategory === 'external';
-      list.push({
-        value: v.venueId,
-        label: `${v.name} (${v.code})`,
-        sublabel: `${isExternal ? '🏨 External Partner' : '🏛️ BRAC Internal'} • ${v.address.city} • ${v.rooms.length} Rooms • ${calculateVenueTotalCapacity(v)} Seats`,
-        badge: isExternal ? 'External' : 'BRAC',
-        badgeClass: isExternal 
-          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60'
-          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60',
-        icon: isExternal ? 'hotel' : 'domain'
-      });
-    });
-    return list;
-  });
-
-  roomOptions = computed<SelectOption[]>(() => {
-    const venue = this.selectedVenue();
-    if (!venue || !venue.rooms || venue.rooms.length === 0) {
-      return [{ value: '', label: 'No specific room designated (Whole facility)', icon: 'domain' }];
-    }
-    const list: SelectOption[] = [
-      { value: '', label: 'Unspecified Room / Entire Facility', sublabel: 'Room assignment decided closer to delivery date', icon: 'meeting_room' }
-    ];
-    venue.rooms.forEach(r => {
-      const amenitiesText = getRoomAmenitiesList(r.amenities).slice(0, 3).join(', ');
-      list.push({
-        value: r.roomId,
-        label: `${r.name} (${r.capacity} seats)`,
-        sublabel: `${r.floorLevel || 'Ground Floor'} • ${amenitiesText}`,
-        badge: `${r.capacity} Seats`,
-        icon: 'meeting_room'
-      });
-    });
-    return list;
-  });
-
-  setVenueCategoryFilter(cat: 'all' | 'brac_internal' | 'external'): void {
-    this.venueCategoryFilter.set(cat);
-  }
-
-  onVenueChange(venueId: string): void {
-    this.selectedVenueId.set(venueId);
-    if (!venueId) {
-      this.selectedRoomId.set('');
-      return;
-    }
-    const v = this.lmsService.venues().find(x => x.venueId === venueId);
-    if (v && v.rooms && v.rooms.length > 0) {
-      this.selectedRoomId.set(v.rooms[0].roomId);
-    } else {
-      this.selectedRoomId.set('');
-    }
-  }
-
-  onRoomChange(roomId: string): void {
-    this.selectedRoomId.set(roomId);
-  }
-
-  openVenueDetailModal(venue?: Venue | null): void {
-    const target = venue || this.selectedVenue();
-    if (target) {
-      this.venueDetailTarget.set(target);
-      this.isVenueDetailModalOpen.set(true);
-    }
-  }
-
-  closeVenueDetailModal(): void {
-    this.isVenueDetailModalOpen.set(false);
-    this.venueDetailTarget.set(null);
-  }
-
-  clearVenue(): void {
-    this.selectedVenueId.set('');
-    this.selectedRoomId.set('');
-  }
-
   // Skill management helpers
   onSkillSelectionChange(value: any) {
     if (Array.isArray(value)) {
@@ -546,7 +385,7 @@ export class CourseCreateComponent implements OnInit {
       if (token === '{{completion_date}}' || token === '{{date}}' || token === '{{issue_date}}') return dateStr;
       if (token === '{{certificate_id}}' || token === '{{serial_number}}') return 'BRAC-CERT-2026-98214';
       if (token === '{{grade}}') return '96.5% (Distinction)';
-      if (token === '{{trainer_name}}') return 'Lead Instructor';
+      if (token === '{{trainer_name}}') return 'Lead Faculty Instructor';
       if (token === '{{signatory_name}}') return 'Dr. Karim Rahman';
       if (token === '{{signatory_designation}}') return 'Director of Academic Affairs';
       if (token === '{{organization_name}}') return 'BRAC Learning Institute';
@@ -581,7 +420,6 @@ export class CourseCreateComponent implements OnInit {
   reviewsConfig = signal<CourseReviewsConfig>({
     contentReviewsEnabled: true,
     instructorReviewsEnabled: true,
-    authorReviewsEnabled: true,
     scale: '5-star-likert'
   });
 
@@ -589,19 +427,6 @@ export class CourseCreateComponent implements OnInit {
   showContentModal = signal<boolean>(false);
   activeTargetNodeId = signal<string | null>(null);
   activeEditContentId = signal<string | null>(null);
-
-  // Subscription / Monetization model options
-  subscriptionAccessOptions: SelectOption[] = [
-    { value: 'standard_enrolled', label: 'Standard Course Enrollment', sublabel: 'Included for all enrolled learners in this course', icon: 'lock_open' },
-    { value: 'subscription_only', label: 'Subscription / Premium Pass Only', sublabel: 'Gated for active subscribers with premium membership', icon: 'workspace_premium' },
-    { value: 'free_preview', label: 'Free Public Preview', sublabel: 'Available to prospective learners before enrolling', icon: 'visibility' }
-  ];
-
-  subscriptionTierOptions: SelectOption[] = [
-    { value: 'all_plans', label: 'All Active Subscriptions', sublabel: 'Starter, Pro, and Enterprise membership tiers', icon: 'card_membership' },
-    { value: 'pro_plus', label: 'Pro & Enterprise Tier Only', sublabel: 'Requires Pro Tier or higher subscription', icon: 'star' },
-    { value: 'enterprise', label: 'Enterprise Executive Pass', sublabel: 'Exclusive to enterprise organization licenses', icon: 'diamond' }
-  ];
 
   contentForm: FormGroup = this.fb.group({
     title: ['', Validators.required],
@@ -613,10 +438,7 @@ export class CourseCreateComponent implements OnInit {
     passingScorePct: [80],
     instructions: [''],
     mediaUrl: [''],
-    instructorId: ['__topic__'],
-    isSubscriptionRequired: [false],
-    subscriptionTier: ['all_plans'],
-    accessModel: ['standard_enrolled']
+    instructorId: ['__topic__']
   });
 
   contentModalInstructorOptions = computed<SelectOption[]>(() => {
@@ -685,21 +507,17 @@ export class CourseCreateComponent implements OnInit {
     this.layer2Label.set('Topic');
     this.layer3Label.set('Lesson');
 
-    // Default Step 4 Skills, Credentials & Physical Venue
+    // Default Step 4 Skills & Credentials
     this.selectedSkillIds.set(['skl-001', 'skl-002']);
     this.selectedBadgeId.set('BDG-1001');
     this.selectedCertificateId.set('CERT-TMP-1972-01');
-    this.deliveryMode.set('blended');
-    this.venueCategoryFilter.set('all');
-    this.selectedVenueId.set('ven-dhk-01');
-    this.selectedRoomId.set('room-dhk-101');
 
     const defaultInst = this.lmsService.instructorsRepo()[0] || {
       id: user.id,
       name: user.name,
       email: user.email,
       avatar: user.avatar,
-      title: 'Senior Lead Instructor',
+      title: 'Senior Faculty Lead',
       department: 'Instructional Design',
       specialization: ['Compliance']
     };
@@ -815,7 +633,7 @@ export class CourseCreateComponent implements OnInit {
     this.structureNodes.set(JSON.parse(JSON.stringify(course.structure)));
     this.reviewsConfig.set({ ...course.reviewsConfig });
 
-    // Step 4: Skills, Badge, Certificate & Physical Venue Attachment
+    // Step 4: Skills, Badge and Certificate credentials
     if (course.skills && course.skills.length > 0) {
       this.selectedSkillIds.set([...course.skills]);
     } else {
@@ -826,18 +644,6 @@ export class CourseCreateComponent implements OnInit {
     }
     if (course.certificateTemplateId !== undefined) {
       this.selectedCertificateId.set(course.certificateTemplateId);
-    }
-    if (course.deliveryMode) {
-      this.deliveryMode.set(course.deliveryMode);
-    }
-    if (course.venueId !== undefined) {
-      this.selectedVenueId.set(course.venueId || '');
-    }
-    if (course.roomId !== undefined) {
-      this.selectedRoomId.set(course.roomId || '');
-    }
-    if (course.venueCategory) {
-      this.venueCategoryFilter.set(course.venueCategory);
     }
 
     // Determine instructor tagged layer
@@ -1718,10 +1524,7 @@ export class CourseCreateComponent implements OnInit {
       passingScorePct: 80,
       instructions: '',
       mediaUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-      instructorId: topicInst ? '__topic__' : '',
-      isSubscriptionRequired: false,
-      subscriptionTier: 'all_plans',
-      accessModel: 'standard_enrolled'
+      instructorId: topicInst ? '__topic__' : ''
     });
     this.showContentModal.set(true);
   }
@@ -1734,8 +1537,6 @@ export class CourseCreateComponent implements OnInit {
       ? item.instructorTags[0].id
       : (parentNode && this.getNodeInstructor(parentNode) ? '__topic__' : '');
 
-    const isSub = item.isSubscriptionRequired || item.accessModel === 'subscription_only';
-
     this.contentForm.patchValue({
       title: item.title,
       family: item.family,
@@ -1746,26 +1547,9 @@ export class CourseCreateComponent implements OnInit {
       passingScorePct: item.assessment?.passingScorePercent || 80,
       instructions: item.assessment?.instructions || '',
       mediaUrl: item.learning?.mediaUrl || '',
-      instructorId: instId,
-      isSubscriptionRequired: isSub,
-      subscriptionTier: item.subscriptionTier || 'all_plans',
-      accessModel: item.accessModel || (isSub ? 'subscription_only' : 'standard_enrolled')
+      instructorId: instId
     });
     this.showContentModal.set(true);
-  }
-
-  toggleContentSubscription(nodeId: string, item: CourseContentItem) {
-    item.isSubscriptionRequired = !item.isSubscriptionRequired;
-    item.accessModel = item.isSubscriptionRequired ? 'subscription_only' : 'standard_enrolled';
-    this.structureNodes.set([...this.structureNodes()]);
-    this.lmsService.showToast(
-      item.isSubscriptionRequired 
-        ? `"${item.title}" is now marked as Subscription-Gated.` 
-        : `"${item.title}" is now included with Standard Enrollment.`,
-      'info',
-      2500,
-      'Subscription Model'
-    );
   }
 
   saveContentItem() {
@@ -1787,17 +1571,12 @@ export class CourseCreateComponent implements OnInit {
       if (foundInst) itemInstructors = [foundInst];
     }
 
-    const isSub = val.accessModel === 'subscription_only' || !!val.isSubscriptionRequired;
-
     const contentItem: CourseContentItem = {
       contentId: this.activeEditContentId() || `cnt-${Date.now()}`,
       title: val.title.trim(),
       family: val.family,
       order: 1,
       instructorTags: itemInstructors,
-      isSubscriptionRequired: isSub,
-      subscriptionTier: val.subscriptionTier || 'all_plans',
-      accessModel: val.accessModel || (isSub ? 'subscription_only' : 'standard_enrolled'),
       learning: val.family === 'learning' ? {
         subtype: val.learningSubtype,
         durationMinutes: val.durationMinutes,
@@ -1942,191 +1721,22 @@ export class CourseCreateComponent implements OnInit {
     return list.filter(entry => entry.item.family === filter);
   }
 
-  // Global Author pool options for content tagging
-  authorPoolOptions = computed<SelectOption[]>(() => {
-    return this.lmsService.activeAuthors().map(a => ({
-      value: a.id,
-      label: `${a.name} (${a.specialization})`,
-      sublabel: `${a.email}${a.isInstructor ? ' • Dual-Role Instructor' : ''}`,
-      icon: 'edit_note'
-    }));
-  });
-
-  // Author Role / Kind Options for custom select
-  authorKindOptions: SelectOption[] = [
-    { value: 'authorOnly', label: 'Author', icon: 'edit_note' },
-    { value: 'instructor', label: 'Instructor', icon: 'school' },
-    { value: 'both', label: 'Author + Instructor', icon: 'badge' }
-  ];
-
-  // Quick Inline Author / Instructor Creation Modal State
-  showQuickAuthorModal = signal<boolean>(false);
-  quickAuthorTargetItem = signal<CourseContentItem | null>(null);
-  quickPersonnelRole = signal<'author' | 'instructor' | 'both'>('author');
-
-  quickRoleOptions: SelectOption[] = [
-    { value: 'author', label: 'Content Author', sublabel: 'Curriculum & lesson instructional author', icon: 'edit_note' },
-    { value: 'instructor', label: 'Instructor', sublabel: 'Instructor delivering course layers', icon: 'school' },
-    { value: 'both', label: 'Dual-Role (Author + Instructor)', sublabel: 'Course author with instructor teaching privileges', icon: 'badge' }
-  ];
-
-  quickAuthorForm = {
-    name: '',
-    email: '',
-    contactNumber: '',
-    specialization: 'Video Scripting & Pedagogical Content',
-    bio: ''
-  };
-
-  openQuickAuthorModal(item?: CourseContentItem) {
-    if (item) this.quickAuthorTargetItem.set(item);
-    this.quickPersonnelRole.set('author');
-    this.quickAuthorForm = {
-      name: '',
-      email: '',
-      contactNumber: '',
-      specialization: 'Video Scripting & Pedagogical Content',
-      bio: ''
-    };
-    this.showQuickAuthorModal.set(true);
-  }
-
-  closeQuickAuthorModal() {
-    this.showQuickAuthorModal.set(false);
-    this.quickAuthorTargetItem.set(null);
-  }
-
-  onSelectAuthorForContent(item: CourseContentItem, authorId: string | string[]) {
-    const id = Array.isArray(authorId) ? authorId[0] : authorId;
-    if (id) {
-      this.addAuthorToContentItem(item, id);
-    }
-  }
-
-  saveQuickAuthor() {
-    if (!this.quickAuthorForm.name.trim() || !this.quickAuthorForm.email.trim()) {
-      this.lmsService.showToast('Please provide full name and email address.', 'error', 3000, 'Required Fields');
-      return;
-    }
-
-    const role = this.quickPersonnelRole();
-    const cleanName = this.quickAuthorForm.name.trim();
-    const cleanEmail = this.quickAuthorForm.email.trim();
-    const contact = this.quickAuthorForm.contactNumber.trim() || undefined;
-    const spec = this.quickAuthorForm.specialization.trim() || 'General Learning Content';
-    const bio = this.quickAuthorForm.bio.trim() || undefined;
-
-    let createdId = '';
-
-    if (role === 'author') {
-      const res = this.lmsService.addAuthor({
-        name: cleanName,
-        email: cleanEmail,
-        contactNumber: contact,
-        specialization: spec,
-        bio: bio,
-        status: 'Active',
-        isQuickAdd: true
+  addAuthorToContentItem(item: CourseContentItem, instructorId: string) {
+    if (!instructorId) return;
+    const inst = this.lmsService.instructorsRepo().find(i => i.id === instructorId);
+    if (!inst) return;
+    if (!item.authors) item.authors = [];
+    if (!item.authors.some(a => a.personId === inst.id)) {
+      item.authors.push({
+        personId: inst.id,
+        name: inst.name,
+        email: inst.email,
+        avatar: inst.avatar,
+        kind: 'authorOnly',
+        source: 'instructor_mgmt'
       });
-      if (!res.success) return;
-      createdId = res.author.id;
-    } else if (role === 'instructor') {
-      const res = this.lmsService.addInstructor({
-        name: cleanName,
-        email: cleanEmail,
-        contactNumber: contact,
-        specialization: spec,
-        bio: bio,
-        department: 'Academic & Training Division',
-        title: 'Course Instructor',
-        status: 'Active',
-        isQuickAdd: true
-      });
-      if (!res.success) return;
-      createdId = res.instructor.id;
-    } else {
-      // Both Author and Instructor
-      const authRes = this.lmsService.addAuthor({
-        name: cleanName,
-        email: cleanEmail,
-        contactNumber: contact,
-        specialization: spec,
-        bio: bio,
-        status: 'Active',
-        isQuickAdd: true
-      });
-      const instRes = this.lmsService.addInstructor({
-        name: cleanName,
-        email: cleanEmail,
-        contactNumber: contact,
-        specialization: spec,
-        bio: bio,
-        department: 'Academic & Training Division',
-        title: 'Instructor & Author',
-        status: 'Active',
-        isQuickAdd: true
-      });
-      createdId = authRes.author?.id || instRes.instructor?.id || '';
-    }
-
-    const targetItem = this.quickAuthorTargetItem();
-    if (targetItem && createdId) {
-      this.addAuthorToContentItem(targetItem, createdId);
-    }
-
-    this.lmsService.showToast(
-      `Quick-added "${cleanName}". Tagged to item and marked with "Incomplete profile" badge in All Users.`,
-      'info',
-      4500,
-      'Quick Personnel Added'
-    );
-
-    this.closeQuickAuthorModal();
-  }
-
-  addAuthorToContentItem(item: CourseContentItem, authorOrInstructorId: string) {
-    if (!authorOrInstructorId) return;
-
-    // Check in Author pool first
-    const author = this.lmsService.authors().find(a => a.id === authorOrInstructorId || a.personId === authorOrInstructorId);
-    if (author) {
-      if (!item.authors) item.authors = [];
-      const alreadyTagged = item.authors.some(a => 
-        (a.personId && (a.personId === author.id || a.personId === author.personId)) ||
-        (a.email && a.email.toLowerCase() === author.email.toLowerCase())
-      );
-
-      if (!alreadyTagged) {
-        item.authors.push({
-          personId: author.personId || author.id,
-          name: author.name,
-          email: author.email,
-          avatar: author.avatar,
-          kind: author.isInstructor ? 'both' : 'authorOnly',
-          source: 'author_pool'
-        });
-        this.structureNodes.set([...this.structureNodes()]);
-        this.lmsService.showToast(`Added Author "${author.name}" to "${item.title}".`, 'success', 2500);
-      }
-      return;
-    }
-
-    // Check in Instructor pool
-    const inst = this.lmsService.instructorsRepo().find(i => i.id === authorOrInstructorId);
-    if (inst) {
-      if (!item.authors) item.authors = [];
-      if (!item.authors.some(a => a.personId === inst.id || a.email.toLowerCase() === inst.email.toLowerCase())) {
-        item.authors.push({
-          personId: inst.id,
-          name: inst.name,
-          email: inst.email,
-          avatar: inst.avatar,
-          kind: 'authorOnly',
-          source: 'instructor_mgmt'
-        });
-        this.structureNodes.set([...this.structureNodes()]);
-        this.lmsService.showToast(`Added ${inst.name} as contributor to "${item.title}".`, 'success', 2500);
-      }
+      this.structureNodes.set([...this.structureNodes()]);
+      this.lmsService.showToast(`Added ${inst.name} as contributor to "${item.title}".`, 'success', 2500);
     }
   }
 
@@ -2172,13 +1782,6 @@ export class CourseCreateComponent implements OnInit {
       badgeTemplateName: this.selectedBadge()?.name || '',
       certificateTemplateId: this.selectedCertificateId(),
       certificateTemplateName: this.selectedCertificate()?.name || '',
-      deliveryMode: this.deliveryMode(),
-      venueId: this.selectedVenueId() || undefined,
-      venueName: this.selectedVenue()?.name,
-      venueCategory: this.selectedVenue()?.venueCategory || 'brac_internal',
-      venueCity: this.selectedVenue()?.address.city,
-      roomId: this.selectedRoomId() || undefined,
-      roomName: this.selectedRoom()?.name,
       version: {
         versionNumber: 1,
         label: 'v1.0-draft',
