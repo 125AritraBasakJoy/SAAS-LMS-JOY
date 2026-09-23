@@ -15,6 +15,23 @@ export type AssessmentQuestionType =
   | 'fileUpload'
   | 'essay';
 
+export type AssessmentQuestionDifficulty = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+
+export type RandomizationMode = 'none' | 'shuffle' | 'pool_plain' | 'pool_by_difficulty';
+
+export interface DifficultyPoolRule {
+  difficulty: AssessmentQuestionDifficulty;
+  count: number;
+}
+
+export interface AssessmentRandomizationPolicy {
+  enabled: boolean;
+  mode: RandomizationMode;
+  poolSize?: number;
+  shuffleOptions?: boolean;
+  difficultyRules?: DifficultyPoolRule[];
+}
+
 export type MultiSelectCreditRule = 'allOrNothing' | 'partial';
 export type ScoreRetentionRule = 'highest' | 'latest' | 'average' | 'first';
 export type ResultDisplayTrigger = 'afterSubmit' | 'afterGrading' | 'afterWindowClose' | 'never';
@@ -46,7 +63,9 @@ export interface AssessmentQuestion {
   prompt?: string;
   required: boolean;
   points: number;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  difficulty?: AssessmentQuestionDifficulty;
+  category?: string;
+  tags?: string[];
   options?: AssessmentQuestionOption[];
   matchingPairs?: MatchingPair[];
   correctSequence?: string[]; // Item IDs or texts in correct order for ordering
@@ -87,6 +106,7 @@ export interface AssessmentScoringPolicy {
     showCorrect: boolean;
     showFeedback: boolean;
   };
+  randomization?: AssessmentRandomizationPolicy;
 }
 
 export interface AssessmentVersion {
