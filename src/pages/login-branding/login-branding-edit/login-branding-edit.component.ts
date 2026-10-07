@@ -1106,6 +1106,10 @@ export class LoginBrandingEditComponent {
     }, 600);
   }
 
+  saveAsDraft() {
+    this.onSaveDraft();
+  }
+
   onSaveDraft() {
     this.lms.updateLoginBranding({
       ...this.formData(),

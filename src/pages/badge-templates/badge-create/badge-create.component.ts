@@ -411,6 +411,10 @@ export class BadgeCreateComponent implements OnInit {
     return true;
   }
 
+  saveAsDraft() {
+    this.saveDraftAndExit();
+  }
+
   saveDraftAndExit() {
     this.saveOrUpdateBadge('draft');
     this.dataService.showToast('Badge template draft saved successfully.', 'success', 4000, 'Draft Saved', 'DRAFT');
