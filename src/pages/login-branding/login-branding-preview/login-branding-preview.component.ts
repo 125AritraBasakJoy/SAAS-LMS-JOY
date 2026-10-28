@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LmsDataService } from '../../../services/lms-data.service';
+import { LocalPersistenceRepository } from '../../../services/local-persistence.repository';
 import { LoginBrandingConfig } from '../../../models/login-branding.model';
 import { SsoLogoComponent } from '../../../components/sso-logo/sso-logo.component';
 
@@ -37,7 +38,8 @@ export class LoginBrandingPreviewComponent {
   isSubmitting = signal<boolean>(false);
 
   branding = computed<LoginBrandingConfig>(() => {
-    const cfg = { ...this.lms.loginBranding() };
+    // Shows the draft configuration in the Preview tool
+    const cfg = { ...LocalPersistenceRepository.getDraftLoginBranding() };
     if (cfg.copyrightText) {
       cfg.copyrightText = cfg.copyrightText.replace(/\s*&\s*BRAC\s*IT\s*Services/gi, '').replace(/\s*&\s*Brac\s*IT\s*Services/gi, '').trim();
     }
